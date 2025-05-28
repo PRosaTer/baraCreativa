@@ -2,18 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @font-face {
-  font-family: 'Sansation';
-  src: url('/fonts/sansation/Sansation-Regular.woff2') format('woff2');
+  font-family: "Sansation";
+  src: url("/fonts/sansation/Sansation-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Sansation';
-  src: url('/fonts/sansation/Sansation-Bold.woff2') format('woff2');
+  font-family: "Sansation";
+  src: url("/fonts/sansation/Sansation-Bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -24,7 +23,6 @@
   --background: #ffffff;
   --foreground: #171717;
 }
-
 
 body {
   background: var(--background);
@@ -48,4 +46,30 @@ a {
 
 .animate-gradient-move {
   animation: gradient-move 3s linear infinite;
+}
+
+/* Estilos de Swiper para el carrusel */
+.swiper-button-next,
+.swiper-button-prev {
+  color: var(--background);
+  background: var(--color-primary);
+  background-opacity: 0.5;
+  border-radius: 50%;
+  padding: 8px;
+  transition: background-opacity 0.3s ease;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  background-opacity: 0.75;
+}
+
+.swiper-pagination-bullet {
+  background: var(--foreground);
+  opacity: 0.4;
+}
+
+.swiper-pagination-bullet-active {
+  background: var(--color-primary);
+  opacity: 1;
 }
