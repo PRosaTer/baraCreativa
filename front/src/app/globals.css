@@ -1,6 +1,7 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 
 @font-face {
   font-family: 'Sansation';
@@ -18,14 +19,12 @@
   font-display: swap;
 }
 
-
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --color-primary: #282323;
+  --background: #ffffff;
+  --foreground: #171717;
 }
+
 
 body {
   background: var(--background);

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import "./navbar/page"
-import Navbar from "../components/Navbar/page";
+
+import Navbar from "../components/Navbar/navbar";
 
 export const metadata: Metadata = {
   title: "Bara Creativa - Edtech Hondureña",
@@ -39,12 +39,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className="antialiased flex flex-col min-h-screen bg-background text-foreground">
-      <Navbar />
+      <body className="antialiased flex flex-col min-h-screen bg-background text-foreground ">
+        <Navbar />
         <main className="flex-grow">
           {children}
         </main>
-     
       </body>
     </html>
   );
