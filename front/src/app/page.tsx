@@ -1,10 +1,11 @@
 import PhotoCarousel from "@/components/slice/page";
+import TwoSquares from "@/components/twosquare/page";
 
 export default function Home() {
   return (
     <div className="bg-background">
       <PhotoCarousel />
-      {/* Aquí puedes agregar cualquier otro contenido que quieras en la página principal */}
+      {/* Sección existente */}
       <section className="container mx-auto py-8">
         <h1 className="text-3xl font-bold text-center">
           Bienvenidos a Bara Creativa
@@ -14,6 +15,8 @@ export default function Home() {
           impacto.
         </p>
       </section>
+      {/* Componente de los dos cuadrados */}
+      <TwoSquares />
     </div>
   );
 }
