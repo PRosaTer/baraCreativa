@@ -1,7 +1,5 @@
 "use client"
 
-import React from 'react';
-
 export default function CursosButton() {
   return (
 <button className="min-w-[88px] sm:min-w-[72px] md:min-w-[80px] lg:min-w-[88px] 
