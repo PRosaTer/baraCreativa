@@ -1,15 +1,29 @@
-"use client"
+
+"use client";
+
+import React from 'react';
 
 export default function ComunidadButton() {
   return (
-<button className="min-w-[88px] sm:min-w-[72px] md:min-w-[80px] lg:min-w-[88px] 
-                    h-[53px] sm:h-[45px] md:h-[50px] lg:h-[53px] 
-                    ml-[74px] sm:ml-[40px] md:ml-[60px] lg:ml-[54px] 
-                    flex items-center justify-center text-foreground font-medium px-4 
-                    rounded-[40px] bg-[#F2E4E4] relative overflow-hidden group">
-  <span className="absolute inset-0 rounded-[40px] border-4 border-transparent bg-gradient-to-r from-red-600 via-yellow-400 to-white bg-[length:300%_300%] opacity-0 group-hover:opacity-100 animate-gradient-move pointer-events-none"></span>
-  <span className="relative z-10">Comunidad</span>
-</button>
-
+    <button
+      className="
+        flex items-center justify-center 
+        bg-red-600 text-white relative overflow-hidden group z-10 
+        hover:text-white duration-1000 rounded-[20px] 
+        
+        h-10 sm:h-12 
+        text-xs sm:text-sm md:text-base lg:text-xl 
+        w-24 sm:w-28 md:w-32 lg:w-auto 
+        px-2 sm:px-3 md:px-4 lg:px-6 
+      "
+    >
+      <span
+        className="absolute bg-yellow-300 w-44 h-36 rounded-full group-hover:scale-100 scale-0 -z-10 -left-2 -top-10 group-hover:duration-500 duration-700 origin-center transform transition-all"
+      ></span>
+      <span
+        className="absolute bg-yellow-500 w-44 h-36 -left-2 -top-10 rounded-full group-hover:scale-100 scale-0 -z-10 group-hover:duration-700 duration-500 origin-center transform transition-all"
+      ></span>
+      Comunidad
+    </button>
   );
 }
