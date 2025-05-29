@@ -1,4 +1,3 @@
-import React from 'react';
 import Logo from '../logo';
 import ComunidadButton from '../Botones/comunidad';
 import SobreNosotrosButton from '../Botones/sobre-nosotros';
