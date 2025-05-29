@@ -1,11 +1,11 @@
+// components/Square.jsx
 "use client";
 
 import React from "react";
 
-// Definimos la interfaz para las props
 interface SquareProps {
-  children: React.ReactNode; // Tipo para children
-  bgColor?: string; // Tipo para bgColor, opcional
+  children: React.ReactNode;
+  bgColor?: string;
 }
 
 const Square: React.FC<SquareProps> = ({
