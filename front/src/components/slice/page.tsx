@@ -8,7 +8,6 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 const PhotoCarousel = () => {
-  // Array de imágenes locales en la carpeta public/images/
   const images = [
     "/Facebook-Logo-Transparent-PNG.png",
     "/Facebook-Logo-Transparent-PNG.png",
@@ -19,7 +18,7 @@ const PhotoCarousel = () => {
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto py-8">
+    <div className="w-full py-8">
       <Swiper
         modules={[Navigation, Pagination, Autoplay]}
         spaceBetween={30}
@@ -28,7 +27,7 @@ const PhotoCarousel = () => {
         pagination={{ clickable: true }}
         autoplay={{ delay: 3000, disableOnInteraction: false }}
         loop={true}
-        className="mySwiper"
+        className="w-full"
       >
         {images.map((image, index) => (
           <SwiperSlide key={index}>
@@ -38,7 +37,7 @@ const PhotoCarousel = () => {
                 alt={`Slide ${index + 1}`}
                 fill
                 className="object-cover rounded-lg"
-                priority={index === 0} // Carga prioritaria para la primera imagen
+                priority={index === 0}
               />
             </div>
           </SwiperSlide>
