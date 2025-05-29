@@ -23,14 +23,14 @@ export default function Home() {
         {/* Contenedor 1: Contenido ligero */}
         <Contenedor_1 bgColor="bg-gray-200">
           <div className="text-center p-4">
-            <h2 className="text-2xl font-bold mb-4">Cursos E-Learning</h2>
+            <h2 className="text-2xl font-bold mb-4">
+              aca iria por que elejirnos
+            </h2>
             <p>
               Explora nuestros cursos en línea diseñados para tu crecimiento.
             </p>
             <ul className="mt-4 space-y-2">
-              <li>Curso de Desarrollo Web</li>
-              <li>Curso de Marketing Digital</li>
-              <li>Curso de Diseño Gráfico</li>
+              <li>aca iria por que elejirnos</li>
             </ul>
           </div>
         </Contenedor_1>
