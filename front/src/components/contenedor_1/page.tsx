@@ -1,24 +1,24 @@
-// components/Square.jsx
+// components/Contenedor_1.tsx
 "use client";
 
 import React from "react";
 
-interface SquareProps {
+interface Contenedor1Props {
   children: React.ReactNode;
   bgColor?: string;
 }
 
-const Square: React.FC<SquareProps> = ({
+const Contenedor_1: React.FC<Contenedor1Props> = ({
   children,
   bgColor = "bg-gray-200",
 }) => {
   return (
     <div
-      className={`w-full md:w-1/2 h-96 ${bgColor} rounded-lg flex items-center justify-center`}
+      className={`w-full md:w-1/2 h-[32rem] ${bgColor} rounded-lg flex items-center justify-center`}
     >
       {children}
     </div>
   );
 };
 
-export default Square;
+export default Contenedor_1;
