@@ -8,13 +8,12 @@ interface Contenedor1Props {
   children?: React.ReactNode; // Restauramos children
 }
 
-const Contenedor_1: React.FC<Contenedor1Props> = ({
-  bgColor = "bg-gray-200",
-  children,
-}) => {
+const Contenedor_1: React.FC<Contenedor1Props> = ({ children }) => {
   return (
     <div
-      className={`w-full md:w-1/2 h-[32rem] ${bgColor} rounded-lg flex items-center justify-center`}
+      className={
+        "w-[667px] h-[592px] bg-gray-200 rounded-lg p-4 flex flex-col items-center justify-center"
+      }
     >
       {children ? (
         children // Si se pasa children, lo renderizamos
