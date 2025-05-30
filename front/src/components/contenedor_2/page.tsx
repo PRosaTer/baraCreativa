@@ -1,21 +1,12 @@
-// components/HeavyComponent.jsx
 "use client";
 
 import React from "react";
-import Image from "next/image";
+import VideoSlider from "../contenedor_2/VideoSlider";
 
 const HeavyComponent = () => {
   return (
-    <div className="mt-4">
-      <p>Este es un componente pesado (ejemplo).</p>
-      <div className="relative w-32 h-32 mx-auto">
-        <Image
-          src="/Facebook-Logo-Transparent-PNG.png"
-          alt="Contenido pesado"
-          fill
-          className="object-contain"
-        />
-      </div>
+    <div className="mt-4 w-[667px] h-[592px] bg-gray-200 rounded-lg p-4 flex flex-col items-center justify-center">
+      <VideoSlider />
     </div>
   );
 };
