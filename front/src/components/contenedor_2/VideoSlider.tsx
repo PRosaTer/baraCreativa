@@ -5,7 +5,7 @@ import ReactPlayer from "react-player";
 import { useVideoNavigation } from "../../app/hooks/useVideoNavigation";
 
 const videos = [
-  "https://www.youtube.com/watch?v=riCP9x31Kuk",
+  // "https://www.youtube.com/watch?v=riCP9x31Kuk",
   "TESTIMONIO-FERNANDO-AREVALO.mp4",
   "TESTIMONIO-DEBORA-SALGUERO.mp4",
   "TESTIMONIO-CANDIDA-MARTINEZ.mp4"
@@ -16,7 +16,7 @@ const VideoSlider = () => {
   const { currentIndex, nextVideo, prevVideo } = useVideoNavigation(videos.length);
 
   return (
-    <div className="relative w-[360px] h-[215px] flex items-center justify-center">
+    <div className="relative w-[214px] h-[305px] mr-24 -mt-56 flex items-center justify-center">
       <div className="relative w-full h-full">
         {videos.map((video, index) => {
           const position = (index - currentIndex + videos.length) % videos.length;
@@ -40,8 +40,8 @@ const VideoSlider = () => {
             >
               <ReactPlayer
                 url={video}
-                width="100%"
-                height="100%"
+                width="305px"
+                height="214px"
                 controls
               />
             </div>
@@ -51,14 +51,14 @@ const VideoSlider = () => {
 
       <button
         onClick={prevVideo}
-        className="absolute left-2 top-1/2 transform -translate-y-1/2 z-30 bg-white p-2 rounded-full shadow"
+        className="absolute left-6 top-1/2 transform -translate-y-1/2 z-30 bg-white p-2 rounded-full shadow"
       >
         <ChevronLeft size={24} />
       </button>
 
       <button
         onClick={nextVideo}
-        className="absolute right-2 top-1/2 transform -translate-y-1/2 z-30 bg-white p-2 rounded-full shadow"
+        className="absolute -right-16 top-1/2 transform -translate-y-1/2 z-30 bg-white p-2 rounded-full shadow"
       >
         <ChevronRight size={24} />
       </button>
