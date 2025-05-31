@@ -10,7 +10,7 @@ export default function BarraBusqueda({ className }: BarraBusquedaProps) {
       <input
         type="text"
         placeholder="Busca tu próximo curso"
-        className="w-full h-full pl-4 outline-none placeholder-gray-500 text-sm"
+        className="w-[600px] h-full pl-4 outline-none placeholder-gray-500 text-sm"
       />
       <svg
         xmlns="http://www.w3.org/2000/svg"

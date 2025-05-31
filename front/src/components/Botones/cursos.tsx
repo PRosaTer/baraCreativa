@@ -13,7 +13,7 @@ export default function Cursos({ className }: { className?: string }) {
         hover:text-white duration-1000 rounded-[20px] 
         h-10 sm:h-12 
         text-xs sm:text-sm md:text-base lg:text-xl 
-        w-24 sm:w-28 md:w-32 lg:w-auto 
+        w-24 sm:w-28 md:w-32 lg:w-52
         px-2 sm:px-3 md:px-4 lg:px-6 
         ${className || ''} // Aquí se aplica el className que se le pase
       `}
