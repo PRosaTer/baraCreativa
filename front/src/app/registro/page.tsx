@@ -261,7 +261,7 @@ const RegisterForm = () => {
         </div>
 
         <div className="mb-4">
-          <button className="w-full py-2 bg-velvet text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <button className="w-full bg-velvet  bg-red-600 text-white relative overflow-hidden group z-10  hover:text-white duration-1000 rounded-[20px]">
             Registrar
           </button>
         </div>

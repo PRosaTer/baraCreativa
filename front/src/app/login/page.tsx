@@ -118,7 +118,7 @@ const Login: React.FC = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-velvet text-white py-2 rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="w-full bg-velvet  bg-red-600 text-white relative overflow-hidden group z-10  hover:text-white duration-1000 rounded-[20px]"
           >
             Ingresar
           </button>
