@@ -140,10 +140,11 @@ const Login: React.FC = () => {
           </form>
           <div className="text-sm text-center mt-6 text-gray-600">
             ¿No tienes una cuenta?{" "}
-            <Link href="/signup" className="text-blue-500 hover:underline">
+            <Link href="/registro" className="text-blue-500 hover:underline">
               Regístrate
             </Link>
           </div>
+
         </div>
       </div>
     </>

@@ -46,8 +46,11 @@
 
 //zumbido
 
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function Logo() {
   const [animate, setAnimate] = useState(false);
@@ -59,14 +62,20 @@ export default function Logo() {
   }, []);
 
   return (
-    <div className={`w-[66px] h-[53px] flex-shrink-0 flex items-center ${animate ? 'animate-shake-twice-pause' : ''}`}>
-      <Image
-        src="/logo-bc.png"
-        alt="Bara Creativa Logo"
-        width={66}
-        height={53}
-        priority
-      />
-    </div>
+    <Link href="/" className="flex items-center">
+      <div
+        className={`w-[66px] h-[53px] flex-shrink-0 flex items-center cursor-pointer ${
+          animate ? "animate-shake-twice-pause" : ""
+        }`}
+      >
+        <Image
+          src="/logo-bc.png"
+          alt="Bara Creativa Logo"
+          width={66}
+          height={53}
+          priority
+        />
+      </div>
+    </Link>
   );
 }

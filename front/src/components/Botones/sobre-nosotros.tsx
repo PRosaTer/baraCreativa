@@ -1,10 +1,18 @@
 "use client";
 
-import React from 'react';
+import React from "react";
+import { useRouter } from "next/navigation";
 
 export default function ComunidadButton() {
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push("/nosotros");
+  };
+
   return (
     <button
+      onClick={handleClick}
       className="
         flex items-center justify-center 
         bg-red-600 text-white relative overflow-hidden group z-10 
