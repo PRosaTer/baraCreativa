@@ -107,19 +107,22 @@ const RegisterForm = () => {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-blue-100 overflow-hidden"
       style={{
         backgroundImage: `url(/bombillo-negro.png)`,
+        backgroundSize: "contain",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
     >
       <form
         onSubmit={handleSubmit}
-        className="max-w-xl mx-auto p-10 bg-white rounded-lg shadow-lg"
+        className="max-w-xl w-full mx-auto p-8 bg-white rounded-2xl shadow-2xl transform transition-all duration-300"
       >
-        <div className="mb-4">
+        <div className="mb-6">
           <label
             htmlFor="name"
-            className="block text-sm font-semibold text-gray-700"
+            className="block text-sm font-medium text-gray-800"
           >
             Nombre
           </label>
@@ -129,15 +132,15 @@ const RegisterForm = () => {
             id="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-3 mt-1 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
             required
           />
         </div>
 
-        <div className="mb-4">
+        <div className="mb-6">
           <label
             htmlFor="lastName"
-            className="block text-sm font-semibold text-gray-700"
+            className="block text-sm font-medium text-gray-800"
           >
             Apellido
           </label>
@@ -147,15 +150,15 @@ const RegisterForm = () => {
             id="lastName"
             value={formData.lastName}
             onChange={handleChange}
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-3 mt-1 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
             required
           />
         </div>
 
-        <div className="mb-4">
+        <div className="mb-6">
           <label
             htmlFor="email"
-            className="block text-sm font-semibold text-gray-700"
+            className="block text-sm font-medium text-gray-800"
           >
             Correo Electrónico
           </label>
@@ -165,15 +168,15 @@ const RegisterForm = () => {
             id="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-3 mt-1 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
             required
           />
         </div>
 
-        <div className="mb-4">
+        <div className="mb-6">
           <label
             htmlFor="nationality"
-            className="block text-sm font-semibold text-gray-700"
+            className="block text-sm font-medium text-gray-800"
           >
             Nacionalidad
           </label>
@@ -183,15 +186,15 @@ const RegisterForm = () => {
             id="nationality"
             value={formData.nationality}
             onChange={handleChange}
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-3 mt-1 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
             required
           />
         </div>
 
-        <div className="mb-4">
+        <div className="mb-6">
           <label
             htmlFor="DOB"
-            className="block text-sm font-semibold text-gray-700"
+            className="block text-sm font-medium text-gray-800"
           >
             Fecha de Nacimiento
           </label>
@@ -201,15 +204,15 @@ const RegisterForm = () => {
             id="DOB"
             value={formData.DOB}
             onChange={handleChange}
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-3 mt-1 border border-gray-200 rounded-md bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
             required
           />
         </div>
 
-        <div className="mb-4">
+        <div className="mb-6">
           <label
             htmlFor="password"
-            className="block text-sm font-semibold text-gray-700"
+            className="block text-sm font-medium text-gray-800"
           >
             Contraseña
           </label>
@@ -220,23 +223,27 @@ const RegisterForm = () => {
               id="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-3 mt-1 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
               required
             />
             <button
               type="button"
               onClick={() => setShowpassword(!showpassword)}
-              className="absolute right-2 top-4 text-gray-500 hover:text-gray-700 focus:outline-none"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition duration-200"
             >
-              {showpassword ? <FaEyeSlash /> : <FaEye />}
+              {showpassword ? (
+                <FaEyeSlash className="w-5 h-5" />
+              ) : (
+                <FaEye className="w-5 h-5" />
+              )}
             </button>
           </div>
         </div>
 
-        <div className="mb-4">
+        <div className="mb-6">
           <label
             htmlFor="confirmPassword"
-            className="block text-sm font-semibold text-gray-700"
+            className="block text-sm font-medium text-gray-800"
           >
             Confirmar Contraseña
           </label>
@@ -247,21 +254,28 @@ const RegisterForm = () => {
               id="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-3 mt-1 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
               required
             />
             <button
               type="button"
               onClick={() => setShowpassword(!showpassword)}
-              className="absolute right-2 top-4 text-gray-500 hover:text-gray-700 focus:outline-none"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition duration-200"
             >
-              {showpassword ? <FaEyeSlash /> : <FaEye />}
+              {showpassword ? (
+                <FaEyeSlash className="w-5 h-5" />
+              ) : (
+                <FaEye className="w-5 h-5" />
+              )}
             </button>
           </div>
         </div>
 
-        <div className="mb-4">
-          <button className="w-full bg-velvet  bg-red-600 text-white relative overflow-hidden group z-10  hover:text-white duration-1000 rounded-[20px]">
+        <div className="mb-6">
+          <button
+            type="submit"
+            className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-300"
+          >
             Registrar
           </button>
         </div>
