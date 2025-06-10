@@ -74,63 +74,79 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center"
-      style={{
-        backgroundImage: `url(/bombillo-negro.png)`,
-      }}
-    >
-      <div className="bg-white w-full max-w-md p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-center mb-6 text-black">
-          Inicia sesión
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm font-medium text-black">
-              Correo electrónico
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={loginData.email}
-              onChange={handleChange}
-              required
-              className="border border-gray-300 rounded-lg p-2 text-sm text-black focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            />
-          </div>
-          <div className="flex flex-col space-y-2 relative">
-            <label className="text-sm font-medium text-black">Contraseña</label>
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              value={loginData.password}
-              onChange={handleChange}
-              required
-              className="border border-gray-300 rounded-lg p-2 text-sm text-black focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            />
+    <>
+      <style jsx global>{`
+        body {
+          overflow: hidden;
+        }
+      `}</style>
+      <div
+        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-blue-100 overflow-hidden"
+        style={{
+          backgroundImage: `url(/bombillo-negro.png)`,
+          backgroundSize: "contain",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl transform transition-all duration-300">
+          <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
+            Inicia sesión
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="flex flex-col space-y-2">
+              <label className="text-sm font-medium text-gray-800">
+                Correo electrónico
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={loginData.email}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+              />
+            </div>
+            <div className="flex flex-col space-y-2 relative">
+              <label className="text-sm font-medium text-gray-800">
+                Contraseña
+              </label>
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={loginData.password}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition duration-200"
+              >
+                {showPassword ? (
+                  <FaEyeSlash className="w-5 h-5" />
+                ) : (
+                  <FaEye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
             <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-1 top-8 text-gray-500 hover:text-gray-700 focus:outline-none"
+              type="submit"
+              className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-300"
             >
-              {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+              Ingresar
             </button>
+          </form>
+          <div className="text-sm text-center mt-6 text-gray-600">
+            ¿No tienes una cuenta?{" "}
+            <Link href="/signup" className="text-blue-500 hover:underline">
+              Regístrate
+            </Link>
           </div>
-          <button
-            type="submit"
-            className="w-full bg-velvet  bg-red-600 text-white relative overflow-hidden group z-10  hover:text-white duration-1000 rounded-[20px]"
-          >
-            Ingresar
-          </button>
-        </form>
-        <div className="text-sm text-center mt-4 text-gray-600">
-          ¿No tienes una cuenta?{" "}
-          <Link href="/signup" className="text-blue-500 hover:underline">
-            Regístrate
-          </Link>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
