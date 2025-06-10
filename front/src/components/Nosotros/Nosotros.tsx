@@ -1,111 +1,90 @@
 "use client";
 
-import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useAlturaNavbar } from '../../app/hooks/useAlturaNavbar';
+import { useAnimacionCompleta } from '../../app/hooks/useAnimacionCompleta';
+import { ImagenFotos } from './ImagenFotos';
+import { ListaImagenes } from '../../app/hooks/tipos';
 
-const imagenes = [
+const imagenes: ListaImagenes = [
   {
     src: "/Victor.JPG",
     alt: "Victor",
     rotate: "-rotate-6",
-    classPosition: "top-[10%] left-[8%] md:top-[6%] md:left-[5%] sm:top-[8%] sm:left-[6%]",
-    zIndex: 30,
+    classPosition: "top-[10%] left-[8%] lg:top-[4%] lg:left-[5%] md:top-[8%] md:left-[6%]",
+    zIndex: 10,
   },
   {
     src: "/ZoomClase1.jpg",
     alt: "Zoom Clase",
     rotate: "rotate-3",
-    classPosition: "top-[8%] right-[4%] md:top-[8%] md:right-[5%] sm:top-[7%] sm:right-[5%]",
-    zIndex: 40,
+    classPosition: "top-[8%] right-[4%] lg:top-[4%] lg:right-[5%] md:top-[7%] md:right-[5%]",
+    zIndex: 20,
   },
   {
     src: "/Pantalla1.jpg",
     alt: "Pantalla",
     rotate: "-rotate-12",
-    classPosition: "bottom-[14%] left-[7%] md:bottom-[12%] md:left-[7%] sm:bottom-[13%] sm:left-[8%]",
-    zIndex: 25,
+    classPosition: "bottom-[14%] left-[7%] lg:bottom-[14%] lg:left-[7%] md:bottom-[13%] md:left-[8%]",
+    zIndex: 15,
   },
   {
     src: "/Victor2.jpg",
     alt: "Victor 2",
     rotate: "rotate-6",
-    classPosition: "bottom-[12%] right-[7%] md:bottom-[10%] md:right-[7%] sm:bottom-[11%] sm:right-[8%]",
-    zIndex: 35,
+    classPosition: "bottom-[12%] right-[7%] lg:bottom-[14%] lg:right-[7%] md:bottom-[11%] md:right-[8%]",
+    zIndex: 25,
   },
   {
     src: "/Victor3.jpg",
     alt: "Victor 3",
     rotate: "-rotate-3",
-    classPosition: "top-[28%] left-[26%] md:top-[30%] md:left-[30%] sm:top-[29%] sm:left-[28%]",
-    zIndex: 50,
+    classPosition: "top-[28%] left-[26%] lg:top-[4%] lg:left-[30%] md:top-[29%] md:left-[28%]",
+    zIndex: 30,
   },
   {
     src: "/Victor4.jpg",
     alt: "Victor 4",
     rotate: "rotate-12",
-    classPosition: "bottom-[24%] right-[26%] md:bottom-[25%] md:right-[28%] sm:bottom-[23%] sm:right-[25%]",
-    zIndex: 20,
+    classPosition: `
+      bottom-[24%] right-[26%]
+      sm:bottom-[25%]
+      md:bottom-[30%]
+      lg:bottom-[45%] lg:right-[25%]
+      xl:bottom-[21%] xl:right-[26%]
+      2xl:bottom-[51%] 2xl:right-[26%]
+    `,
+    zIndex: 35,
   },
   {
     src: "/Victor5.jpg",
     alt: "Victor 5",
     rotate: "",
-    classPosition: "top-[50%] left-[50%] md:top-[50%] md:left-[50%] sm:top-[50%] sm:left-[50%]",
-    zIndex: 55,
+    classPosition: "top-[50%] left-[50%]",
+    zIndex: 50,
     centerTransform: true,
+    isMain: true
   },
 ];
 
-export default function Nosotros() {
-  const [indiceVisible, setIndiceVisible] = useState(0);
-
-  useEffect(() => {
-    if (indiceVisible < imagenes.length - 1) {
-      const timer = setTimeout(() => {
-        setIndiceVisible((prev) => prev + 1);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [indiceVisible]);
+export const Nosotros = () => {
+  const alturaNavbar = useAlturaNavbar();
+  const cantidadVisible = useAnimacionCompleta(imagenes.length);
 
   return (
-    <div
-      className="
-        relative w-full min-h-screen bg-gray-100
-      "
-      style={{ overflow: "visible" }}
+    <div 
+      className="relative w-full bg-gray-100"
+      style={{
+        height: `calc(100vh - ${alturaNavbar})`,
+        minHeight: `calc(100vh - ${alturaNavbar})`
+      }}
     >
-      {imagenes.slice(0, indiceVisible + 1).map((img, i) => {
-        const esUltima = i === imagenes.length - 1;
-
-        const widthClamp = esUltima
-          ? "clamp(250px, 45vw, 450px)"
-          : "clamp(220px, 40vw, 400px)";
-
-        return (
-          <div
-            key={i}
-            className={`absolute ${img.classPosition} ${img.rotate} transition-all duration-700`}
-            style={{
-              width: widthClamp,
-              aspectRatio: "1 / 1",
-              maxWidth: "100%",
-              zIndex: img.zIndex,
-              transform: img.centerTransform ? "translate(-50%, -50%)" : undefined,
-            }}
-          >
-            <Image
-              src={img.src}
-              alt={img.alt}
-              fill
-              className="object-cover rounded-xl shadow-xl"
-              priority={esUltima}
-              sizes="(max-width: 480px) 70vw, (max-width: 768px) 60vw, (max-width: 1024px) 45vw, (max-width: 1366px) 40vw, 400px"
-              quality={80}
-            />
-          </div>
-        );
-      })}
+      <div className="absolute inset-0 overflow-hidden [clip-path:inset(0_0_0_0)]">
+        {imagenes.slice(0, cantidadVisible).map((imagen, i) => (
+          <ImagenFotos key={i} imagen={imagen} />
+        ))}
+      </div>
     </div>
   );
-}
+};
+
+export default Nosotros;
