@@ -1,6 +1,6 @@
 import { ListaImagenes } from '../app/hooks/tipos';
 
-export const imagenesNosotros: ListaImagenes = [
+export const imagenesComunidad: ListaImagenes = [
   {
     src: "/Victor.JPG",
     alt: "Victor",
