@@ -2,10 +2,10 @@
 
 import { useAlturaNavbar } from "@/app/hooks/useAlturaNavbar";
 import { useMostrarLienzo } from "@/app/hooks/useMostrarLienzo";
-import { FondoFotosAnimadas } from "@/components/Nosotros/FondoFotosAnimadas";
-import { imagenesNosotros } from "@/data/imagenesNosotros";
-import { ContenedorNosotros } from "@/components/Nosotros/ContenedorNosotros";
-import { LienzoCompleto } from "@/components/Nosotros/LienzoCompleto";
+import { FondoFotosAnimadas } from "@/components/Comunidad/FondoFotosAnimadas";
+import { imagenesComunidad } from "@/data/imagenesNosotros";
+import { ContenedorNosotros } from "./ContenedorComunidad";
+import { LienzoCompleto } from "@/components/Comunidad/LienzoCompleto";
 
 const Nosotros = () => {
   const alturaNavbar = useAlturaNavbar();
@@ -13,7 +13,7 @@ const Nosotros = () => {
 
   return (
     <ContenedorNosotros alturaNavbar={alturaNavbar}>
-      <FondoFotosAnimadas imagenes={imagenesNosotros} />
+      <FondoFotosAnimadas imagenes={imagenesComunidad} />
       {mostrarLienzo && <LienzoCompleto />}
     </ContenedorNosotros>
   );

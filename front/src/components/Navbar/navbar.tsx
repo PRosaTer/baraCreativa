@@ -2,8 +2,8 @@
 
 import React from 'react';
 import Logo from '../logo';
-import ComunidadButton from '../Botones/comunidad';
-import SobreNosotrosButton from '../Botones/sobre-nosotros';
+import ComunidadButton from '../Botones/sobre-nosotros';
+import SobreComunidadButton from '../Botones/comunidad';
 import BarraBusqueda from '../BarraBusqueda/barrabusqueda';
 import Cursos from '../Botones/cursos';
 import Contactenos from '../Botones/contactenos';
@@ -22,8 +22,8 @@ export default function Navbar() {
           <div className="flex-shrink-0">
             <Logo />
           </div>
+          <SobreComunidadButton />
           <ComunidadButton />
-          <SobreNosotrosButton />
           <BarraBusqueda className="flex-grow min-w-[200px] max-w-[656px]" />
           <Cursos />
           <Contactenos />
