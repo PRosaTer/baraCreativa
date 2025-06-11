@@ -74,3 +74,27 @@ a {
   background: var(--color-primary);
   opacity: 1;
 }
+
+@keyframes desplazar {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.animate-desplazar {
+  animation: desplazar 10s linear infinite;
+}
+@font-face {
+  font-family: "Sansation";
+  src: url("/fonts/Sansation.woff2") format("woff2"),
+       url("/fonts/Sansation.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.font-sansation {
+  font-family: "Sansation", sans-serif;
+}
