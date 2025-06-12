@@ -1,9 +1,9 @@
-// app/layout.tsx o app/layout.ts
 import type { Metadata } from "next";
 import "./globals.css";
 
 import Navbar from "../components/Navbar/navbar";
-import WhatsApp from "../components/whatsapp/WhatsApp"; // 👈 importá el componente
+import WhatsApp from "../components/whatsapp/WhatsApp";
+import Chatbot from "@/components/chatbot/Chatbot";
 
 export const metadata: Metadata = {
   title: "Bara Creativa - Edtech Hondureña",
@@ -46,7 +46,8 @@ export default function RootLayout({
         <main className="flex-grow">
           {children}
         </main>
-        <WhatsApp /> {/* 👈 Acá se renderiza el botón */}
+        <WhatsApp />
+        <Chatbot />
       </body>
     </html>
   );
