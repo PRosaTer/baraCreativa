@@ -1,8 +1,9 @@
-// app/page.tsx
 import PhotoCarousel from "@/components/slice/page";
 import Contenedor_1 from "@/components/contenedor_1/page";
 import DynamicContenedor2 from "@/components/DynamicContenedor2/page";
 import LogoSlider from "@/components/logoSlider/page";
+import ThreeCoursesSection from "@/components/cursos-principales/page";
+import ThreeServicesSection from "@/components/servicios-pricipales/page"; // Importa el nuevo componente
 
 export default function Home() {
   return (
@@ -26,6 +27,10 @@ export default function Home() {
       </section>
       {/* Carrusel de marcas */}
       <LogoSlider />
+      {/* Sección de tres cursos */}
+      <ThreeCoursesSection />
+      {/* Sección de tres servicios */}
+      <ThreeServicesSection />
     </div>
   );
 }
