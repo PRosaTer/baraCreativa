@@ -8,7 +8,7 @@ interface Props {
 const BotonChat: React.FC<Props> = ({ alHacerClick }) => (
   <button
     onClick={alHacerClick}
-    className="fixed bottom-6 right-2 z-50 w-[50px] h-[50px] md:w-[60px] md:h-[60px]"
+    className="fixed bottom-1 right-2 z-50 w-[50px] h-[50px] md:w-[90px] md:h-[90px]"
   >
     <Image
       src="/chatbot.png"
