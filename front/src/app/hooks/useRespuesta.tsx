@@ -13,6 +13,10 @@ export const obtenerRespuesta = (mensaje: string): React.ReactNode => {
     "qué ofrecen ustedes",
     "qué ofrecen acá",
     "que ofrecen acá",
+    "que ofrecen aqui",
+    "que ofrecen aquí",
+    "cursos",
+    "cursos",
   ];
 
   if (texto.includes("hola") && keywordsServicios.some((k) => texto.includes(k))) {
@@ -76,7 +80,7 @@ export const obtenerRespuesta = (mensaje: string): React.ReactNode => {
         target="_blank"
         rel="noopener noreferrer"
       >
-        Usa el botón de WhatsApp
+        Comunicate con nosotros
       </a>{" "}
       o reinicia el chat.
     </>
