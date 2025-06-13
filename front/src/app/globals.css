@@ -98,3 +98,9 @@ a {
 .font-sansation {
   font-family: "Sansation", sans-serif;
 }
+
+
+#__next-build-watcher,
+.__nextjs-dev-overlay {
+  display: none !important;
+}
