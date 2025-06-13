@@ -1,7 +1,7 @@
 import React from "react";
-import Image from "next/image";
+import Card from "@/components/tarjetas/page";
 
-// Datos de ejemplo para los tres cursos (puedes reemplazarlos con datos reales)
+// Datos de ejemplo para los tres cursos (reemplaza con los cursos reales de Bara Creativa)
 const courses = [
   {
     title: "Programación Web",
@@ -31,26 +31,12 @@ const ThreeCoursesSection: React.FC = () => {
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 sm:px-6 lg:px-8">
         {courses.slice(0, 3).map((course) => (
-          <div
+          <Card
             key={course.title}
-            className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-xl"
-          >
-            <Image
-              src={course.image}
-              alt={course.title}
-              width={300}
-              height={200}
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold text-[var(--foreground)] mb-2">
-                {course.title}
-              </h3>
-              <p className="text-sm text-gray-600 line-clamp-2">
-                {course.description}
-              </p>
-            </div>
-          </div>
+            title={course.title}
+            image={course.image}
+            description={course.description}
+          />
         ))}
       </div>
     </section>
