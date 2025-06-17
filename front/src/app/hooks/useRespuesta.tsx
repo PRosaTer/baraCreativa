@@ -2,19 +2,20 @@ import React from "react";
 import Link from "next/link";
 
 const claseBotonBase =
-  "text-white px-4 py-2 rounded font-medium text-sm transition w-full max-w-[240px] text-center";
+  "block text-white px-4 py-2 rounded font-medium text-sm transition w-full max-w-[240px] text-center";
 
-export const obtenerRespuesta = (mensaje: string): React.ReactNode => {
-  const texto = mensaje.toLowerCase();
+export const obtenerRespuesta = (mensaje: unknown): React.ReactNode => {
+  const texto =
+    typeof mensaje === "string" ? mensaje.toLowerCase() : String(mensaje).toLowerCase();
 
   if (texto.includes("registro") || texto.includes("registrar")) {
     return (
       <div className="flex flex-col gap-2">
         <span>¿Tenés problemas para registrarte?</span>
-        <Link href="/registro">
-          <button className={`${claseBotonBase} bg-blue-600 hover:bg-blue-700`}>
+        <Link href="/registro" passHref>
+          <p className={`${claseBotonBase} bg-blue-600 hover:bg-blue-700 cursor-pointer`}>
             Ir a Registro
-          </button>
+          </p>
         </Link>
       </div>
     );
@@ -23,11 +24,13 @@ export const obtenerRespuesta = (mensaje: string): React.ReactNode => {
   if (texto.includes("cursos") || texto.includes("servicios")) {
     return (
       <div className="flex flex-col gap-2">
-        <span>Ofrecemos varios cursos y servicios. ¿Querés ver los cursos disponibles?</span>
-        <Link href="/cursos">
-          <button className={`${claseBotonBase} bg-green-600 hover:bg-green-700`}>
+        <span>
+          Ofrecemos varios cursos y servicios. ¿Querés ver los cursos disponibles?
+        </span>
+        <Link href="/cursos" passHref>
+          <p className={`${claseBotonBase} bg-green-600 hover:bg-green-700 cursor-pointer`}>
             Ver Cursos
-          </button>
+          </p>
         </Link>
       </div>
     );
@@ -37,26 +40,31 @@ export const obtenerRespuesta = (mensaje: string): React.ReactNode => {
     return (
       <div className="flex flex-col gap-3 mt-2">
         <span>Hola, soy Pepito. ¿En qué te puedo ayudar?</span>
-        <Link href="/registro">
-          <button className={`${claseBotonBase} bg-blue-600 hover:bg-blue-700`}>
+
+        <Link href="/registro" passHref>
+          <p className={`${claseBotonBase} bg-blue-600 hover:bg-blue-700 cursor-pointer`}>
             ¿Tenés problemas para registrarte?
-          </button>
+          </p>
         </Link>
-        <Link href="/cursos">
-          <button className={`${claseBotonBase} bg-green-600 hover:bg-green-700`}>
+
+        <Link href="/cursos" passHref>
+          <p className={`${claseBotonBase} bg-green-600 hover:bg-green-700 cursor-pointer`}>
             Quiero ver los cursos
-          </button>
+          </p>
         </Link>
-        <Link href="/comunidad">
-          <button className={`${claseBotonBase} bg-purple-600 hover:bg-purple-700`}>
+
+        <Link href="/comunidad" passHref>
+          <p className={`${claseBotonBase} bg-purple-600 hover:bg-purple-700 cursor-pointer`}>
             Comunidad
-          </button>
+          </p>
         </Link>
-        <Link href="/">
-          <button className={`${claseBotonBase} bg-red-600 hover:bg-red-700`}>
+
+        <Link href="/" passHref>
+          <p className={`${claseBotonBase} bg-red-600 hover:bg-red-700 cursor-pointer`}>
             Inicio
-          </button>
+          </p>
         </Link>
+
         <a
           href="https://wa.me/50433351621"
           target="_blank"

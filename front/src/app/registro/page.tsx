@@ -16,6 +16,14 @@ const RegisterForm = () => {
     nombreEmpresa: "",
     fotoPerfil: "",
     confirmContrasena: "",
+    nombreCompleto: "",
+    correoElectronico: "",
+    contrasena: "",
+    numeroTelefono: "",
+    tipoUsuario: "Alumno",
+    nombreEmpresa: "", 
+    fotoPerfil: "", 
+    confirmContrasena: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -33,6 +41,7 @@ const RegisterForm = () => {
   const validatePassword = (password: string) => {
     const passwordRegex =
       /^(?=.[A-Z])(?=.[!@#$%^&])(?=.\d)(?=.*[a-zA-Z]).{8,}$/;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*\d)(?=.*[a-zA-Z]).{8,}$/;
     return passwordRegex.test(password);
   };
 
@@ -54,6 +63,24 @@ const RegisterForm = () => {
       nombreEmpresa,
       fotoPerfil,
     } = formData;
+
+    if (nombreCompleto.length < 4) {
+      Swal.fire(
+        "Error",
+        "El nombre completo debe tener al menos 4 caracteres.",
+        "error"
+      );
+    const {
+      nombreCompleto,
+      correoElectronico,
+      contrasena,
+      confirmContrasena,
+      numeroTelefono,
+      tipoUsuario,
+      nombreEmpresa,
+      fotoPerfil,
+    } = formData;
+
 
     if (nombreCompleto.length < 4) {
       Swal.fire(
@@ -100,6 +127,19 @@ const RegisterForm = () => {
 
     console.log("Enviando datos al backend:", dataToSend);
 
+    const dataToSend = {
+      nombre_completo: nombreCompleto,
+      correo_electronico: correoElectronico,
+      contrasena: contrasena,
+      numero_telefono: numeroTelefono,
+      tipo_usuario: tipoUsuario,
+      nombre_empresa: tipoUsuario === "Empresa" ? nombreEmpresa : null,
+      fecha_registro: new Date().toISOString(),
+      foto_perfil: fotoPerfil || null,
+    };
+
+    console.log("Enviando datos al backend:", dataToSend);
+
     try {
       const response = await fetch(`${API_URL}/usuarios`, {
         method: "POST",
@@ -116,6 +156,13 @@ const RegisterForm = () => {
           "Error",
           errorData.message ||
             "Error al registrar al usuario. Intenta de nuevo más tarde.",
+          "error"
+        );
+        return;
+        console.error("Detalles del error del backend:", errorData);
+        Swal.fire(
+          "Error",
+          errorData.message || "Error al registrar al usuario. Intenta de nuevo más tarde.",
           "error"
         );
         return;
@@ -156,6 +203,10 @@ const RegisterForm = () => {
         <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-8">
           Regístrate
         </h2>
+        <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-8">
+          Regístrate
+        </h2>
+
 
         <div className="mb-6">
           <label
@@ -175,6 +226,7 @@ const RegisterForm = () => {
           />
         </div>
 
+
         <div className="mb-6">
           <label
             htmlFor="correoElectronico"
@@ -193,6 +245,7 @@ const RegisterForm = () => {
           />
         </div>
 
+ 
         <div className="mb-6">
           <label
             htmlFor="numeroTelefono"
@@ -211,6 +264,7 @@ const RegisterForm = () => {
           />
         </div>
 
+
         <div className="mb-6">
           <label
             htmlFor="tipoUsuario"
@@ -225,6 +279,10 @@ const RegisterForm = () => {
             onChange={handleChange}
             className="w-full px-4 py-3 mt-1 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
             required
+          >
+            <option value="Alumno">Alumno</option>
+            <option value="Empresa">Empresa</option>
+          </select>
           >
             <option value="Alumno">Alumno</option>
             <option value="Empresa">Empresa</option>
@@ -251,6 +309,27 @@ const RegisterForm = () => {
           </div>
         )}
 
+        {formData.tipoUsuario === "Empresa" && (
+          <div className="mb-6">
+            <label
+              htmlFor="nombreEmpresa"
+              className="block text-sm font-medium text-gray-800"
+            >
+              Nombre de la Empresa
+            </label>
+            <input
+              type="text"
+              name="nombreEmpresa"
+              id="nombreEmpresa"
+              value={formData.nombreEmpresa}
+              onChange={handleChange}
+              className="w-full px-4 py-3 mt-1 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+              required
+            />
+          </div>
+        )}
+
+
         <div className="mb-6">
           <label
             htmlFor="contrasena"
@@ -271,10 +350,12 @@ const RegisterForm = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
+              onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition duration-200"
               aria-label={
                 showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
               }
+              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
             >
               {showPassword ? (
                 <FaEyeSlash className="w-5 h-5" />
@@ -305,11 +386,14 @@ const RegisterForm = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
+              onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition duration-200"
               aria-label={
                 showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
               }
+              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
             >
+              {showPassword ? (
               {showPassword ? (
                 <FaEyeSlash className="w-5 h-5" />
               ) : (
@@ -336,6 +420,26 @@ const RegisterForm = () => {
             placeholder="Ej: https://example.com/mi-foto.jpg"
           />
         </div>
+
+   
+        <div className="mb-6">
+          <label
+            htmlFor="fotoPerfil"
+            className="block text-sm font-medium text-gray-800"
+          >
+            URL de Foto de Perfil (Opcional)
+          </label>
+          <input
+            type="url"
+            name="fotoPerfil"
+            id="fotoPerfil"
+            value={formData.fotoPerfil}
+            onChange={handleChange}
+            className="w-full px-4 py-3 mt-1 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+            placeholder="Ej: https://example.com/mi-foto.jpg"
+          />
+        </div>
+
 
         <div className="mb-6">
           <button
