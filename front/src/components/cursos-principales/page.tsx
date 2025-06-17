@@ -4,20 +4,20 @@ import Card from "@/components/tarjetas/page";
 // Datos de ejemplo para los tres cursos (reemplaza con los cursos reales de Bara Creativa)
 const courses = [
   {
-    title: "Programación Web",
-    image: "/BARA-GAMES.png",
+    title: "FORMACION CAT",
+    image: "/formacion-cat.png",
     description:
       "Aprende HTML, CSS y JavaScript para crear sitios web dinámicos.",
   },
   {
-    title: "Diseño UX/UI",
+    title: "BARA GAMES",
     image: "/BARA-GAMES.png",
     description:
       "Crea interfaces intuitivas y atractivas con las mejores prácticas.",
   },
   {
-    title: "Marketing Digital",
-    image: "/BARA-GAMES.png",
+    title: "VIRTUAL T",
+    image: "/virtual-t.png",
     description:
       "Domina estrategias para promocionar tu marca en redes sociales.",
   },

@@ -4,20 +4,20 @@ import Card from "@/components/tarjetas/page";
 // Datos de ejemplo para los tres servicios (reemplaza con los servicios reales de Bara Creativa)
 const services = [
   {
-    title: "Capacitaciones Empresariales",
+    title: "PROYECTOS DE CAPACITACION EMPRESARIAL",
     image: "/foto-servicio.png",
     description:
       "Soluciones personalizadas para mejorar las habilidades de tu equipo.",
   },
   {
-    title: "Consultoría Educativa",
-    image: "/foto-servicio.png",
+    title: "DESSARROLLO DE PROYECTOS E LAEARNING BC",
+    image: "/desarrollo-de-proyectos-e-learning-bc.png",
     description:
       "Asesoría para optimizar programas de aprendizaje y e-learning.",
   },
   {
-    title: "Desarrollo de Contenidos",
-    image: "/foto-servicio.png",
+    title: "COACHING EDUCATIVO BC",
+    image: "/coaching-educativo-bc.png",
     description:
       "Creación de materiales educativos interactivos y de alto impacto.",
   },
