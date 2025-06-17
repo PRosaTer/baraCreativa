@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import BotonChat from "./BotonChat";
 import VentanaChat from "./VentanaChat";
@@ -8,6 +9,8 @@ const STORAGE_KEY = "pepito_chat_memory";
 interface MensajeTipo {
   texto: React.ReactNode;
   emisor: "pepito" | "usuario";
+  tipo?: "normal" | "botones";
+  opciones?: string[];
 }
 
 const Chatbot: React.FC = () => {
@@ -43,9 +46,7 @@ const Chatbot: React.FC = () => {
 
   return (
     <>
-      {!visible && (
-        <BotonChat alHacerClick={() => setVisible(true)} />
-      )}
+      {!visible && <BotonChat alHacerClick={() => setVisible(true)} />}
       <VentanaChat
         key={claveReinicio}
         visible={visible}
