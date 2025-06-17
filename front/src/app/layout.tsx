@@ -3,8 +3,9 @@ import "./globals.css";
 
 import Navbar from "../components/Navbar/navbar";
 import WhatsApp from "../components/whatsapp/WhatsApp";
-import Chatbot from "@/components/chatbot/Chatbot";
 import Footer from "@/components/Footer/Footer";
+import ChatbotFlotante from "@/components/ChatSimple/ChatbotFlotante"; // o la ruta correcta según tu estructura
+
 
 export const metadata: Metadata = {
   title: "Bara Creativa - Edtech Hondureña",
@@ -48,7 +49,7 @@ export default function RootLayout({
           {children}
         </main>
         <WhatsApp />
-        <Chatbot />
+        <ChatbotFlotante />
          <Footer />
       </body>
     </html>
