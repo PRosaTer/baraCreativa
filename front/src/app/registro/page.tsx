@@ -13,8 +13,8 @@ const RegisterForm = () => {
     contrasena: "",
     numeroTelefono: "",
     tipoUsuario: "Alumno",
-    nombreEmpresa: "", 
-    fotoPerfil: "", 
+    nombreEmpresa: "",
+    fotoPerfil: "",
     confirmContrasena: "",
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -31,7 +31,8 @@ const RegisterForm = () => {
   };
 
   const validatePassword = (password: string) => {
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*\d)(?=.*[a-zA-Z]).{8,}$/;
+    const passwordRegex =
+      /^(?=.[A-Z])(?=.[!@#$%^&])(?=.\d)(?=.*[a-zA-Z]).{8,}$/;
     return passwordRegex.test(password);
   };
 
@@ -53,7 +54,6 @@ const RegisterForm = () => {
       nombreEmpresa,
       fotoPerfil,
     } = formData;
-
 
     if (nombreCompleto.length < 4) {
       Swal.fire(
@@ -87,7 +87,6 @@ const RegisterForm = () => {
       return;
     }
 
-
     const dataToSend = {
       nombre_completo: nombreCompleto,
       correo_electronico: correoElectronico,
@@ -115,7 +114,8 @@ const RegisterForm = () => {
         console.error("Detalles del error del backend:", errorData);
         Swal.fire(
           "Error",
-          errorData.message || "Error al registrar al usuario. Intenta de nuevo más tarde.",
+          errorData.message ||
+            "Error al registrar al usuario. Intenta de nuevo más tarde.",
           "error"
         );
         return;
@@ -143,7 +143,7 @@ const RegisterForm = () => {
     <div
       className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-blue-100 overflow-hidden"
       style={{
-        backgroundImage: `url(/bombillo-negro.png)`,
+        backgroundImage: url(`/bombillo-negro.png`),
         backgroundSize: "contain",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -156,7 +156,6 @@ const RegisterForm = () => {
         <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-8">
           Regístrate
         </h2>
-
 
         <div className="mb-6">
           <label
@@ -176,7 +175,6 @@ const RegisterForm = () => {
           />
         </div>
 
-
         <div className="mb-6">
           <label
             htmlFor="correoElectronico"
@@ -195,7 +193,6 @@ const RegisterForm = () => {
           />
         </div>
 
- 
         <div className="mb-6">
           <label
             htmlFor="numeroTelefono"
@@ -213,7 +210,6 @@ const RegisterForm = () => {
             placeholder="Ej: +549341xxxxxxx"
           />
         </div>
-
 
         <div className="mb-6">
           <label
@@ -255,7 +251,6 @@ const RegisterForm = () => {
           </div>
         )}
 
-
         <div className="mb-6">
           <label
             htmlFor="contrasena"
@@ -277,7 +272,9 @@ const RegisterForm = () => {
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition duration-200"
-              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              aria-label={
+                showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+              }
             >
               {showPassword ? (
                 <FaEyeSlash className="w-5 h-5" />
@@ -309,7 +306,9 @@ const RegisterForm = () => {
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition duration-200"
-              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              aria-label={
+                showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+              }
             >
               {showPassword ? (
                 <FaEyeSlash className="w-5 h-5" />
@@ -320,7 +319,6 @@ const RegisterForm = () => {
           </div>
         </div>
 
-   
         <div className="mb-6">
           <label
             htmlFor="fotoPerfil"
@@ -338,7 +336,6 @@ const RegisterForm = () => {
             placeholder="Ej: https://example.com/mi-foto.jpg"
           />
         </div>
-
 
         <div className="mb-6">
           <button
