@@ -2,20 +2,17 @@ import React from "react";
 
 interface Props {
   texto: React.ReactNode;
-  emisor: "pepito" | "usuario";
+  emisor: string;
 }
 
 const Mensaje: React.FC<Props> = ({ texto, emisor }) => {
-  const esPepito = emisor === "pepito";
+  const estilos =
+    emisor === "usuario"
+      ? "bg-blue-100 text-right self-end"
+      : "bg-gray-100 text-left self-start";
 
   return (
-    <div
-      className={`p-2 my-1 max-w-[80%] rounded-md text-sm break-words ${
-        esPepito
-          ? "bg-blue-100 text-blue-900 self-start"
-          : "bg-gray-200 text-gray-800 self-end"
-      }`}
-    >
+    <div className={`p-2 my-1 rounded max-w-[90%] ${estilos}`}>
       {texto}
     </div>
   );

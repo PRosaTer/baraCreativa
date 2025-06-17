@@ -7,7 +7,7 @@ import CabeceraChat from "./CabeceraChat";
 import { obtenerRespuesta } from "../../app/hooks/useRespuesta";
 
 interface MensajeTipo {
-  texto: React.ReactNode;
+  texto: React.ReactNode; 
   emisor: "pepito" | "usuario";
 }
 
@@ -42,8 +42,7 @@ const VentanaChat: React.FC<Props> = ({
   const responder = (entrada: string) => {
     if (!entrada.trim()) return;
 
-    const respuesta = obtenerRespuesta(entrada);
-    console.log("Respuesta de Pepito:", respuesta);
+    const respuesta = obtenerRespuesta(entrada.toLowerCase());
 
     setMensajes((prev) => [
       ...prev,
@@ -66,10 +65,9 @@ const VentanaChat: React.FC<Props> = ({
         bg-white border border-gray-300 shadow-xl rounded-md
         flex flex-col
         z-50 overflow-hidden
-
-        bottom-4      /* móviles */
-        md:bottom-10  /* notebooks */
-        xl:bottom-4  /* monitores grandes */
+        bottom-4
+        md:bottom-10
+        xl:bottom-4
       "
     >
       <CabeceraChat minimizar={minimizar} cerrar={cerrar} />
@@ -77,9 +75,20 @@ const VentanaChat: React.FC<Props> = ({
         ref={mensajesRef}
         className="flex flex-col p-3 gap-1 flex-1 overflow-y-auto"
       >
-        {mensajes.map((msg, i) => (
-          <Mensaje key={i} texto={msg.texto} emisor={msg.emisor} />
-        ))}
+        {mensajes.map((msg, i) => {
+          if (msg.emisor === "usuario") {
+            return <Mensaje key={i} texto={msg.texto as string} emisor={msg.emisor} />;
+          }
+          return (
+            <div
+              key={i}
+              className="bg-gray-100 p-2 rounded max-w-[90%] self-start"
+              style={{ whiteSpace: "pre-wrap" }}
+            >
+              {msg.texto}
+            </div>
+          );
+        })}
       </div>
       <ChatInput onEnviar={responder} />
       <div className="text-center py-1">
