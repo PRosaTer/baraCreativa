@@ -5,105 +5,39 @@ import { testimoniosDeUsuarios } from "../../app/datos/testimoniosDeUsuarios";
 import { motion, AnimatePresence } from "framer-motion";
 
 const ContenedorDeTestimonios = () => {
-  const [grupoActual, setGrupoActual] = useState(0);
-  const [volteadas, setVolteadas] = useState<boolean[]>([false, false, false]);
-
-  const grupos = [
-    testimoniosDeUsuarios.slice(0, 3),
-    testimoniosDeUsuarios.slice(3, 6),
-  ];
+  const [indiceActual, setIndiceActual] = useState(0);
 
   useEffect(() => {
-    setVolteadas([false, false, false]);
+    const intervalo = setInterval(() => {
+      setIndiceActual((prev) => (prev + 1) % testimoniosDeUsuarios.length);
+    }, 8000);
 
-    const flipTimers = grupos[grupoActual].map((_, i) =>
-      setTimeout(() => {
-        setVolteadas((prev) => {
-          const copia = [...prev];
-          copia[i] = true;
-          return copia;
-        });
-      }, 3000)
-    );
+    return () => clearInterval(intervalo);
+  }, []);
 
-    const cambioDeGrupo = setTimeout(() => {
-      setGrupoActual((prev) => (prev + 1) % grupos.length);
-    }, 10000);
-
-    return () => {
-      flipTimers.forEach(clearTimeout);
-      clearTimeout(cambioDeGrupo);
-    };
-  }, [grupoActual]);
+  const testimonio = testimoniosDeUsuarios[indiceActual];
 
   return (
-    <div className="relative w-full h-[380px] mt-64 overflow-hidden flex items-center justify-center">
+    <div className="relative w-[580px] h-[250px] mt-72 overflow-hidden mx-auto flex items-center justify-center">
       <AnimatePresence mode="wait">
         <motion.div
-          key={grupoActual}
-          initial={{ opacity: 0, y: 200 }}
+          key={indiceActual}
+          initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -200 }}
-          transition={{ duration: 0.8 }}
-          className="flex gap-4"
+          exit={{ opacity: 0, y: -50 }}
+          transition={{ duration: 0.6 }}
+          className="flex bg-orange-100 text-orange-900 rounded-lg shadow-lg p-6 gap-4 w-full h-full"
         >
-          {grupos[grupoActual].map((testimonio, i) => (
-            <motion.div
-              key={testimonio.nombre}
-              className="w-[180px] h-[240px] relative rounded-lg shadow-lg cursor-pointer"
-              style={{ perspective: 1000 }}
-            >
-              <motion.div
-                animate={{ rotateY: volteadas[i] ? 180 : 0 }}
-                transition={{ duration: 0.8 }}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  position: "relative",
-                  transformStyle: "preserve-3d",
-                }}
-              >
+          <img
+            src={testimonio.imagen}
+            alt={testimonio.nombre}
+            className="w-[120px] h-[120px] object-cover rounded-full self-center border-2 border-orange-300"
+          />
 
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "100%",
-                    height: "100%",
-                    backfaceVisibility: "hidden",
-                    borderRadius: "0.5rem",
-                    overflow: "hidden",
-                  }}
-                >
-                  <img
-                    src={testimonio.imagen}
-                    alt={testimonio.nombre}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "100%",
-                    height: "100%",
-                    backfaceVisibility: "hidden",
-                    backgroundColor: "#fed7aa",
-                    color: "#78350f",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "1rem",
-                    fontWeight: "600",
-                    borderRadius: "0.5rem",
-                    transform: "rotateY(180deg)",
-                    textAlign: "center",
-                  }}
-                >
-                  {testimonio.mensaje}
-                </div>
-              </motion.div>
-            </motion.div>
-          ))}
+          <div className="flex flex-col justify-center h-full">
+            <h3 className="text-lg font-bold mb-2">{testimonio.nombre}</h3>
+            <p className="text-sm whitespace-pre-line">{testimonio.mensaje}</p>
+          </div>
         </motion.div>
       </AnimatePresence>
     </div>
