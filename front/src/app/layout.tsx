@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "../components/Navbar/navbar";
 import WhatsApp from "../components/whatsapp/WhatsApp";
 import Chatbot from "@/components/chatbot/Chatbot";
+import Footer from "@/components/Footer/Footer";
 
 export const metadata: Metadata = {
   title: "Bara Creativa - Edtech Hondureña",
@@ -48,6 +49,7 @@ export default function RootLayout({
         </main>
         <WhatsApp />
         <Chatbot />
+         <Footer />
       </body>
     </html>
   );

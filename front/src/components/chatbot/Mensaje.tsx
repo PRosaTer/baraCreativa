@@ -7,6 +7,7 @@ interface Props {
 
 const Mensaje: React.FC<Props> = ({ texto, emisor }) => {
   const esPepito = emisor === "pepito";
+
   return (
     <div
       className={`p-2 my-1 max-w-[80%] rounded-md text-sm break-words ${

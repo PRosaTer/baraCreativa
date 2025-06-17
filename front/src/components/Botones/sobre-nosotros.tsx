@@ -3,7 +3,7 @@
 
 import React from 'react';
 
-export default function ComunidadButton() {
+export default function NosotrosButton() {
   return (
     <button
       className="
