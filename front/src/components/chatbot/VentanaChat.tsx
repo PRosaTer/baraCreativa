@@ -1,45 +1,51 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import Mensaje from "./Mensaje";
 import ChatInput from "./ChatInput";
 import CabeceraChat from "./CabeceraChat";
 import { obtenerRespuesta } from "../../app/hooks/useRespuesta";
 
+interface MensajeTipo {
+  texto: React.ReactNode;
+  emisor: "pepito" | "usuario";
+}
+
 interface Props {
   visible: boolean;
+  mensajes: MensajeTipo[];
+  setMensajes: React.Dispatch<React.SetStateAction<MensajeTipo[]>>;
   reiniciar: () => void;
   cerrar: () => void;
   minimizar: () => void;
+  registrado: boolean;
 }
 
 const VentanaChat: React.FC<Props> = ({
   visible,
+  mensajes,
+  setMensajes,
   reiniciar,
   cerrar,
   minimizar,
 }) => {
-  const [conversacion, setConversacion] = useState<
-    { texto: React.ReactNode; emisor: "pepito" | "usuario" }[]
-  >([]);
-  const [entrada, setEntrada] = useState("");
-
   const mensajesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (mensajesRef.current) {
       mensajesRef.current.scrollTop = mensajesRef.current.scrollHeight;
     }
-  }, [conversacion]);
+  }, [mensajes]);
 
   if (!visible) return null;
 
-  const responder = () => {
+  const responder = (entrada: string) => {
     if (!entrada.trim()) return;
 
     const respuesta = obtenerRespuesta(entrada);
+    console.log("Respuesta de Pepito:", respuesta);
 
-    setConversacion((prev) => [
+    setMensajes((prev) => [
       ...prev,
       { texto: entrada, emisor: "usuario" },
       { texto: respuesta, emisor: "pepito" },
@@ -48,22 +54,34 @@ const VentanaChat: React.FC<Props> = ({
     const audio = new Audio("/sonidos/NotificacionChatbot.mp4");
     audio.volume = 0.2;
     audio.play();
-
-    setEntrada("");
   };
 
   return (
-    <div className="fixed bottom-20 right-2 w-72 md:w-80 bg-white border border-gray-300 shadow-xl rounded-md flex flex-col z-50 overflow-hidden">
+    <div
+      className="
+        fixed
+        right-2
+        w-72 md:w-80
+        max-h-[80vh] min-h-[450px]
+        bg-white border border-gray-300 shadow-xl rounded-md
+        flex flex-col
+        z-50 overflow-hidden
+
+        bottom-4      /* móviles */
+        md:bottom-10  /* notebooks */
+        xl:bottom-4  /* monitores grandes */
+      "
+    >
       <CabeceraChat minimizar={minimizar} cerrar={cerrar} />
       <div
         ref={mensajesRef}
-        className="flex flex-col p-3 gap-1 h-64 overflow-y-auto"
+        className="flex flex-col p-3 gap-1 flex-1 overflow-y-auto"
       >
-        {conversacion.map((msg, i) => (
+        {mensajes.map((msg, i) => (
           <Mensaje key={i} texto={msg.texto} emisor={msg.emisor} />
         ))}
       </div>
-      <ChatInput entrada={entrada} setEntrada={setEntrada} onEnviar={responder} />
+      <ChatInput onEnviar={responder} />
       <div className="text-center py-1">
         <button onClick={reiniciar} className="text-xs text-gray-500 underline">
           Reiniciar chat

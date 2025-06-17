@@ -5,6 +5,7 @@ import LogoSlider from "@/components/logoSlider/page";
 import ThreeCoursesSection from "@/components/cursos-principales/page";
 import ThreeServicesSection from "@/components/servicios-pricipales/page"; // Importa el nuevo componente
 
+
 export default function Home() {
   return (
     <div className="bg-[var(--background)] font-sans">
@@ -31,6 +32,7 @@ export default function Home() {
       <ThreeCoursesSection />
       {/* Sección de tres servicios */}
       <ThreeServicesSection />
+     
     </div>
   );
 }
