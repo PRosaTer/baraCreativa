@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const config_1 = require("@nestjs/config");
 const usuarios_module_1 = require("./usuarios/usuarios.module");
+const password_module_1 = require("./password/password.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -22,22 +23,19 @@ exports.AppModule = AppModule = __decorate([
             }),
             typeorm_1.TypeOrmModule.forRootAsync({
                 inject: [config_1.ConfigService],
-                useFactory: async (config) => {
-                    const settings = {
-                        type: 'postgres',
-                        host: config.get('DB_HOST'),
-                        port: parseInt(config.get('DB_PORT') || '5432', 10),
-                        username: config.get('DB_USER'),
-                        password: config.get('DB_PASSWORD'),
-                        database: config.get('DB_NAME'),
-                        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-                        synchronize: true,
-                    };
-                    console.log('🟢 Configuración de DB cargada:', settings);
-                    return settings;
-                },
+                useFactory: async (config) => ({
+                    type: 'postgres',
+                    host: config.get('DB_HOST'),
+                    port: parseInt(config.get('DB_PORT') || '5432', 10),
+                    username: config.get('DB_USER'),
+                    password: config.get('DB_PASSWORD'),
+                    database: config.get('DB_NAME'),
+                    entities: [__dirname + '/**/*.entity.{ts,js}'],
+                    synchronize: true,
+                }),
             }),
             usuarios_module_1.UsuariosModule,
+            password_module_1.PasswordModule,
         ],
     })
 ], AppModule);

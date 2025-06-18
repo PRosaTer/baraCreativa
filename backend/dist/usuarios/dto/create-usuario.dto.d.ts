@@ -1,7 +1,7 @@
 export declare class CreateUsuarioDto {
     nombreCompleto: string;
     correoElectronico: string;
-    contraseña: string;
+    password: string;
     telefono?: string;
     tipoUsuario: string;
     nombreEmpresa?: string;

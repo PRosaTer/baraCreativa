@@ -14,7 +14,7 @@ const class_validator_1 = require("class-validator");
 class CreateUsuarioDto {
     nombreCompleto;
     correoElectronico;
-    contraseña;
+    password;
     telefono;
     tipoUsuario;
     nombreEmpresa;
@@ -36,7 +36,7 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)({ message: 'La contraseña es obligatoria' }),
     __metadata("design:type", String)
-], CreateUsuarioDto.prototype, "contrase\u00F1a", void 0);
+], CreateUsuarioDto.prototype, "password", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
