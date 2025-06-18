@@ -24,7 +24,7 @@ export const useAutenticacion = () => {
     }));
   };
 
-  const manejarInicioSesion = async (e: React.FormEvent<HTMLFormElement>) => {
+  const manejarInicioSesion = async (e: React.FormEvent): Promise<boolean> => {
     e.preventDefault();
 
     try {
@@ -42,23 +42,18 @@ export const useAutenticacion = () => {
       if (!respuesta.ok) {
         const errorData = await respuesta.json();
         alert(errorData.message || "Error al iniciar sesión");
-        return;
+        return false;
       }
 
       const data = await respuesta.json();
-
       localStorage.setItem("token", data.access_token);
-
       setMensajeExito(true);
-
-      setTimeout(() => {
-        setMensajeExito(false);
-        router.push("/");
-      }, 2500);
+      return true;
 
     } catch (error) {
       alert("Error al conectar con el servidor");
       console.error(error);
+      return false;
     }
   };
 
