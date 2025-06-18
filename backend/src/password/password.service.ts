@@ -1,21 +1,30 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Usuario } from '../entidades/usuario.entity';
+import { Usuario } from 'src/entidades/usuario.entity';
 import { SolicitarResetDto } from './dto/solicitar-reset.dto';
 import { ConfirmarResetDto } from './dto/confirmar-reset.dto';
 import { randomUUID } from 'crypto';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
+import { crearTransportador } from 'src/config/mail.config';
 
 @Injectable()
 export class PasswordService {
+  private transporter;
+
   constructor(
     @InjectRepository(Usuario)
     private usuariosRepo: Repository<Usuario>,
-  ) {}
+    private configService: ConfigService,
+  ) {
+    this.transporter = crearTransportador(this.configService);
+  }
 
   async solicitarReset(dto: SolicitarResetDto) {
-    const usuario = await this.usuariosRepo.findOne({ where: { correoElectronico: dto.correoElectronico } });
+    const usuario = await this.usuariosRepo.findOne({
+      where: { correoElectronico: dto.correoElectronico },
+    });
 
     if (!usuario) {
       throw new NotFoundException('No se encontró un usuario con ese correo');
@@ -27,27 +36,45 @@ export class PasswordService {
 
     usuario.tokenRecuperacion = token;
     usuario.expiracionTokenRecuperacion = expiracion;
-
     await this.usuariosRepo.save(usuario);
 
-    console.log(`🔐 Token para reset: ${token}`);
+    const enlace = `http://localhost:3000/password/restablecer?token=${token}`;
 
-    return { mensaje: 'Se ha enviado un correo con el enlace para restablecer tu contraseña.' };
+    try {
+      await this.transporter.sendMail({
+        from: `"Bara Creativa" <${this.configService.get('EMAIL_USER')}>`,
+        to: usuario.correoElectronico,
+        subject: 'Restablecer contraseña - Bara Creativa',
+        html: `
+          <p>Hola ${usuario.nombreCompleto},</p>
+          <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
+          <a href="${enlace}">${enlace}</a>
+          <p>Este enlace expirará en 1 hora.</p>
+        `,
+      });
+    } catch (error) {
+      console.error('Error enviando mail:', error);
+      throw new InternalServerErrorException('No se pudo enviar el correo de recuperación.');
+    }
+
+    return {
+      mensaje: 'Se ha enviado un correo con el enlace para restablecer tu contraseña.',
+    };
   }
 
   async confirmarReset(dto: ConfirmarResetDto) {
-    const usuario = await this.usuariosRepo.findOne({ where: { tokenRecuperacion: dto.token } });
+    const usuario = await this.usuariosRepo.findOne({
+      where: { tokenRecuperacion: dto.token },
+    });
 
     if (!usuario) {
       throw new BadRequestException('Token inválido');
     }
 
-
     if (!usuario.expiracionTokenRecuperacion || usuario.expiracionTokenRecuperacion < new Date()) {
       throw new BadRequestException('Token expirado');
     }
 
-  
     const hash = await bcrypt.hash(dto.password, 10);
 
     usuario.password = hash;

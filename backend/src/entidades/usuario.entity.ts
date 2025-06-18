@@ -22,8 +22,9 @@ export class Usuario {
   @Column()
   nombreCompleto: string;
 
-  @Column({ unique: true })
-  correoElectronico: string;
+@Column({ unique: true, name: 'correoelectronico' })
+correoElectronico: string;
+
 
   @Column()
   password: string;

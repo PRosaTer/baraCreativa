@@ -18,13 +18,14 @@ export class UsuariosService {
 
   async findOne(id: number): Promise<Usuario> {
     const usuario = await this.usuariosRepository.findOneBy({ id });
-
-    if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
-    }
-
+    if (!usuario) throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     return usuario;
   }
+
+async encontrarPorCorreo(correoElectronico: string): Promise<Usuario | null> {
+  return this.usuariosRepository.findOne({ where: { correoElectronico } });
+}
+
 
   async create(usuarioData: CreateUsuarioDto): Promise<Usuario> {
     const hash = await bcrypt.hash(usuarioData.password, 10);

@@ -1,4 +1,10 @@
+import { IsNotEmpty, MinLength } from 'class-validator';
+
 export class ConfirmarResetDto {
+  @IsNotEmpty()
   token: string;
-  password: string;  // Ojo, que el campo sea 'password' porque en el JSON envías "password"
+
+  @IsNotEmpty()
+  @MinLength(6)
+  password: string;
 }
