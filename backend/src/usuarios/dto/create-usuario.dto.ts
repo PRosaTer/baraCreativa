@@ -11,7 +11,7 @@ export class CreateUsuarioDto {
 
   @IsString()
   @IsNotEmpty({ message: 'La contraseña es obligatoria' })
-  contraseña: string;
+  password: string;
 
   @IsString()
   @IsOptional()

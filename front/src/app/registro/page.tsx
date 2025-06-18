@@ -143,8 +143,8 @@ const RegisterForm = () => {
     <div
       className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-blue-100 overflow-hidden"
       style={{
-        backgroundImage: url(`/bombillo-negro.png`),
-        backgroundSize: "contain",
+        backgroundImage: 'url("/bombillo-negro.png")',
+        backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
       }}
