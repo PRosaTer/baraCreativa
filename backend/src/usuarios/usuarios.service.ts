@@ -22,10 +22,9 @@ export class UsuariosService {
     return usuario;
   }
 
-async encontrarPorCorreo(correoElectronico: string): Promise<Usuario | null> {
-  return this.usuariosRepository.findOne({ where: { correoElectronico } });
-}
-
+  async encontrarPorCorreo(correoElectronico: string): Promise<Usuario | null> {
+    return this.usuariosRepository.findOne({ where: { correoElectronico } });
+  }
 
   async create(usuarioData: CreateUsuarioDto): Promise<Usuario> {
     const hash = await bcrypt.hash(usuarioData.password, 10);
