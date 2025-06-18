@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PasswordService } from './password.service';
-import { PasswordController } from './password.controller';
 import { Usuario } from 'src/entidades/usuario.entity';
-import { ConfigModule } from '@nestjs/config';
+import { PasswordController } from './password.controller';
+import { PasswordService } from './password.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Usuario]), ConfigModule],
-  providers: [PasswordService],
+  imports: [TypeOrmModule.forFeature([Usuario])],
   controllers: [PasswordController],
+  providers: [PasswordService],
 })
 export class PasswordModule {}

@@ -9,18 +9,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PasswordModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
-const password_service_1 = require("./password.service");
-const password_controller_1 = require("./password.controller");
 const usuario_entity_1 = require("../entidades/usuario.entity");
-const config_1 = require("@nestjs/config");
+const password_controller_1 = require("./password.controller");
+const password_service_1 = require("./password.service");
 let PasswordModule = class PasswordModule {
 };
 exports.PasswordModule = PasswordModule;
 exports.PasswordModule = PasswordModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([usuario_entity_1.Usuario]), config_1.ConfigModule],
-        providers: [password_service_1.PasswordService],
+        imports: [typeorm_1.TypeOrmModule.forFeature([usuario_entity_1.Usuario])],
         controllers: [password_controller_1.PasswordController],
+        providers: [password_service_1.PasswordService],
     })
 ], PasswordModule);
 //# sourceMappingURL=password.module.js.map

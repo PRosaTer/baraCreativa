@@ -16,8 +16,8 @@ class SolicitarResetDto {
 }
 exports.SolicitarResetDto = SolicitarResetDto;
 __decorate([
-    (0, class_validator_1.IsEmail)(),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsEmail)(),
     __metadata("design:type", String)
 ], SolicitarResetDto.prototype, "correoElectronico", void 0);
 //# sourceMappingURL=solicitar-reset.dto.js.map

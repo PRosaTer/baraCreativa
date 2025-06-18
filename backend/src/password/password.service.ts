@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { Usuario } from 'src/entidades/usuario.entity';
 import { SolicitarResetDto } from './dto/solicitar-reset.dto';
 import { ConfirmarResetDto } from './dto/confirmar-reset.dto';
@@ -23,11 +23,11 @@ export class PasswordService {
 
   async solicitarReset(dto: SolicitarResetDto) {
     const usuario = await this.usuariosRepo.findOne({
-      where: { correoElectronico: dto.correoElectronico },
+      where: { correoElectronico: ILike(dto.correoElectronico) },
     });
 
     if (!usuario) {
-      throw new NotFoundException('No se encontró un usuario con ese correo');
+      throw new NotFoundException('Este correo no pertenece a un usuario registrado');
     }
 
     const token = randomUUID();

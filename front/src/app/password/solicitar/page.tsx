@@ -23,15 +23,13 @@ const SolicitarReset: React.FC = () => {
 
       const data = await respuesta.json();
 
-     if (!respuesta.ok) {
-  setError(data.message || "Error al solicitar recuperación");
-  return;
-}
+      if (!respuesta.ok) {
+        setError(data.message || "Error al solicitar recuperación");
+        return;
+      }
 
-localStorage.setItem("correoRecuperacion", correo);
-setMensaje(data.mensaje);
-setCorreo("");
-
+      setMensaje(data.mensaje);
+      setCorreo("");
     } catch (err) {
       setError("Error de conexión con el servidor");
     }

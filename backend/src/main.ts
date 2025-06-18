@@ -1,10 +1,10 @@
-// main.ts (NestJS)
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors({ origin: 'http://localhost:3000' }); // Ajusta según tu frontend
+  app.enableCors(); 
   await app.listen(3001);
+  console.log('🚀 Backend corriendo en http://localhost:3001');
 }
 bootstrap();

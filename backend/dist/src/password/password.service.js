@@ -32,10 +32,10 @@ let PasswordService = class PasswordService {
     }
     async solicitarReset(dto) {
         const usuario = await this.usuariosRepo.findOne({
-            where: { correoElectronico: dto.correoElectronico },
+            where: { correoElectronico: (0, typeorm_2.ILike)(dto.correoElectronico) },
         });
         if (!usuario) {
-            throw new common_1.NotFoundException('No se encontró un usuario con ese correo');
+            throw new common_1.NotFoundException('Este correo no pertenece a un usuario registrado');
         }
         const token = (0, crypto_1.randomUUID)();
         const expiracion = new Date();

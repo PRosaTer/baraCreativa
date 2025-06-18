@@ -5,9 +5,12 @@ import React, { useState } from "react";
 export default function SolicitarRecuperacion() {
   const [correo, setCorreo] = useState("");
   const [mensaje, setMensaje] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMensaje("");
+    setError("");
 
     try {
       const res = await fetch("http://localhost:3001/password/solicitar", {
@@ -17,9 +20,16 @@ export default function SolicitarRecuperacion() {
       });
 
       const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Error al solicitar recuperación");
+        return;
+      }
+
       setMensaje(data.mensaje || "Revisa tu correo para continuar.");
+      setCorreo("");
     } catch (err) {
-      setMensaje("Ocurrió un error al enviar el correo.");
+      setError("Error de conexión con el servidor");
     }
   };
 
@@ -38,7 +48,8 @@ export default function SolicitarRecuperacion() {
         <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full">
           Enviar enlace
         </button>
-        {mensaje && <p className="mt-4 text-center text-sm text-gray-700">{mensaje}</p>}
+        {mensaje && <p className="mt-4 text-center text-sm text-green-600">{mensaje}</p>}
+        {error && <p className="mt-4 text-center text-sm text-red-600">{error}</p>}
       </form>
     </div>
   );
