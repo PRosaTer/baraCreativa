@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import ContenedorFormulario from "@/components/formularios/ContenedorFormulario";
+import ContenedorFormulario from "@/components/formularios/ContenedorFormularioLogin";
 import CampoEntrada from "@/components/formularios/CampoEntrada";
 import CampoContrasena from "@/components/formularios/CampoContrasena";
 import BotonEnviar from "@/components/formularios/BotonEnviar";
@@ -9,7 +9,7 @@ import EnlaceFormulario from "@/components/formularios/EnlaceFormulario";
 import { useAutenticacion } from "@/app/hooks/usarAutenticacion";
 
 const InicioSesion: React.FC = () => {
-  const { datosInicioSesion, manejarCambio, manejarInicioSesion } =
+  const { datosInicioSesion, manejarCambioInicioSesion, manejarInicioSesion } =
     useAutenticacion();
 
   return (
@@ -20,14 +20,14 @@ const InicioSesion: React.FC = () => {
           tipo="email"
           nombre="correo"
           valor={datosInicioSesion.correo}
-          onChange={manejarCambio}
+          onChange={manejarCambioInicioSesion}
           requerido
         />
         <CampoContrasena
           etiqueta="Contraseña"
           nombre="contrasena"
           valor={datosInicioSesion.contrasena}
-          onChange={manejarCambio}
+          onChange={manejarCambioInicioSesion}
           requerido
         />
         <div className="text-sm text-right">
