@@ -1,1 +1,1 @@
-{"version":3,"file":"confirmar-reset.dto.js","sourceRoot":"","sources":["../../../../src/password/dto/confirmar-reset.dto.ts"],"names":[],"mappings":";;;AAAA,MAAa,iBAAiB;IAC5B,KAAK,CAAS;IACd,QAAQ,CAAS;CAClB;AAHD,8CAGC"}
+{"version":3,"file":"confirmar-reset.dto.js","sourceRoot":"","sources":["../../../../src/password/dto/confirmar-reset.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,qDAAwD;AAExD,MAAa,iBAAiB;IAE5B,KAAK,CAAS;IAId,QAAQ,CAAS;CAClB;AAPD,8CAOC;AALC;IADC,IAAA,4BAAU,GAAE;;gDACC;AAId;IAFC,IAAA,4BAAU,GAAE;IACZ,IAAA,2BAAS,EAAC,CAAC,CAAC;;mDACI"}

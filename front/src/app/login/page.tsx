@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import ContenedorFormulario from "@/components/formularios/ContenedorFormulario";
 import CampoEntrada from "@/components/formularios/CampoEntrada";
 import CampoContrasena from "@/components/formularios/CampoContrasena";
@@ -10,8 +10,26 @@ import { useAutenticacion } from "@/app/hooks/usarAutenticacion";
 import MensajeAviso from "@/components/Aviso/MensajeAviso";
 
 const InicioSesion: React.FC = () => {
-  const { datosInicioSesion, manejarCambio, manejarInicioSesion, mensajeExito, setMensajeExito } =
-    useAutenticacion();
+  const {
+    datosInicioSesion,
+    manejarCambio,
+    manejarInicioSesion,
+    mensajeExito,
+    setMensajeExito,
+  } = useAutenticacion();
+
+  useEffect(() => {
+    const correoGuardado = localStorage.getItem("correoRecuperacion");
+    if (correoGuardado) {
+      manejarCambio({
+        target: {
+          name: "correo",
+          value: correoGuardado,
+        },
+      } as React.ChangeEvent<HTMLInputElement>);
+      localStorage.removeItem("correoRecuperacion");
+    }
+  }, [manejarCambio]);
 
   return (
     <>
