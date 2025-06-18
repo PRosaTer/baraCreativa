@@ -13,6 +13,7 @@ const config_1 = require("@nestjs/config");
 const usuarios_module_1 = require("./usuarios/usuarios.module");
 const password_module_1 = require("./password/password.module");
 const auth_module_1 = require("./auth/auth.module");
+const path_1 = require("path");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -31,7 +32,7 @@ exports.AppModule = AppModule = __decorate([
                     username: config.get('DB_USER'),
                     password: config.get('DB_PASSWORD'),
                     database: config.get('DB_NAME'),
-                    entities: [__dirname + '/**/*.entity.{ts,js}'],
+                    entities: [(0, path_1.join)(__dirname, '**', '*.entity.{ts,js}')],
                     synchronize: true,
                 }),
             }),
