@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, CSSProperties } from "react";
 import {
   MainContainer,
   ChatContainer,
@@ -12,23 +12,49 @@ import {
 
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 
+import { hasKeyword, findFaqAnswer } from "@/app/utils/chatbotUtils";
+import { FAQItem } from "@/app/data/faqData";
+
 type Mensaje = {
   message: string;
   sender: "bot" | "user";
   widget?: React.ReactNode;
 };
 
+const getButtonStyles = (bgColor: string): CSSProperties => ({
+  backgroundColor: bgColor,
+  color: "white",
+  border: "none",
+  borderRadius: "12px",
+  padding: "8px 14px",
+  fontWeight: 600,
+  fontSize: "14px",
+  boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+  cursor: "pointer",
+  transition: "transform 0.2s, box-shadow 0.2s",
+});
+
+const handleButtonMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const target = e.currentTarget;
+  target.style.transform = "scale(1.05)";
+  target.style.boxShadow = "0 4px 10px rgba(0,0,0,0.25)";
+};
+
+const handleButtonMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const target = e.currentTarget;
+  target.style.transform = "scale(1)";
+  target.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
+};
+
 export const ChatSimple = () => {
   const [messages, setMessages] = useState<Mensaje[]>([
     {
-      message: "Hola! Soy Pepito, tu asistente virtual. ¿En qué puedo ayudarte?",
+      message: "Hola! Soy Pepito, tu asistente virtual. ¿En qué puedo ayudarte? Puedes preguntar sobre nuestros cursos, métodos de pago, o cualquier duda sobre Bara Creativa HN.",
       sender: "bot",
     },
   ]);
   const [isTyping, setIsTyping] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
-
-
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
@@ -40,13 +66,165 @@ export const ChatSimple = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleButtonClick = (url: string) => {
-    window.location.href = url;
-  };
 
-  const tienePalabra = (texto: string, palabra: string) => {
-    const regex = new RegExp(`\\b${palabra}\\b`, "i");
-    return regex.test(texto);
+  const handleButtonClick = (url: string) => {
+    window.open(url, '_self'); 
+  };
+ 
+
+  const getBotResponse = (input: string): Mensaje => {
+    const texto = input.toLowerCase();
+
+
+    const matchedFaqItem = findFaqAnswer(texto);
+    if (matchedFaqItem) {
+      return {
+        message: matchedFaqItem.answer,
+        sender: "bot",
+        widget: matchedFaqItem.redirectTo && matchedFaqItem.buttonText ? (
+          <button
+            onClick={() => handleButtonClick(matchedFaqItem.redirectTo!)}
+            style={getButtonStyles("#4f46e5")}
+            onMouseEnter={handleButtonMouseEnter}
+            onMouseLeave={handleButtonMouseLeave}
+          >
+            {matchedFaqItem.buttonText}
+          </button>
+        ) : undefined,
+      };
+    }
+
+
+    if (hasKeyword(texto, "curso") || hasKeyword(texto, "cursos")) {
+      return {
+        message: "¡Claro! Tenemos cursos muy interesantes para vos. Aquí puedes verlos:",
+        sender: "bot",
+        widget: (
+          <button
+            onClick={() => handleButtonClick("/cursos")}
+            style={getButtonStyles("#4f46e5")}
+            onMouseEnter={handleButtonMouseEnter}
+            onMouseLeave={handleButtonMouseLeave}
+          >
+            Ver Cursos
+          </button>
+        ),
+      };
+    }
+    if (hasKeyword(texto, "comunidad")) {
+      return {
+        message: "Te invitamos a conocer nuestra comunidad en Telegram:",
+        sender: "bot",
+        widget: (
+          <button
+            onClick={() => handleButtonClick("https://t.me/TuGrupoDeTelegram")} //aca tenemos que agregar el grupo que pase victor
+            style={getButtonStyles("#0ea5e9")}
+            onMouseEnter={handleButtonMouseEnter}
+            onMouseLeave={handleButtonMouseLeave}
+          >
+            Unirme a la Comunidad
+          </button>
+        ),
+      };
+    }
+    if (hasKeyword(texto, "nosotros") || hasKeyword(texto, "quienes somos")) {
+      return {
+        message: "Conocé más sobre Bara Creativa HN:",
+        sender: "bot",
+        widget: (
+          <button
+            onClick={() => handleButtonClick("/nosotros")}
+            style={getButtonStyles("#10b981")}
+            onMouseEnter={handleButtonMouseEnter}
+            onMouseLeave={handleButtonMouseLeave}
+          >
+            Sobre Nosotros
+          </button>
+        ),
+      };
+    }
+    if (hasKeyword(texto, "login") || hasKeyword(texto, "iniciar sesion")) {
+      return {
+        message: "Iniciá sesión en tu cuenta:",
+        sender: "bot",
+        widget: (
+          <button
+            onClick={() => handleButtonClick("/login")}
+            style={getButtonStyles("#f59e0b")}
+            onMouseEnter={handleButtonMouseEnter}
+            onMouseLeave={handleButtonMouseLeave}
+          >
+            Login
+          </button>
+        ),
+      };
+    }
+    if (
+      hasKeyword(texto, "registro") ||
+      hasKeyword(texto, "registrate") ||
+      hasKeyword(texto, "registrarse") ||
+      hasKeyword(texto, "registrarme") ||
+      hasKeyword(texto, "registración")
+    ) {
+      return {
+        message: "Registrate para acceder a todos los cursos y beneficios:",
+        sender: "bot",
+        widget: (
+          <button
+            onClick={() => handleButtonClick("/registro")}
+            style={getButtonStyles("#ec4899")}
+            onMouseEnter={handleButtonMouseEnter}
+            onMouseLeave={handleButtonMouseLeave}
+          >
+            Registro
+          </button>
+        ),
+      };
+    }
+    if (hasKeyword(texto, "hola") || hasKeyword(texto, "saludo")) {
+      return {
+        message: "¡Hola! ¿En qué puedo ayudarte hoy?",
+        sender: "bot",
+      };
+    }
+    if (hasKeyword(texto, "gracias")) {
+      return {
+        message: "¡De nada! Estoy aquí para ayudarte.",
+        sender: "bot",
+      };
+    }
+    if (hasKeyword(texto, "contacto") || hasKeyword(texto, "soporte")) {
+      return {
+        message: "Para soporte directo o preguntas, puedes contactarnos por WhatsApp:",
+        sender: "bot",
+        widget: (
+          <button
+            onClick={() => handleButtonClick("https://wa.me/50433351621")}
+            style={getButtonStyles("#25d366")}
+            onMouseEnter={handleButtonMouseEnter}
+            onMouseLeave={handleButtonMouseLeave}
+          >
+            WhatsApp (+504 33351621)
+          </button>
+        ),
+      };
+    }
+
+
+    return {
+      message: "Perdona, no entendí eso. ¿Querés que te ayude vía WhatsApp?",
+      sender: "bot",
+      widget: (
+        <button
+          onClick={() => handleButtonClick("https://wa.me/50433351621")}
+          style={getButtonStyles("#25d366")}
+          onMouseEnter={handleButtonMouseEnter}
+          onMouseLeave={handleButtonMouseLeave}
+        >
+          Contactar por WhatsApp
+        </button>
+      ),
+    };
   };
 
   const handleSend = (text: string) => {
@@ -68,153 +246,6 @@ export const ChatSimple = () => {
     }, 1000);
   };
 
-  const getBotResponse = (input: string): Mensaje => {
-    const texto = input.toLowerCase();
-
-    if (tienePalabra(texto, "curso") || tienePalabra(texto, "cursos")) {
-      return {
-        message: "¡Claro! Tenemos cursos muy interesantes para vos.",
-        sender: "bot",
-        widget: (
-          <button
-            onClick={() => handleButtonClick("/cursos")}
-            style={botonEstilo("#4f46e5")}
-            onMouseEnter={mouseEntra}
-            onMouseLeave={mouseSale}
-          >
-            Cursos
-          </button>
-        ),
-      };
-    }
-
-    if (tienePalabra(texto, "comunidad")) {
-      return {
-        message: "Te invitamos a conocer nuestra comunidad.",
-        sender: "bot",
-        widget: (
-          <button
-            onClick={() => handleButtonClick("/comunidad")}
-            style={botonEstilo("#0ea5e9")}
-            onMouseEnter={mouseEntra}
-            onMouseLeave={mouseSale}
-          >
-            Comunidad
-          </button>
-        ),
-      };
-    }
-    if (tienePalabra(texto, "nosotros")) {
-      return {
-        message: "Conocé más sobre Bara Creativa.",
-        sender: "bot",
-        widget: (
-          <button
-            onClick={() => handleButtonClick("/nosotros")}
-            style={botonEstilo("#10b981")}
-            onMouseEnter={mouseEntra}
-            onMouseLeave={mouseSale}
-          >
-            Nosotros
-          </button>
-        ),
-      };
-    }
-    if (tienePalabra(texto, "login")) {
-      return {
-        message: "Iniciá sesión en tu cuenta.",
-        sender: "bot",
-        widget: (
-          <button
-            onClick={() => handleButtonClick("/login")}
-            style={botonEstilo("#f59e0b")}
-            onMouseEnter={mouseEntra}
-            onMouseLeave={mouseSale}
-          >
-            Login
-          </button>
-        ),
-      };
-    }
-    if (
-      tienePalabra(texto, "registro") ||
-      tienePalabra(texto, "registrate") ||
-      tienePalabra(texto, "registrarse") ||
-      tienePalabra(texto, "registrarme") ||
-      tienePalabra(texto, "registración")
-    ) {
-      return {
-        message: "Registrate para acceder a todos los cursos.",
-        sender: "bot",
-        widget: (
-          <button
-            onClick={() => handleButtonClick("/registro")}
-            style={botonEstilo("#ec4899")}
-            onMouseEnter={mouseEntra}
-            onMouseLeave={mouseSale}
-          >
-            Registro
-          </button>
-        ),
-      };
-    }
-    if (tienePalabra(texto, "hola")) {
-      return {
-        message: "¡Hola! ¿Cómo puedo ayudarte hoy?",
-        sender: "bot",
-      };
-    }
-    if (tienePalabra(texto, "gracias")) {
-      return {
-        message: "¡De nada! Estoy aquí para ayudarte.",
-        sender: "bot",
-      };
-    }
-
-    return {
-      message: "Perdona, no entendí eso. ¿Querés que te ayude vía WhatsApp?",
-      sender: "bot",
-      widget: (
-        <button
-          onClick={() => handleButtonClick("https://wa.me/50433351621")}
-          style={botonEstilo("#25d366")}
-          onMouseEnter={mouseEntra}
-          onMouseLeave={mouseSale}
-        >
-          WhatsApp
-        </button>
-      ),
-    };
-  };
-
-  const botonEstilo = (bgColor: string): React.CSSProperties => ({
-    backgroundColor: bgColor,
-    color: "white",
-    border: "none",
-    borderRadius: "12px",
-    padding: "8px 14px",
-    fontWeight: 600,
-    fontSize: "14px",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-    cursor: "pointer",
-    transition: "transform 0.2s, box-shadow 0.2s",
-  });
-
-  const mouseEntra = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const target = e.currentTarget;
-    target.style.transform = "scale(1.05)";
-    target.style.boxShadow = "0 4px 10px rgba(0,0,0,0.25)";
-  };
-
-  const mouseSale = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const target = e.currentTarget;
-    target.style.transform = "scale(1)";
-    target.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
-  };
-
-  // Calculamos ancho y alto dinámicos para <1440px
-  // El tamaño base es 450x550 para 1440px o más
-  // Para menor a 1440, escalamos proporcionalmente con un mínimo
   const maxWidth = 350;
   const maxHeight = 450;
   const minWidth = 320;
@@ -225,11 +256,11 @@ export const ChatSimple = () => {
   const dynamicWidth = Math.max(minWidth, Math.floor(maxWidth * scaleFactor));
   const dynamicHeight = Math.max(minHeight, Math.floor(maxHeight * scaleFactor));
 
-  const containerStyle = {
+  const containerStyle: CSSProperties = {
     width: dynamicWidth,
     height: dynamicHeight,
     margin: "auto",
-    borderRadius: 12,
+    borderRadius: "12px",
     boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
   };
 
