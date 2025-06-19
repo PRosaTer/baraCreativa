@@ -15,7 +15,7 @@ import { join } from 'path';
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: async (config: ConfigService): Promise<TypeOrmModuleOptions> => ({
+      useFactory: (config: ConfigService): TypeOrmModuleOptions => ({
         type: 'postgres',
         host: config.get<string>('DB_HOST'),
         port: parseInt(config.get<string>('DB_PORT') || '5432', 10),
@@ -23,13 +23,13 @@ import { join } from 'path';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
         entities: [join(__dirname, '**', '*.entity.{ts,js}')],
-
         synchronize: true,
       }),
+
     }),
     UsuariosModule,
     PasswordModule,
     AuthModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

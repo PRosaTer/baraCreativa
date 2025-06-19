@@ -25,7 +25,7 @@ exports.AppModule = AppModule = __decorate([
             }),
             typeorm_1.TypeOrmModule.forRootAsync({
                 inject: [config_1.ConfigService],
-                useFactory: async (config) => ({
+                useFactory: (config) => ({
                     type: 'postgres',
                     host: config.get('DB_HOST'),
                     port: parseInt(config.get('DB_PORT') || '5432', 10),
