@@ -1,4 +1,3 @@
-
 import { RegisterApiData, ApiResponse } from "../types/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -24,5 +23,5 @@ export const registerUser = async (userData: RegisterApiData): Promise<ApiRespon
   } catch (error) {
     console.error("Network or unexpected error (registerUser):", error);
     throw new Error("No se pudo conectar con el servidor. Verifica tu conexión o intenta más tarde.");
-  }
+}
 };
