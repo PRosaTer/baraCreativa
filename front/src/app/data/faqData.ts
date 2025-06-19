@@ -128,7 +128,7 @@ Profesionales: Certificado digital con habilidades técnicas reconocidas en el m
     question: "¿Tienen comunidad de estudiantes?",
     keywords: ["comunidad", "estudiantes", "grupo", "telegram"],
     answer: `Sí, únete a nuestro grupo de Telegram para networking y soporte.`,
-    redirectTo: "https://t.me/TuGrupoDeTelegram", // aca tenemos que poner el grupo
+    redirectTo: "https://t.me/+CjxZK-U297s4YjA5",
     buttonText: "Unirme a la Comunidad",
   },
   {
