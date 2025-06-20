@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Usuario = void 0;
+exports.Usuario = exports.EstadoCuenta = exports.TipoUsuario = void 0;
 const typeorm_1 = require("typeorm");
 const carrito_entity_1 = require("./carrito.entity");
 const certificado_entity_1 = require("./certificado.entity");
@@ -18,6 +18,18 @@ const equipo_empresa_entity_1 = require("./equipo-empresa.entity");
 const inscripcion_entity_1 = require("./inscripcion.entity");
 const pago_entity_1 = require("./pago.entity");
 const resena_entity_1 = require("./resena.entity");
+var TipoUsuario;
+(function (TipoUsuario) {
+    TipoUsuario["Alumno"] = "Alumno";
+    TipoUsuario["Empresa"] = "Empresa";
+    TipoUsuario["Admin"] = "Admin";
+})(TipoUsuario || (exports.TipoUsuario = TipoUsuario = {}));
+var EstadoCuenta;
+(function (EstadoCuenta) {
+    EstadoCuenta["Activo"] = "activo";
+    EstadoCuenta["Inactivo"] = "inactivo";
+    EstadoCuenta["Bloqueado"] = "bloqueado";
+})(EstadoCuenta || (exports.EstadoCuenta = EstadoCuenta = {}));
 let Usuario = class Usuario {
     id;
     nombreCompleto;
@@ -29,6 +41,11 @@ let Usuario = class Usuario {
     actualizadoEn;
     tokenRecuperacion;
     expiracionTokenRecuperacion;
+    telefono;
+    tipoUsuario;
+    nombreEmpresa;
+    ultimaSesion;
+    estadoCuenta;
     carritos;
     certificados;
     contactosSoporte;
@@ -78,6 +95,34 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
     __metadata("design:type", Object)
 ], Usuario.prototype, "expiracionTokenRecuperacion", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Usuario.prototype, "telefono", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'enum',
+        enum: TipoUsuario,
+        default: TipoUsuario.Alumno,
+    }),
+    __metadata("design:type", String)
+], Usuario.prototype, "tipoUsuario", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Usuario.prototype, "nombreEmpresa", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], Usuario.prototype, "ultimaSesion", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'enum',
+        enum: EstadoCuenta,
+        default: EstadoCuenta.Activo,
+    }),
+    __metadata("design:type", String)
+], Usuario.prototype, "estadoCuenta", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => carrito_entity_1.Carrito, (carrito) => carrito.usuario),
     __metadata("design:type", Array)

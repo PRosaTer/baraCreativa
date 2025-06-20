@@ -14,6 +14,19 @@ import { Inscripcion } from './inscripcion.entity';
 import { Pago } from './pago.entity';
 import { Resena } from './resena.entity';
 
+
+export enum TipoUsuario {
+  Alumno = 'Alumno',
+  Empresa = 'Empresa',
+  Admin = 'Admin',
+}
+
+export enum EstadoCuenta {
+  Activo = 'activo',
+  Inactivo = 'inactivo',
+  Bloqueado = 'bloqueado',
+}
+
 @Entity('usuarios')
 export class Usuario {
   @PrimaryGeneratedColumn()
@@ -22,9 +35,8 @@ export class Usuario {
   @Column()
   nombreCompleto: string;
 
-@Column({ unique: true, name: 'correoelectronico' })
-correoElectronico: string;
-
+  @Column({ unique: true, name: 'correoelectronico' })
+  correoElectronico: string;
 
   @Column()
   password: string;
@@ -47,6 +59,28 @@ correoElectronico: string;
   @Column({ type: 'timestamp', nullable: true })
   expiracionTokenRecuperacion: Date | null;
 
+  @Column({ nullable: true })
+  telefono?: string;
+
+  @Column({
+    type: 'enum',
+    enum: TipoUsuario,
+    default: TipoUsuario.Alumno,
+  })
+  tipoUsuario: TipoUsuario;
+
+  @Column({ nullable: true })
+  nombreEmpresa?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  ultimaSesion?: Date;
+
+  @Column({
+    type: 'enum',
+    enum: EstadoCuenta,
+    default: EstadoCuenta.Activo,
+  })
+  estadoCuenta: EstadoCuenta;
 
   @OneToMany(() => Carrito, (carrito) => carrito.usuario)
   carritos: Carrito[];

@@ -1,63 +1,30 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Logo from "../logo";
-import ComunidadButton from "../Botones/sobre-nosotros";
-import SobreComunidadButton from "../Botones/comunidad";
-import BarraBusqueda from "../BarraBusqueda/barrabusqueda";
-import Cursos from "../Botones/cursos";
-import Contactenos from "../Botones/contactenos";
-import Acceso from "../Botones/acceso";
-import { useRouter } from "next/navigation";
-
-// Definir el tipo para el estado user
-interface User {
-  name: string;
-}
+import React, { useEffect } from 'react';
+import Logo from '../logo';
+import ComunidadButton from '../Botones/sobre-nosotros';
+import SobreComunidadButton from '../Botones/comunidad';
+import BarraBusqueda from '../BarraBusqueda/barrabusqueda';
+import Cursos from '../Botones/cursos';
+import Contactenos from '../Botones/contactenos';
+import { useAuth } from '@/app/context/AuthContext';
+import Link from 'next/link';
+import BotonConEfecto from '../Botones/BotonConEfecto';
 
 export default function Navbar() {
-  const [user, setUser] = useState<User | null>(null); // Inicializar como null o User
-  const router = useRouter();
+  const { usuario, cargandoUsuario, cerrarSesion } = useAuth();
 
   useEffect(() => {
-    // Verificar si hay un token al montar el componente
-    const token = localStorage.getItem("token");
-    if (token) {
-      setUser({ name: "nombre de la persona" }); // Usar texto fijo en lugar del token
-    }
-
-    // Escuchar el evento de login
-    const handleLogin = () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        setUser({ name: "nombre de la persona" }); // Actualizar con texto fijo al logueo
-      }
-    };
-
-    window.addEventListener("userLoggedIn", handleLogin);
-
-    // Limpiar el listener al desmontar
-    return () => {
-      window.removeEventListener("userLoggedIn", handleLogin);
-    };
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token"); // Eliminar token
-    setUser(null); // Limpiar estado
-    router.push("/"); // Redirigir al inicio
-  };
+  }, [usuario, cargandoUsuario]);
 
   return (
     <nav className="w-full bg-primary py-2 sm:py-4">
-      <div
-        className="
+      <div className="
         flex items-center justify-between
         w-full max-w-screen-xl mx-auto
         px-2 sm:px-4 md:px-8 lg:px-20
         gap-x-[54px]
-      "
-      >
+      ">
         <div className="flex items-center justify-start w-full gap-x-[34px]">
           <div className="flex-shrink-0">
             <Logo />
@@ -67,32 +34,50 @@ export default function Navbar() {
           <BarraBusqueda className="flex-grow min-w-[200px] max-w-[656px]" />
           <Cursos />
           <Contactenos />
-          {user ? (
-            <div className="flex items-center gap-x-4">
-              <span className="text-white font-medium">
-                Bienvenido, {user.name}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="
-                  flex items-center justify-center 
-                  bg-red-600 text-white relative overflow-hidden group z-10 
-                  hover:text-white duration-1000 rounded-[20px] 
-                  h-10 sm:h-12 
-                  text-xs sm:text-sm md:text-base lg:text-xl 
-                  w-24 sm:w-28 md:w-32 lg:w-40
-                  -mr-20 sm:-mr-20 md:-mr-28 lg:-mr-10
-                  px-2 sm:px-2 md:px-4 lg:px-6
-                "
-              >
-                <span className="absolute bg-yellow-300 w-36 h-36 rounded-full group-hover:scale-100 scale-0 -z-10 -left-2 -top-10 group-hover:duration-500 duration-700 origin-center transform transition-all"></span>
-                <span className="absolute bg-yellow-500 w-36 h-36 -left-2 -top-10 rounded-full group-hover:scale-100 scale-0 -z-10 group-hover:duration-700 duration-500 origin-center transform transition-all"></span>
-                <span className="absolute bg-red-600 w-36 h-36 -left-2 -top-10 rounded-full group-hover:scale-100 scale-0 -z-10 group-hover:duration-700 duration-500 origin-center transform transition-all"></span>
-                Cerrar sesión
-              </button>
+
+          {cargandoUsuario ? (
+            <div className="
+              px-4 py-2 rounded-lg font-medium text-white bg-gray-400
+              transition duration-300 whitespace-nowrap animate-pulse
+            ">
+              Cargando...
+            </div>
+          ) : usuario ? (
+            <div className="relative group">
+              <BotonConEfecto
+                texto={`Hola, ${usuario.nombreCompleto.split(' ')[0]}`}
+                href="/perfil"
+              />
+              <div className="absolute right-0 top-full w-fit bg-white rounded-md shadow-lg py-1 z-10
+                  opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                  transition-opacity duration-700 ease-out
+                  flex flex-col items-center">
+                <button
+                  onClick={cerrarSesion}
+                  className="px-8 py-2 text-sm whitespace-nowrap
+                             bg-gray-800 text-gray-200 font-bold rounded-lg shadow-sm border border-transparent
+                             hover:bg-gray-700 hover:text-cyan-400 hover:shadow-md hover:shadow-cyan-500/30 hover:border-cyan-400
+                             transition-all duration-300 ease-in-out"
+                >
+                  Cerrar sesión
+                </button>
+                {usuario.esAdmin && (
+                  <Link href="/admin"
+                    className="mt-1 px-4 py-2 text-sm whitespace-nowrap // CAMBIO: Estilo tecnológico para Panel Admin
+                               bg-gray-800 text-gray-200 font-bold rounded-lg shadow-sm border border-transparent
+                               hover:bg-gray-700 hover:text-blue-400 hover:shadow-md hover:shadow-blue-500/30 hover:border-blue-400
+                               transition-all duration-300 ease-in-out"
+                  >
+                    Panel Admin
+                  </Link>
+                )}
+              </div>
             </div>
           ) : (
-            <Acceso />
+            <BotonConEfecto
+              texto="Acceso"
+              href="/login"
+            />
           )}
         </div>
       </div>

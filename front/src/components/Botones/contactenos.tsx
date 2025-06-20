@@ -12,7 +12,7 @@ export default function ComunidadButton() {
         
         h-10 sm:h-12 
         text-xs sm:text-sm md:text-base lg:text-xl 
-        w-24 sm:w-28 md:w-32 lg:w-52
+        w-24 sm:w-28 md:w-32 lg:w-64
         px-2 sm:px-3 md:px-4 lg:px-6 
       "
     >

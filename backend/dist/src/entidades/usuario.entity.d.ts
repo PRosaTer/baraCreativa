@@ -5,6 +5,16 @@ import { EquipoEmpresaMiembro } from './equipo-empresa.entity';
 import { Inscripcion } from './inscripcion.entity';
 import { Pago } from './pago.entity';
 import { Resena } from './resena.entity';
+export declare enum TipoUsuario {
+    Alumno = "Alumno",
+    Empresa = "Empresa",
+    Admin = "Admin"
+}
+export declare enum EstadoCuenta {
+    Activo = "activo",
+    Inactivo = "inactivo",
+    Bloqueado = "bloqueado"
+}
 export declare class Usuario {
     id: number;
     nombreCompleto: string;
@@ -16,6 +26,11 @@ export declare class Usuario {
     actualizadoEn: Date;
     tokenRecuperacion: string | null;
     expiracionTokenRecuperacion: Date | null;
+    telefono?: string;
+    tipoUsuario: TipoUsuario;
+    nombreEmpresa?: string;
+    ultimaSesion?: Date;
+    estadoCuenta: EstadoCuenta;
     carritos: Carrito[];
     certificados: Certificado[];
     contactosSoporte: ContactoSoporte[];

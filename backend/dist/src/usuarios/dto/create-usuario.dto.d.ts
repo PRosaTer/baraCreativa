@@ -1,10 +1,11 @@
+import { TipoUsuario, EstadoCuenta } from '../../entidades/usuario.entity';
 export declare class CreateUsuarioDto {
     nombreCompleto: string;
     correoElectronico: string;
     password: string;
     telefono?: string;
-    tipoUsuario: string;
+    tipoUsuario: TipoUsuario;
     nombreEmpresa?: string;
     fotoPerfil?: string;
-    estadoCuenta?: string;
+    estadoCuenta?: EstadoCuenta;
 }

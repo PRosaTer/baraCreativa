@@ -2,8 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Usuario } from '../entidades/usuario.entity';
-import { CreateUsuarioDto } from './dto/create-usuario.dto';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsuariosService {
@@ -12,36 +10,49 @@ export class UsuariosService {
     private usuariosRepository: Repository<Usuario>,
   ) {}
 
+  async encontrarPorId(id: number): Promise<Usuario | null> {
+    const usuario = await this.usuariosRepository.findOne({ where: { id } });
+    return usuario || null;
+  }
+
+  async encontrarPorCorreo(correoElectronico: string): Promise<Usuario | null> {
+    const usuario = await this.usuariosRepository.findOne({ where: { correoElectronico } });
+    return usuario || null;
+  }
+
+
   async findAll(): Promise<Usuario[]> {
     return this.usuariosRepository.find();
   }
 
   async findOne(id: number): Promise<Usuario> {
-    const usuario = await this.usuariosRepository.findOneBy({ id });
-    if (!usuario) throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    const usuario = await this.usuariosRepository.findOne({ where: { id } });
+    if (!usuario) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
+    }
     return usuario;
   }
 
-  async encontrarPorCorreo(correoElectronico: string): Promise<Usuario | null> {
-    return this.usuariosRepository.findOne({ where: { correoElectronico } });
+
+  async create(usuarioData: Partial<Usuario>): Promise<Usuario> {
+    const nuevoUsuario = this.usuariosRepository.create(usuarioData);
+    return this.usuariosRepository.save(nuevoUsuario);
   }
 
-  async create(usuarioData: CreateUsuarioDto): Promise<Usuario> {
-    const hash = await bcrypt.hash(usuarioData.password, 10);
-    const usuario = this.usuariosRepository.create({
-      ...usuarioData,
-      password: hash,
-    });
-    return this.usuariosRepository.save(usuario);
-  }
 
   async update(id: number, usuarioData: Partial<Usuario>): Promise<Usuario> {
-    await this.usuariosRepository.update(id, usuarioData);
+    const resultado = await this.usuariosRepository.update(id, usuarioData);
+    if (resultado.affected === 0) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
+    }
     return this.findOne(id);
   }
 
+
   async remove(id: number): Promise<void> {
-    const usuario = await this.findOne(id);
-    await this.usuariosRepository.delete(usuario.id);
+    const resultado = await this.usuariosRepository.delete(id);
+    if (resultado.affected === 0) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
+    }
   }
 }

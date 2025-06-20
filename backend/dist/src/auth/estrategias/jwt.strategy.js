@@ -14,9 +14,11 @@ const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 const passport_jwt_1 = require("passport-jwt");
 const config_1 = require("@nestjs/config");
+const usuarios_service_1 = require("../../usuarios/usuarios.service");
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
     configService;
-    constructor(configService) {
+    usuariosService;
+    constructor(configService, usuariosService) {
         const jwtSecret = configService.get('JWT_SECRET');
         if (!jwtSecret) {
             throw new Error('JWT_SECRET no está definido en las variables de entorno');
@@ -28,14 +30,33 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         };
         super(options);
         this.configService = configService;
+        this.usuariosService = usuariosService;
     }
     async validate(payload) {
-        return { userId: payload.sub, correoElectronico: payload.correoElectronico };
+        const usuario = await this.usuariosService.encontrarPorId(payload.sub);
+        if (!usuario) {
+            throw new common_1.UnauthorizedException('Token inválido o usuario no encontrado.');
+        }
+        return {
+            id: usuario.id,
+            nombreCompleto: usuario.nombreCompleto,
+            correoElectronico: usuario.correoElectronico,
+            telefono: usuario.telefono,
+            tipoUsuario: usuario.tipoUsuario,
+            nombreEmpresa: usuario.nombreEmpresa,
+            fotoPerfil: usuario.fotoPerfil,
+            estadoCuenta: usuario.estadoCuenta,
+            esAdmin: usuario.esAdmin,
+            creadoEn: usuario.creadoEn,
+            actualizadoEn: usuario.actualizadoEn,
+            ultimaSesion: usuario.ultimaSesion,
+        };
     }
 };
 exports.JwtStrategy = JwtStrategy;
 exports.JwtStrategy = JwtStrategy = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [config_1.ConfigService])
+    __metadata("design:paramtypes", [config_1.ConfigService,
+        usuarios_service_1.UsuariosService])
 ], JwtStrategy);
 //# sourceMappingURL=jwt.strategy.js.map

@@ -17,39 +17,45 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const usuario_entity_1 = require("../entidades/usuario.entity");
-const bcrypt = require("bcrypt");
 let UsuariosService = class UsuariosService {
     usuariosRepository;
     constructor(usuariosRepository) {
         this.usuariosRepository = usuariosRepository;
     }
+    async encontrarPorId(id) {
+        const usuario = await this.usuariosRepository.findOne({ where: { id } });
+        return usuario || null;
+    }
+    async encontrarPorCorreo(correoElectronico) {
+        const usuario = await this.usuariosRepository.findOne({ where: { correoElectronico } });
+        return usuario || null;
+    }
     async findAll() {
         return this.usuariosRepository.find();
     }
     async findOne(id) {
-        const usuario = await this.usuariosRepository.findOneBy({ id });
-        if (!usuario)
-            throw new common_1.NotFoundException(`Usuario con ID ${id} no encontrado`);
+        const usuario = await this.usuariosRepository.findOne({ where: { id } });
+        if (!usuario) {
+            throw new common_1.NotFoundException(`Usuario con ID ${id} no encontrado.`);
+        }
         return usuario;
     }
-    async encontrarPorCorreo(correoElectronico) {
-        return this.usuariosRepository.findOne({ where: { correoElectronico } });
-    }
     async create(usuarioData) {
-        const hash = await bcrypt.hash(usuarioData.password, 10);
-        const usuario = this.usuariosRepository.create({
-            ...usuarioData,
-            password: hash,
-        });
-        return this.usuariosRepository.save(usuario);
+        const nuevoUsuario = this.usuariosRepository.create(usuarioData);
+        return this.usuariosRepository.save(nuevoUsuario);
     }
     async update(id, usuarioData) {
-        await this.usuariosRepository.update(id, usuarioData);
+        const resultado = await this.usuariosRepository.update(id, usuarioData);
+        if (resultado.affected === 0) {
+            throw new common_1.NotFoundException(`Usuario con ID ${id} no encontrado.`);
+        }
         return this.findOne(id);
     }
     async remove(id) {
-        const usuario = await this.findOne(id);
-        await this.usuariosRepository.delete(usuario.id);
+        const resultado = await this.usuariosRepository.delete(id);
+        if (resultado.affected === 0) {
+            throw new common_1.NotFoundException(`Usuario con ID ${id} no encontrado.`);
+        }
     }
 };
 exports.UsuariosService = UsuariosService;
