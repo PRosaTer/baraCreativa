@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateUsuarioDto = void 0;
 const class_validator_1 = require("class-validator");
+const usuario_entity_1 = require("../../entidades/usuario.entity");
 class CreateUsuarioDto {
     nombreCompleto;
     correoElectronico;
@@ -43,7 +44,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUsuarioDto.prototype, "telefono", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEnum)(usuario_entity_1.TipoUsuario, { message: 'Tipo de usuario inválido' }),
     (0, class_validator_1.IsNotEmpty)({ message: 'El tipo de usuario es obligatorio' }),
     __metadata("design:type", String)
 ], CreateUsuarioDto.prototype, "tipoUsuario", void 0);
@@ -58,7 +59,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUsuarioDto.prototype, "fotoPerfil", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEnum)(usuario_entity_1.EstadoCuenta, { message: 'Estado de cuenta inválido' }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateUsuarioDto.prototype, "estadoCuenta", void 0);

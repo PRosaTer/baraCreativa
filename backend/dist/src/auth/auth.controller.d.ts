@@ -8,4 +8,5 @@ export declare class AuthController {
     }): Promise<{
         access_token: string;
     }>;
+    getProfile(req: any): any;
 }

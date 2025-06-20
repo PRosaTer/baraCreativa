@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, IsEmail, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsOptional, IsEnum } from 'class-validator';
+import { TipoUsuario, EstadoCuenta } from '../../entidades/usuario.entity';
 
 export class CreateUsuarioDto {
   @IsString()
@@ -17,9 +18,9 @@ export class CreateUsuarioDto {
   @IsOptional()
   telefono?: string;
 
-  @IsString()
+  @IsEnum(TipoUsuario, { message: 'Tipo de usuario inválido' })
   @IsNotEmpty({ message: 'El tipo de usuario es obligatorio' })
-  tipoUsuario: string;
+  tipoUsuario: TipoUsuario;
 
   @IsString()
   @IsOptional()
@@ -29,7 +30,8 @@ export class CreateUsuarioDto {
   @IsOptional()
   fotoPerfil?: string;
 
-  @IsString()
+  @IsEnum(EstadoCuenta, { message: 'Estado de cuenta inválido' })
   @IsOptional()
-  estadoCuenta?: string;
+  estadoCuenta?: EstadoCuenta;
+
 }

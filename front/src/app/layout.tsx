@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-
-import Navbar from "../components/Navbar/navbar";
 import WhatsApp from "../components/whatsapp/WhatsApp";
 import Footer from "@/components/Footer/Footer";
-import ChatbotFlotante from "@/components/ChatSimple/ChatbotFlotante"; // o la ruta correcta según tu estructura
-
+import ChatbotFlotante from "@/components/ChatSimple/ChatbotFlotante";
+import RootLayoutContent from './RootLayoutContent';
 
 export const metadata: Metadata = {
   title: "Bara Creativa - Edtech Hondureña",
@@ -44,13 +42,12 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="antialiased flex flex-col min-h-screen bg-background text-foreground">
-        <Navbar />
-        <main className="flex-grow">
+        <RootLayoutContent>
           {children}
-        </main>
+        </RootLayoutContent>
         <WhatsApp />
         <ChatbotFlotante />
-         <Footer />
+        <Footer />
       </body>
     </html>
   );

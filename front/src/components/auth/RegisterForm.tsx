@@ -1,6 +1,6 @@
 "use client";
 
-import { useRegisterForm } from "../../app/hooks/auth/useRegisterForm";
+import { useRegisterForm } from "../../app/hooks/authRegistro/useRegisterForm";
 import FormField from "@/components/ui/FormField";
 import PasswordInput from "@/components/ui/PasswordInput";
 import SelectInput from "@/components/ui/SelectInput";

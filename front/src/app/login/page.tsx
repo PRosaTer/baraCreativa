@@ -1,99 +1,64 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect } from "react";
 import ContenedorFormulario from "@/components/formularios/ContenedorFormulario";
 import CampoEntrada from "@/components/formularios/CampoEntrada";
 import CampoContrasena from "@/components/formularios/CampoContrasena";
 import BotonEnviar from "@/components/formularios/BotonEnviar";
 import EnlaceFormulario from "@/components/formularios/EnlaceFormulario";
 import { useAutenticacion } from "@/app/hooks/usarAutenticacion";
-import MensajeAviso from "@/components/Aviso/MensajeAviso";
 
 const InicioSesion: React.FC = () => {
-  const router = useRouter();
-  const [mostrarVentana, setMostrarVentana] = useState(true);
   const {
     datosInicioSesion,
     manejarCambio,
     manejarInicioSesion: iniciarSesionHook,
-    mensajeExito,
-    setMensajeExito,
+    usuario
   } = useAutenticacion();
 
   const manejarInicioSesion = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("LOGIN_PAGE: manejarInicioSesion - Llamando a iniciarSesionHook.");
     const exito = await iniciarSesionHook(e);
     if (exito) {
-      setMensajeExito(true);
-      setTimeout(() => {
-        setMostrarVentana(false);
-        setTimeout(() => router.push("/"), 800); 
-      }, 1500);
+      console.log("LOGIN_PAGE: manejarInicioSesion - Inicio de sesión exitoso. Redirección manejada por el hook.");
+    } else {
+      console.log("LOGIN_PAGE: manejarInicioSesion - Inicio de sesión fallido.");
     }
   };
 
   useEffect(() => {
-    const correoGuardado = localStorage.getItem("correoRecuperacion");
-    if (correoGuardado) {
-      manejarCambio({
-        target: {
-          name: "correo",
-          value: correoGuardado,
-        },
-      } as React.ChangeEvent<HTMLInputElement>);
-      localStorage.removeItem("correoRecuperacion");
-    }
-  }, [manejarCambio]);
+    console.log("LOGIN_PAGE: useEffect - Estado actual del usuario:", usuario);
+  }, [usuario]);
 
   return (
     <>
-      {mensajeExito && (
-        <MensajeAviso
-          mensaje="Bienvenido"
-          onCerrar={() => setMensajeExito(false)}
-          duracion={2000}
-        />
-      )}
-
-      <AnimatePresence>
-        {mostrarVentana && (
-          <motion.div
-            initial={{ x: 0, opacity: 1 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: "-100%", opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-          >
-            <ContenedorFormulario titulo="Inicia sesión">
-              <form onSubmit={manejarInicioSesion} className="space-y-6">
-                <CampoEntrada
-                  etiqueta="Correo electrónico"
-                  tipo="email"
-                  nombre="correo"
-                  valor={datosInicioSesion.correo}
-                  onChange={manejarCambio}
-                  requerido
-                />
-                <CampoContrasena
-                  etiqueta="Contraseña"
-                  nombre="contrasena"
-                  valor={datosInicioSesion.contrasena}
-                  onChange={manejarCambio}
-                  requerido
-                />
-                <div className="text-sm text-right">
-                  <EnlaceFormulario texto="¿Olvidaste la contraseña?" href="/password" />
-                </div>
-                <BotonEnviar texto="Ingresar" />
-              </form>
-              <div className="text-sm text-center mt-6 text-gray-600">
-                ¿No tienes una cuenta? <EnlaceFormulario texto="Regístrate" href="/registro" />
-              </div>
-            </ContenedorFormulario>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ContenedorFormulario titulo="Inicia sesión">
+        <form onSubmit={manejarInicioSesion} className="space-y-6">
+          <CampoEntrada
+            etiqueta="Correo electrónico"
+            tipo="email"
+            nombre="correo"
+            valor={datosInicioSesion.correo}
+            onChange={manejarCambio}
+            requerido
+          />
+          <CampoContrasena
+            etiqueta="Contraseña"
+            nombre="contrasena"
+            valor={datosInicioSesion.contrasena}
+            onChange={manejarCambio}
+            requerido
+          />
+          <div className="text-sm text-right">
+            <EnlaceFormulario texto="¿Olvidaste la contraseña?" href="/password" />
+          </div>
+          <BotonEnviar texto="Ingresar" />
+        </form>
+        <div className="text-sm text-center mt-6 text-gray-600">
+          ¿No tienes una cuenta? <EnlaceFormulario texto="Regístrate" href="/registro" />
+        </div>
+      </ContenedorFormulario>
     </>
   );
 };
