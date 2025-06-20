@@ -7,14 +7,14 @@ import { Autoplay } from "swiper/modules";
 import "swiper/css";
 
 const brands = [
-  { src: "/Facebook-Logo-Transparent-PNG.png", alt: "Facebook" },
-  { src: "/Facebook-Logo-Transparent-PNG.png", alt: "Facebook" },
-  { src: "/Facebook-Logo-Transparent-PNG.png", alt: "Facebook" },
-  { src: "/Facebook-Logo-Transparent-PNG.png", alt: "Facebook" },
-  { src: "/Facebook-Logo-Transparent-PNG.png", alt: "Facebook" },
-  { src: "/Facebook-Logo-Transparent-PNG.png", alt: "Facebook" },
-  { src: "/Facebook-Logo-Transparent-PNG.png", alt: "Facebook" },
-  { src: "/Facebook-Logo-Transparent-PNG.png", alt: "Facebook" },
+  { src: "/facebook.logo.png", alt: "Facebook" },
+  { src: "/facebook.logo.png", alt: "Facebook" },
+  { src: "/facebook.logo.png", alt: "Facebook" },
+  { src: "/facebook.logo.png", alt: "Facebook" },
+  { src: "/facebook.logo.png", alt: "Facebook" },
+  { src: "/facebook.logo.png", alt: "Facebook" },
+  { src: "/facebook.logo.png", alt: "Facebook" },
+  { src: "/facebook.logo.png", alt: "Facebook" },
 
   // Agrega más imágenes para un mejor efecto
 ];

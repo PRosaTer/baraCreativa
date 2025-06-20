@@ -9,12 +9,12 @@ import "swiper/css/pagination";
 
 const PhotoCarousel = () => {
   const images = [
-    "/Facebook-Logo-Transparent-PNG.png",
-    "/Facebook-Logo-Transparent-PNG.png",
-    "/Facebook-Logo-Transparent-PNG.png",
-    "/Facebook-Logo-Transparent-PNG.png",
-    "/Facebook-Logo-Transparent-PNG.png",
-    "/Facebook-Logo-Transparent-PNG.png",
+    "/facebook.logo.png",
+    "/facebook.logo.png",
+    "/facebook.logo.png",
+    "/facebook.logo.png",
+    "/facebook.logo.png",
+    "/facebook.logo.png",
   ];
 
   return (
