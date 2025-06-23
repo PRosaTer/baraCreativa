@@ -10,4 +10,5 @@ export declare class UsuariosService {
     create(usuarioData: Partial<Usuario>): Promise<Usuario>;
     update(id: number, usuarioData: Partial<Usuario>): Promise<Usuario>;
     remove(id: number): Promise<void>;
+    logout(userId: number): Promise<void>;
 }

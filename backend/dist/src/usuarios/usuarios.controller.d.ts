@@ -6,7 +6,7 @@ export declare class UsuariosController {
     constructor(usuariosService: UsuariosService);
     getAll(): Promise<Usuario[]>;
     getOne(id: string): Promise<Usuario>;
-    create(usuarioData: CreateUsuarioDto): Promise<Usuario>;
+    create(usuarioData: CreateUsuarioDto, foto?: Express.Multer.File): Promise<Usuario>;
     update(id: string, usuarioData: Partial<Usuario>): Promise<Usuario>;
     remove(id: string): Promise<void>;
 }

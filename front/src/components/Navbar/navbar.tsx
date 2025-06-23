@@ -61,16 +61,7 @@ export default function Navbar() {
                 >
                   Cerrar sesión
                 </button>
-                {usuario.esAdmin && (
-                  <Link href="/admin"
-                    className="mt-1 px-4 py-2 text-sm whitespace-nowrap // CAMBIO: Estilo tecnológico para Panel Admin
-                               bg-gray-800 text-gray-200 font-bold rounded-lg shadow-sm border border-transparent
-                               hover:bg-gray-700 hover:text-blue-400 hover:shadow-md hover:shadow-blue-500/30 hover:border-blue-400
-                               transition-all duration-300 ease-in-out"
-                  >
-                    Panel Admin
-                  </Link>
-                )}
+             
               </div>
             </div>
           ) : (

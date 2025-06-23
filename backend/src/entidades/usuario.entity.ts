@@ -14,7 +14,6 @@ import { Inscripcion } from './inscripcion.entity';
 import { Pago } from './pago.entity';
 import { Resena } from './resena.entity';
 
-
 export enum TipoUsuario {
   Alumno = 'Alumno',
   Empresa = 'Empresa',
@@ -42,10 +41,39 @@ export class Usuario {
   password: string;
 
   @Column({ nullable: true })
-  fotoPerfil?: string;
+  telefono?: string;
 
-  @Column({ default: false })
+  @Column({
+    type: 'enum',
+    enum: TipoUsuario,
+    default: TipoUsuario.Alumno,
+  })
+  tipoUsuario: TipoUsuario;
+
+  @Column({ nullable: true })
+  nombreEmpresa?: string;
+
+  @Column({
+    type: 'enum',
+    enum: EstadoCuenta,
+    default: EstadoCuenta.Activo,
+  })
+  estadoCuenta: EstadoCuenta;
+
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
+  estaConectado: boolean;
+
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
   esAdmin: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  ultimaSesion?: Date;
 
   @CreateDateColumn()
   creadoEn: Date;
@@ -59,28 +87,9 @@ export class Usuario {
   @Column({ type: 'timestamp', nullable: true })
   expiracionTokenRecuperacion: Date | null;
 
-  @Column({ nullable: true })
-  telefono?: string;
-
-  @Column({
-    type: 'enum',
-    enum: TipoUsuario,
-    default: TipoUsuario.Alumno,
-  })
-  tipoUsuario: TipoUsuario;
 
   @Column({ nullable: true })
-  nombreEmpresa?: string;
-
-  @Column({ type: 'timestamp', nullable: true })
-  ultimaSesion?: Date;
-
-  @Column({
-    type: 'enum',
-    enum: EstadoCuenta,
-    default: EstadoCuenta.Activo,
-  })
-  estadoCuenta: EstadoCuenta;
+  fotoPerfil?: string;
 
   @OneToMany(() => Carrito, (carrito) => carrito.usuario)
   carritos: Carrito[];

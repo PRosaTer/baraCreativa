@@ -33,5 +33,4 @@ export class CreateUsuarioDto {
   @IsEnum(EstadoCuenta, { message: 'Estado de cuenta inválido' })
   @IsOptional()
   estadoCuenta?: EstadoCuenta;
-
 }

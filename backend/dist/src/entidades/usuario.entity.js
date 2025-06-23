@@ -35,17 +35,18 @@ let Usuario = class Usuario {
     nombreCompleto;
     correoElectronico;
     password;
-    fotoPerfil;
+    telefono;
+    tipoUsuario;
+    nombreEmpresa;
+    estadoCuenta;
+    estaConectado;
     esAdmin;
+    ultimaSesion;
     creadoEn;
     actualizadoEn;
     tokenRecuperacion;
     expiracionTokenRecuperacion;
-    telefono;
-    tipoUsuario;
-    nombreEmpresa;
-    ultimaSesion;
-    estadoCuenta;
+    fotoPerfil;
     carritos;
     certificados;
     contactosSoporte;
@@ -74,11 +75,45 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
-], Usuario.prototype, "fotoPerfil", void 0);
+], Usuario.prototype, "telefono", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: false }),
+    (0, typeorm_1.Column)({
+        type: 'enum',
+        enum: TipoUsuario,
+        default: TipoUsuario.Alumno,
+    }),
+    __metadata("design:type", String)
+], Usuario.prototype, "tipoUsuario", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Usuario.prototype, "nombreEmpresa", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'enum',
+        enum: EstadoCuenta,
+        default: EstadoCuenta.Activo,
+    }),
+    __metadata("design:type", String)
+], Usuario.prototype, "estadoCuenta", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'boolean',
+        default: false,
+    }),
+    __metadata("design:type", Boolean)
+], Usuario.prototype, "estaConectado", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'boolean',
+        default: false,
+    }),
     __metadata("design:type", Boolean)
 ], Usuario.prototype, "esAdmin", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], Usuario.prototype, "ultimaSesion", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
@@ -98,31 +133,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
-], Usuario.prototype, "telefono", void 0);
-__decorate([
-    (0, typeorm_1.Column)({
-        type: 'enum',
-        enum: TipoUsuario,
-        default: TipoUsuario.Alumno,
-    }),
-    __metadata("design:type", String)
-], Usuario.prototype, "tipoUsuario", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], Usuario.prototype, "nombreEmpresa", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
-    __metadata("design:type", Date)
-], Usuario.prototype, "ultimaSesion", void 0);
-__decorate([
-    (0, typeorm_1.Column)({
-        type: 'enum',
-        enum: EstadoCuenta,
-        default: EstadoCuenta.Activo,
-    }),
-    __metadata("design:type", String)
-], Usuario.prototype, "estadoCuenta", void 0);
+], Usuario.prototype, "fotoPerfil", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => carrito_entity_1.Carrito, (carrito) => carrito.usuario),
     __metadata("design:type", Array)

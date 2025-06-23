@@ -14,8 +14,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsuariosController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
 const usuarios_service_1 = require("./usuarios.service");
 const create_usuario_dto_1 = require("./dto/create-usuario.dto");
+const path_1 = require("path");
 let UsuariosController = class UsuariosController {
     usuariosService;
     constructor(usuariosService) {
@@ -27,8 +30,19 @@ let UsuariosController = class UsuariosController {
     getOne(id) {
         return this.usuariosService.findOne(+id);
     }
-    create(usuarioData) {
-        return this.usuariosService.create(usuarioData);
+    async create(usuarioData, foto) {
+        console.log('📤 Archivo recibido:', foto);
+        console.log('📝 Datos del usuario antes de guardar:', usuarioData);
+        if (foto) {
+            usuarioData.fotoPerfil = foto.filename;
+            console.log('✅ Se asignó fotoPerfil:', usuarioData.fotoPerfil);
+        }
+        else {
+            console.log('⚠️ No se recibió ninguna imagen');
+        }
+        const nuevoUsuario = await this.usuariosService.create(usuarioData);
+        console.log('🎉 Usuario creado:', nuevoUsuario);
+        return nuevoUsuario;
     }
     update(id, usuarioData) {
         return this.usuariosService.update(+id, usuarioData);
@@ -53,9 +67,20 @@ __decorate([
 ], UsuariosController.prototype, "getOne", null);
 __decorate([
     (0, common_1.Post)(),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('fotoPerfil', {
+        storage: (0, multer_1.diskStorage)({
+            destination: './uploads/perfiles',
+            filename: (req, file, cb) => {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+                const ext = (0, path_1.extname)(file.originalname);
+                cb(null, `${uniqueSuffix}${ext}`);
+            },
+        }),
+    })),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_usuario_dto_1.CreateUsuarioDto]),
+    __metadata("design:paramtypes", [create_usuario_dto_1.CreateUsuarioDto, Object]),
     __metadata("design:returntype", Promise)
 ], UsuariosController.prototype, "create", null);
 __decorate([

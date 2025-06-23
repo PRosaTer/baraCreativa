@@ -1,3 +1,4 @@
+// ...otros imports
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -12,13 +13,11 @@ export class UsuariosService {
   ) {}
 
   async encontrarPorId(id: number): Promise<Usuario | null> {
-    const usuario = await this.usuariosRepository.findOne({ where: { id } });
-    return usuario || null;
+    return await this.usuariosRepository.findOne({ where: { id } });
   }
 
   async encontrarPorCorreo(correoElectronico: string): Promise<Usuario | null> {
-    const usuario = await this.usuariosRepository.findOne({ where: { correoElectronico } });
-    return usuario || null;
+    return await this.usuariosRepository.findOne({ where: { correoElectronico } });
   }
 
   async findAll(): Promise<Usuario[]> {
@@ -32,7 +31,6 @@ export class UsuariosService {
     }
     return usuario;
   }
-
 
   async create(usuarioData: Partial<Usuario>): Promise<Usuario> {
     if (usuarioData.password) {
@@ -57,5 +55,11 @@ export class UsuariosService {
     if (resultado.affected === 0) {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
     }
+  }
+
+  async logout(userId: number): Promise<void> {
+    await this.usuariosRepository.update(userId, {
+      estaConectado: false,
+    });
   }
 }

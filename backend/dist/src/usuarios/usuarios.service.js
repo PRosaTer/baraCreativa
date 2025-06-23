@@ -24,12 +24,10 @@ let UsuariosService = class UsuariosService {
         this.usuariosRepository = usuariosRepository;
     }
     async encontrarPorId(id) {
-        const usuario = await this.usuariosRepository.findOne({ where: { id } });
-        return usuario || null;
+        return await this.usuariosRepository.findOne({ where: { id } });
     }
     async encontrarPorCorreo(correoElectronico) {
-        const usuario = await this.usuariosRepository.findOne({ where: { correoElectronico } });
-        return usuario || null;
+        return await this.usuariosRepository.findOne({ where: { correoElectronico } });
     }
     async findAll() {
         return this.usuariosRepository.find();
@@ -61,6 +59,11 @@ let UsuariosService = class UsuariosService {
         if (resultado.affected === 0) {
             throw new common_1.NotFoundException(`Usuario con ID ${id} no encontrado.`);
         }
+    }
+    async logout(userId) {
+        await this.usuariosRepository.update(userId, {
+            estaConectado: false,
+        });
     }
 };
 exports.UsuariosService = UsuariosService;

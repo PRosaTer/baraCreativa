@@ -5,4 +5,5 @@ export declare class AuthService {
     private readonly jwtService;
     constructor(usuariosService: UsuariosService, jwtService: JwtService);
     validarUsuarioYGenerarToken(correoElectronico: string, password: string): Promise<string | null>;
+    logout(userId: number): Promise<void>;
 }

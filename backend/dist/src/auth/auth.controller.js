@@ -16,10 +16,13 @@ exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 const auth_service_1 = require("./auth.service");
+const usuarios_service_1 = require("../usuarios/usuarios.service");
 let AuthController = class AuthController {
     authService;
-    constructor(authService) {
+    usuariosService;
+    constructor(authService, usuariosService) {
         this.authService = authService;
+        this.usuariosService = usuariosService;
     }
     async login(datos) {
         const token = await this.authService.validarUsuarioYGenerarToken(datos.correoElectronico, datos.password);
@@ -29,8 +32,17 @@ let AuthController = class AuthController {
         return { access_token: token };
     }
     getProfile(req) {
-        console.log('Backend: Accediendo a /auth/profile, usuario:', req.user);
         return req.user;
+    }
+    async logout(req) {
+        await this.usuariosService.logout(req.user.id);
+        return { message: 'Sesión cerrada correctamente' };
+    }
+    async getAllUsersForAdmin(req) {
+        if (!req.user.esAdmin) {
+            throw new common_1.UnauthorizedException('Acceso no autorizado. Solo para administradores.');
+        }
+        return this.usuariosService.findAll();
     }
 };
 exports.AuthController = AuthController;
@@ -49,8 +61,25 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "getProfile", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, common_1.Post)('logout'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "logout", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, common_1.Get)('admin/users'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "getAllUsersForAdmin", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
-    __metadata("design:paramtypes", [auth_service_1.AuthService])
+    __metadata("design:paramtypes", [auth_service_1.AuthService,
+        usuarios_service_1.UsuariosService])
 ], AuthController);
 //# sourceMappingURL=auth.controller.js.map
