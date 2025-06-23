@@ -124,6 +124,7 @@ export default function AgregarUsuario({ onUsuarioCreado }: Props) {
         className="w-full border p-2 rounded"
       >
         <option value="Alumno">Alumno</option>
+        <option value="Instructor">Instructor</option>
         <option value="Empresa">Empresa</option>
         <option value="Admin">Administrador</option>
       </select>
