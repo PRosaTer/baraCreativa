@@ -22,7 +22,7 @@ export const equipo: MiembroEquipo[] = [
         nombre: 'Víctor Padilla',
         rol: 'Co-Fundador',
         descripcion: 'Líder apasionado por transformar la educación con tecnología.',
-        imagen: '/lucia-ejemplo.jpg',
+        imagen: '/Victor.jpg',
     },
     {
         nombre: 'lucy',
