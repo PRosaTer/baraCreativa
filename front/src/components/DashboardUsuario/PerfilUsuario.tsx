@@ -16,7 +16,7 @@ export default function PerfilUsuario({ usuario }: Props) {
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded shadow space-y-4">
       <h1 className="text-2xl font-bold text-center">
-        Estos son tus datos, {usuario.nombreCompleto}
+        Bienvenido {usuario.nombreCompleto}
       </h1>
 
       <SelectorFotoPerfil fotoPerfilInicial={urlFotoPerfil} editable={false} />
