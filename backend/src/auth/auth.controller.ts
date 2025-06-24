@@ -1,19 +1,28 @@
-import { Controller, Post, Body, UnauthorizedException, Get, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UnauthorizedException,
+  Get,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { UsuariosService } from '../usuarios/usuarios.service';
 import { Usuario } from '../entidades/usuario.entity';
+import { SocketGateway } from '../socket/socket.gateway';
 
 interface UserRequest extends Request {
   user: Usuario;
 }
-
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly usuariosService: UsuariosService,
+    private readonly socketGateway: SocketGateway,
   ) {}
 
   @Post('login')
@@ -25,6 +34,13 @@ export class AuthController {
 
     if (!token) {
       throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    const usuario = await this.usuariosService.encontrarPorCorreo(datos.correoElectronico);
+    if (usuario) {
+      await this.usuariosService.actualizarEstado(usuario.id, true);
+      const usuarios = await this.usuariosService.findAll();
+      this.socketGateway.server.emit('usuariosActualizados', usuarios);
     }
 
     return { access_token: token };
@@ -39,7 +55,12 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Post('logout')
   async logout(@Req() req: UserRequest) {
-    await this.usuariosService.logout(req.user.id);
+    await this.usuariosService.actualizarEstado(req.user.id, false);
+
+ 
+    const usuarios = await this.usuariosService.findAll();
+    this.socketGateway.server.emit('usuariosActualizados', usuarios);
+
     return { message: 'Sesión cerrada correctamente' };
   }
 
