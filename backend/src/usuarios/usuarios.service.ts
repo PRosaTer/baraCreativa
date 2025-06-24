@@ -1,4 +1,3 @@
-// ...otros imports
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -57,9 +56,11 @@ export class UsuariosService {
     }
   }
 
-  async logout(userId: number): Promise<void> {
-    await this.usuariosRepository.update(userId, {
-      estaConectado: false,
-    });
+  async actualizarEstado(id: number, conectado: boolean): Promise<void> {
+    const resultado = await this.usuariosRepository.update(id, { estaConectado: conectado });
+    if (resultado.affected === 0) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado para actualizar estado.`);
+    }
+    console.log(`UsuariosService: actualizado estado usuario ${id} a ${conectado}`);
   }
 }

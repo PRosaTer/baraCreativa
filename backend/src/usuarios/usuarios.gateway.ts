@@ -1,56 +1,62 @@
 import {
   WebSocketGateway,
+  WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { UsuariosService } from './usuarios.service';
-import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3000',
-    credentials: true,
+    origin: '*',
   },
 })
 export class UsuariosGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  private usuariosConectados = new Map<string, number>();
-  private logger = new Logger('UsuariosGateway');
+  private connectedUsers = new Map<number, Socket>();
 
   constructor(private readonly usuariosService: UsuariosService) {}
 
   async handleConnection(client: Socket) {
-    const userId = Number(client.handshake.query.userId);
-    this.logger.log(`📡 Nueva conexión de userId: ${userId} (socket.id: ${client.id})`);
+    const userIdStr = client.handshake.query.userId as string;
+    const userId = parseInt(userIdStr);
 
-    if (!userId) {
-      this.logger.warn('❌ Conexión rechazada: userId faltante');
+    if (!userId || isNaN(userId)) {
       client.disconnect();
       return;
     }
 
-    this.usuariosConectados.set(client.id, userId);
-    await this.usuariosService.update(userId, { estaConectado: true });
+    this.connectedUsers.set(userId, client);
+
+    await this.usuariosService.actualizarEstado(userId, true);
 
     const usuarios = await this.usuariosService.findAll();
     this.server.emit('usuariosActualizados', usuarios);
+
+    console.log(`✅ Usuario ${userId} conectado.`);
   }
 
   async handleDisconnect(client: Socket) {
-    const userId = this.usuariosConectados.get(client.id);
-    this.logger.log(`🔌 Desconexión de socket.id: ${client.id} (userId: ${userId})`);
+    let disconnectedUserId: number | undefined;
 
-    if (userId) {
-      this.logger.log(`⚠️ Usuario ${userId} desconectado, marcando estaConectado = false`);
-      await this.usuariosService.update(userId, { estaConectado: false });
-      this.usuariosConectados.delete(client.id);
+    for (const [userId, socket] of this.connectedUsers.entries()) {
+      if (socket.id === client.id) {
+        disconnectedUserId = userId;
+        this.connectedUsers.delete(userId);
+        break;
+      }
+    }
+
+    if (disconnectedUserId !== undefined) {
+      await this.usuariosService.actualizarEstado(disconnectedUserId, false);
 
       const usuarios = await this.usuariosService.findAll();
       this.server.emit('usuariosActualizados', usuarios);
+
+      console.log(`❌ Usuario ${disconnectedUserId} desconectado.`);
     }
   }
 }

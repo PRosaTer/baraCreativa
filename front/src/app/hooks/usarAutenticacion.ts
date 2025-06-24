@@ -32,6 +32,7 @@ export const useAutenticacion = () => {
   const [mensajeExito, setMensajeExito] = useState(false);
   const [usuario, setUsuario] = useState<UsuarioAutenticado | null>(null);
   const [cargandoUsuario, setCargandoUsuario] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -73,7 +74,7 @@ export const useAutenticacion = () => {
       setUsuario(null);
       return null;
     }
-  }, []); 
+  }, []);
 
   const manejarInicioSesion = async (e: React.FormEvent): Promise<boolean> => {
     e.preventDefault();
@@ -97,15 +98,14 @@ export const useAutenticacion = () => {
       }
 
       const data = await respuesta.json();
-      const token = data.access_token;
-      localStorage.setItem("token", token);
+      const newToken = data.access_token;
+      localStorage.setItem("token", newToken);
+      setToken(newToken);
 
-      const usuarioLogeado = await obtenerDatosUsuario(token);
+      const usuarioLogeado = await obtenerDatosUsuario(newToken);
       if (usuarioLogeado) {
         setMensajeExito(true);
-
-        window.location.href = '/'; 
-        
+        window.location.href = '/';
         return true;
       } else {
         alert("Inicio de sesión exitoso, pero no se pudieron cargar los datos del usuario. Intente recargar la página.");
@@ -119,39 +119,55 @@ export const useAutenticacion = () => {
     }
   };
 
-  const cerrarSesion = useCallback(() => {
+  const cerrarSesion = useCallback(async () => {
+    const currentToken = localStorage.getItem("token");
+    if (currentToken) {
+      try {
+        await fetch("http://localhost:3001/auth/logout", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${currentToken}`,
+            "Content-Type": "application/json",
+          },
+        });
+      } catch (error) {
+        console.error("Error al notificar logout al backend:", error);
+      }
+    }
+
     localStorage.removeItem("token");
-    setUsuario(null); 
+    setToken(null);
+    setUsuario(null);
     setMensajeExito(false);
-    router.push("/"); 
-    router.refresh(); 
+    router.push("/");
+    router.refresh();
   }, [router]);
 
   useEffect(() => {
     const loadUserFromToken = async () => {
-      setCargandoUsuario(true);
-      const token = localStorage.getItem("token");
-      const loadedUser = await obtenerDatosUsuario(token || ''); 
-      setUsuario(loadedUser);
-      setCargandoUsuario(false);
+      const storedToken = localStorage.getItem("token");
+      if (storedToken) {
+        setToken(storedToken);
+        setCargandoUsuario(true);
+        const loadedUser = await obtenerDatosUsuario(storedToken);
+        setUsuario(loadedUser);
+        setCargandoUsuario(false);
+      } else {
+        setCargandoUsuario(false);
+      }
     };
 
-    loadUserFromToken(); 
+    loadUserFromToken();
 
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'token' || event.key === null) { 
+      if (event.key === 'token' || event.key === null) {
         loadUserFromToken();
       }
     };
+
     window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, [obtenerDatosUsuario]); 
-
-  useEffect(() => {
-  }, [usuario, cargandoUsuario]);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [obtenerDatosUsuario]);
 
   return {
     datosInicioSesion,
@@ -162,5 +178,6 @@ export const useAutenticacion = () => {
     usuario,
     cargandoUsuario,
     cerrarSesion,
+    token,
   };
 };

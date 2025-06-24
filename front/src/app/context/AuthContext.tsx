@@ -21,7 +21,8 @@ interface UsuarioAutenticado {
 interface AuthContextType {
   usuario: UsuarioAutenticado | null;
   cargandoUsuario: boolean;
-  cerrarSesion: () => void;
+  cerrarSesion: () => void | Promise<void>;
+  token: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,10 +32,10 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const { usuario, cargandoUsuario, cerrarSesion } = useAutenticacion();
+  const { usuario, cargandoUsuario, cerrarSesion, token } = useAutenticacion();
 
   return (
-    <AuthContext.Provider value={{ usuario, cargandoUsuario, cerrarSesion }}>
+    <AuthContext.Provider value={{ usuario, cargandoUsuario, cerrarSesion, token }}>
       {children}
     </AuthContext.Provider>
   );

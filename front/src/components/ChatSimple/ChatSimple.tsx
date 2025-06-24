@@ -117,7 +117,7 @@ export const ChatSimple = () => {
         sender: "bot",
         widget: (
           <button
-            onClick={() => handleButtonClick("https://t.me/TuGrupoDeTelegram")} //aca tenemos que agregar el grupo que pase victor
+            onClick={() => handleButtonClick("https://t.me/TuGrupoDeTelegram")}
             style={getButtonStyles("#0ea5e9")}
             onMouseEnter={handleButtonMouseEnter}
             onMouseLeave={handleButtonMouseLeave}
