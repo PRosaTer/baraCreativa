@@ -5,7 +5,7 @@ import MenuAdmin from '@/components/DashboardAdmin/MenuAdmin';
 import VistaUsuarios from '@/components/DashboardAdmin/VistaUsuarios';
 import VistaCursos from '@/components/DashboardAdmin/VistaCursos';
 import AgregarUsuario from '@/components/DashboardAdmin/AgregarUsuario';
-import PerfilUsuario from '@/components/DashboardUsuario/PerfilUsuario';
+import PerfilUsuarioEditable from '@/components/DashboardUsuario/PerfilUsuario';
 import { Usuario } from '@/app/types/auth';
 
 export default function PerfilPage() {
@@ -67,7 +67,7 @@ export default function PerfilPage() {
 
   return (
     <main className="p-4">
-      <PerfilUsuario usuario={usuario} />
+      <PerfilUsuarioEditable usuario={usuario} onActualizar={setUsuario} />
     </main>
   );
 }

@@ -65,7 +65,7 @@ const RegisterForm = () => {
 
       alert('Registro exitoso');
 
-      // Limpiar form y foto
+ 
       setForm({
         nombreCompleto: '',
         correoElectronico: '',
@@ -77,7 +77,7 @@ const RegisterForm = () => {
       });
       setFoto(null);
 
-      // Redirigir al login
+
       router.push('/login');
     } catch (err: any) {
       setError(err.message || 'Error inesperado');
@@ -103,8 +103,7 @@ const RegisterForm = () => {
         <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-8">Regístrate</h2>
 
         {error && <div className="text-red-600 font-semibold text-center">{error}</div>}
-
-        <SelectorFotoPerfil fotoPerfilInicial={undefined} onFotoSeleccionada={setFoto} />
+        <SelectorFotoPerfil fotoPerfilInicial={undefined} onFotoChange={setFoto} />
 
         <input
           name="nombreCompleto"

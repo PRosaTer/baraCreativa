@@ -75,8 +75,12 @@ export default function AgregarUsuario({ onUsuarioCreado }: Props) {
       onUsuarioCreado();
 
       alert('Usuario creado con éxito');
-    } catch (err: any) {
-      setError(err.message || 'Error inesperado');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Error inesperado');
+      }
     } finally {
       setCargando(false);
     }
@@ -88,7 +92,8 @@ export default function AgregarUsuario({ onUsuarioCreado }: Props) {
 
       {error && <div className="text-red-600 font-semibold text-center">{error}</div>}
 
-      <SelectorFotoPerfil onFotoSeleccionada={setFoto} />
+ 
+      <SelectorFotoPerfil onFotoChange={setFoto} />
 
       <input
         name="nombreCompleto"

@@ -17,6 +17,7 @@ import { Resena } from './resena.entity';
 export enum TipoUsuario {
   Alumno = 'Alumno',
   Empresa = 'Empresa',
+  Instructor = 'Instructor',
   Admin = 'Admin',
 }
 

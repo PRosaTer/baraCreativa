@@ -4,14 +4,14 @@ import React, { useState, useEffect } from 'react';
 
 interface Props {
   fotoPerfilInicial?: string;
-  onFotoSeleccionada?: (file: File) => void;
-  editable?: boolean; 
+  editable?: boolean;
+  onFotoChange?: (file: File | null) => void;
 }
 
 export default function SelectorFotoPerfil({
   fotoPerfilInicial,
-  onFotoSeleccionada,
   editable = true,
+  onFotoChange,
 }: Props) {
   const [preview, setPreview] = useState<string | undefined>(undefined);
 
@@ -24,13 +24,11 @@ export default function SelectorFotoPerfil({
   }, [fotoPerfilInicial]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0] ?? null;
+    setPreview(file ? URL.createObjectURL(file) : undefined);
 
-    setPreview(URL.createObjectURL(file));
-
-    if (onFotoSeleccionada) {
-      onFotoSeleccionada(file);
+    if (onFotoChange) {
+      onFotoChange(file);
     }
   };
 
