@@ -8,12 +8,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { UsuariosService } from '../../usuarios/usuarios.service';
 
-
 interface JwtPayload {
-  sub: number; 
+  sub: number;
   correoElectronico: string;
 }
-
 
 interface UserFromJwtValidation {
   id: number;
@@ -50,7 +48,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super(options);
   }
 
-  
   async validate(payload: JwtPayload): Promise<UserFromJwtValidation> {
     const usuario = await this.usuariosService.encontrarPorId(payload.sub);
 
