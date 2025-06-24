@@ -8,4 +8,4 @@ export interface ImagenFoto {
   isMain?: boolean;
 }
 
-export type ListaImagenes = ImagenFoto[]; 
+export type ListaImagenes = ImagenFoto[];
