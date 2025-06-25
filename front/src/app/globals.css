@@ -104,3 +104,48 @@ a {
 .__nextjs-dev-overlay {
   display: none !important;
 }
+
+@keyframes spin-border {
+  0% {
+    mask-image: linear-gradient(90deg, white 30%, transparent 100%);
+    transform: rotate(0deg);
+  }
+  100% {
+    mask-image: linear-gradient(90deg, white 30%, transparent 100%);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes move-dot {
+  0% {
+    top: 0;
+    left: 0;
+  }
+  25% {
+    top: 0;
+    left: calc(100% - 8px);
+  }
+  50% {
+    top: calc(100% - 8px);
+    left: calc(100% - 8px);
+  }
+  75% {
+    top: calc(100% - 8px);
+    left: 0;
+  }
+  100% {
+    top: 0;
+    left: 0;
+  }
+}
+
+.border-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background-color: white;
+  pointer-events: none;
+  z-index: 20;
+  animation: move-dot 3s linear infinite;
+}

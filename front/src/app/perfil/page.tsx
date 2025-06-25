@@ -58,15 +58,17 @@ export default function PerfilPage() {
     };
 
     return (
-      <div className="flex h-screen">
+      <div className="flex flex-row min-h-screen">
         <MenuAdmin seleccionarVista={setVista} />
-        <main className="flex-1 bg-white">{renderVista()}</main>
+        <main className="flex-1 bg-white p-4">
+          {renderVista()}
+        </main>
       </div>
     );
   }
 
   return (
-    <main className="p-4">
+    <main className="p-4 bg-white">
       <PerfilUsuarioEditable usuario={usuario} onActualizar={setUsuario} />
     </main>
   );
