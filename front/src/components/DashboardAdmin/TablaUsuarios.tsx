@@ -1,0 +1,54 @@
+import React from 'react';
+
+interface Usuario {
+  id: number;
+  nombreCompleto: string;
+  correoElectronico: string;
+  tipoUsuario?: string;
+  estadoCuenta?: string;
+  estaConectado: boolean;
+}
+
+interface Props {
+  usuarios: Usuario[];
+}
+
+const TablaUsuarios: React.FC<Props> = ({ usuarios }) => {
+  return (
+    <table className="w-full border border-gray-300">
+      <thead>
+        <tr className="bg-gray-200 text-center">
+          <th className="p-2 border-r border-gray-300">ID</th>
+          <th className="p-2 border-r border-gray-300">Nombre</th>
+          <th className="p-2 border-r border-gray-300">Email</th>
+          <th className="p-2 border-r border-gray-300">Tipo</th>
+          <th className="p-2 border-r border-gray-300">Estado</th>
+          <th className="p-2">Conectado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {usuarios.map((u) => (
+          <tr key={u.id} className="text-center border-t border-gray-300">
+            <td className="p-2 border-r border-gray-300">{u.id}</td>
+            <td className="p-2 border-r border-gray-300">{u.nombreCompleto}</td>
+            <td className="p-2 border-r border-gray-300">{u.correoElectronico}</td>
+            <td className="p-2 border-r border-gray-300">{u.tipoUsuario || '-'}</td>
+            <td className="p-2 border-r border-gray-300">{u.estadoCuenta || '-'}</td>
+            <td className={`p-2 ${u.estaConectado ? 'text-green-600' : 'text-gray-400'}`}>
+              {u.estaConectado ? '🟢 Conectado' : '⚪ Desconectado'}
+            </td>
+          </tr>
+        ))}
+        {usuarios.length === 0 && (
+          <tr>
+            <td colSpan={6} className="text-center p-4 text-gray-500">
+              No hay usuarios para mostrar.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  );
+};
+
+export default TablaUsuarios;
