@@ -13,17 +13,16 @@ export default function PerfilUsuarioEditable({ usuario, onActualizar }: Props) 
   const [nombreCompleto, setNombreCompleto] = useState(usuario.nombreCompleto);
   const [telefono, setTelefono] = useState(usuario.telefono || '');
   const [fotoPerfil, setFotoPerfil] = useState<File | null>(null);
-  const [previewFoto, setPreviewFoto] = useState(
+  const [previewFoto, setPreviewFoto] = useState<string | undefined>(
     usuario.fotoPerfil ? `http://localhost:3001/uploads/perfiles/${usuario.fotoPerfil}` : undefined
   );
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editando, setEditando] = useState(false);
 
-
   const [estadoInicial, setEstadoInicial] = useState({
     telefono: usuario.telefono || '',
-    fotoPerfilUrl: usuario.fotoPerfil ? `http://localhost:3001/uploads/perfiles/${usuario.fotoPerfil}` : undefined,
+    fotoPerfilUrl: previewFoto,
   });
 
   useEffect(() => {
@@ -37,7 +36,11 @@ export default function PerfilUsuarioEditable({ usuario, onActualizar }: Props) 
     if (editando) setFotoPerfil(file);
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const isErrorWithMessage = (error: unknown): error is { message: string } => {
+    return typeof error === 'object' && error !== null && 'message' in error && typeof (error as any).message === 'string';
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!editando) {
@@ -72,8 +75,12 @@ export default function PerfilUsuarioEditable({ usuario, onActualizar }: Props) 
       onActualizar(usuarioActualizado);
       alert('Perfil actualizado con éxito');
       setEditando(false);
-    } catch (err: any) {
-      setError(err.message || 'Error desconocido');
+    } catch (error: unknown) {
+      if (isErrorWithMessage(error)) {
+        setError(error.message);
+      } else {
+        setError('Error desconocido');
+      }
     } finally {
       setGuardando(false);
     }
