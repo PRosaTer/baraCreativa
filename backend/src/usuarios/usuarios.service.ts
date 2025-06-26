@@ -31,21 +31,24 @@ export class UsuariosService {
     return usuario;
   }
 
-async create(usuarioData: Partial<Usuario>): Promise<Usuario> {
-  if (usuarioData.password) {
-    const salt = await bcrypt.genSalt();
-    usuarioData.password = await bcrypt.hash(usuarioData.password, salt);
+  async create(usuarioData: Partial<Usuario>): Promise<Usuario> {
+    if (usuarioData.password) {
+      const salt = await bcrypt.genSalt();
+      usuarioData.password = await bcrypt.hash(usuarioData.password, salt);
+    }
+
+    const nuevoUsuario = this.usuariosRepository.create(usuarioData);
+    return this.usuariosRepository.save(nuevoUsuario);
   }
-
-  const nuevoUsuario = this.usuariosRepository.create(usuarioData);
-  return this.usuariosRepository.save(nuevoUsuario);
-}
-
 
   async update(id: number, usuarioData: Partial<Usuario>): Promise<Usuario> {
     const usuarioExistente = await this.encontrarPorId(id);
     if (!usuarioExistente) {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
+    }
+
+    if (usuarioData.tipoUsuario) {
+      usuarioData.esAdmin = usuarioData.tipoUsuario === 'Admin';
     }
 
     if (usuarioData.password) {
