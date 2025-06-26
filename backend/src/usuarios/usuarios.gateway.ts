@@ -9,7 +9,8 @@ import { UsuariosService } from './usuarios.service';
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: 'http://localhost:3000',
+    credentials: true,
   },
 })
 export class UsuariosGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -21,7 +22,7 @@ export class UsuariosGateway implements OnGatewayConnection, OnGatewayDisconnect
   constructor(private readonly usuariosService: UsuariosService) {}
 
   async handleConnection(client: Socket) {
-    const userIdStr = client.handshake.query.userId as string;
+    const userIdStr = client.handshake.query.usuarioId as string;
     const userId = parseInt(userIdStr);
 
     if (!userId || isNaN(userId)) {

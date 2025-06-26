@@ -5,34 +5,36 @@ import { useSocket } from '@/app/context/SocketProvider';
 
 interface Props {
   usuarioId: number;
-  inicial: boolean;
 }
 
-export default function EstadoUsuario({ usuarioId, inicial }: Props) {
-  const [conectado, setConectado] = useState(inicial);
+interface EstadoActualizadoPayload {
+  usuarioId: number;
+  estaConectado: boolean;
+}
+
+export default function EstadoUsuario({ usuarioId }: Props) {
   const socket = useSocket();
+  const [conectado, setConectado] = useState(false);
 
   useEffect(() => {
     if (!socket) return;
 
-    const actualizarEstado = (data: any) => {
+    const actualizarEstado = (data: EstadoActualizadoPayload) => {
       if (data.usuarioId === usuarioId) {
         setConectado(data.estaConectado);
       }
     };
 
     socket.on('estadoActualizado', actualizarEstado);
+
+
     return () => {
       socket.off('estadoActualizado', actualizarEstado);
     };
   }, [usuarioId, socket]);
 
   return (
-    <span
-      className={`px-2 py-1 rounded text-white text-sm ${
-        conectado ? 'bg-green-600' : 'bg-red-600'
-      }`}
-    >
+    <span className={conectado ? 'text-green-600' : 'text-gray-600'}>
       {conectado ? 'Conectado' : 'Desconectado'}
     </span>
   );
