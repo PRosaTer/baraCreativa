@@ -1,10 +1,9 @@
-import { PartialType, OmitType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/mapped-types';
 import { CreateUsuarioDto } from './create-usuario.dto';
-import { IsDate, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsOptional, IsString, IsEnum } from 'class-validator';
+import { TipoUsuario } from '../../entidades/usuario.entity';
 
-export class UpdateUsuarioDto extends PartialType(
-  OmitType(CreateUsuarioDto, ['tipoUsuario'] as const),
-) {
+export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
   @IsOptional()
   @IsDate()
   ultimaSesion?: Date;
@@ -16,4 +15,8 @@ export class UpdateUsuarioDto extends PartialType(
   @IsOptional()
   @IsString()
   password?: string;
+
+  @IsOptional()
+  @IsEnum(TipoUsuario)
+  tipoUsuario?: TipoUsuario; 
 }

@@ -88,7 +88,6 @@ export class Usuario {
   @Column({ type: 'timestamp', nullable: true })
   expiracionTokenRecuperacion: Date | null;
 
-
   @Column({ nullable: true })
   fotoPerfil?: string;
 
