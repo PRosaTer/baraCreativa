@@ -1,19 +1,12 @@
 import React from 'react';
-
-interface Usuario {
-  id: number;
-  nombreCompleto: string;
-  correoElectronico: string;
-  tipoUsuario?: string;
-  estadoCuenta?: string;
-  estaConectado: boolean;
-}
+import { Usuario } from '@/app/types/auth';
 
 interface Props {
   usuarios: Usuario[];
+  onEditar: (usuario: Usuario) => void;
 }
 
-const TablaUsuarios: React.FC<Props> = ({ usuarios }) => {
+const TablaUsuarios: React.FC<Props> = ({ usuarios, onEditar }) => {
   return (
     <table className="w-full border border-gray-300">
       <thead>
@@ -28,12 +21,16 @@ const TablaUsuarios: React.FC<Props> = ({ usuarios }) => {
       </thead>
       <tbody>
         {usuarios.map((u) => (
-          <tr key={u.id} className="text-center border-t border-gray-300">
+          <tr
+            key={u.id}
+            className="text-center border-t border-gray-300 cursor-pointer hover:bg-yellow-50"
+            onClick={() => onEditar(u)}
+          >
             <td className="p-2 border-r border-gray-300">{u.id}</td>
             <td className="p-2 border-r border-gray-300">{u.nombreCompleto}</td>
             <td className="p-2 border-r border-gray-300">{u.correoElectronico}</td>
-            <td className="p-2 border-r border-gray-300">{u.tipoUsuario || '-'}</td>
-            <td className="p-2 border-r border-gray-300">{u.estadoCuenta || '-'}</td>
+            <td className="p-2 border-r border-gray-300">{u.tipoUsuario}</td>
+            <td className="p-2 border-r border-gray-300">{u.estadoCuenta}</td>
             <td className={`p-2 ${u.estaConectado ? 'text-green-600' : 'text-gray-400'}`}>
               {u.estaConectado ? '🟢 Conectado' : '⚪ Desconectado'}
             </td>

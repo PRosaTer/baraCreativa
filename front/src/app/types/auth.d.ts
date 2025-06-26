@@ -1,3 +1,4 @@
+
 export interface RegisterFormData {
   nombreCompleto: string;
   correoElectronico: string;
@@ -38,9 +39,10 @@ export interface Usuario {
   nombreCompleto: string;
   correoElectronico: string;
   telefono?: string;
-  tipoUsuario: "Alumno" | "Empresa" | "Admin";
-  estadoCuenta: "activo" | "inactivo" | "bloqueado";
-  ultimaSesion?: string;
+  tipoUsuario: 'Alumno' | 'Empresa' | 'Admin' | 'Instructor';
+  estadoCuenta: 'activo' | 'inactivo' | 'bloqueado';
   esAdmin: boolean;
   fotoPerfil?: string | null;
+  ultimaSesion?: string;
+  estaConectado: boolean; 
 }
