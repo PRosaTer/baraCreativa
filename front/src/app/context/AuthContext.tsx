@@ -20,10 +20,11 @@ interface UsuarioAutenticado {
 
 interface AuthContextType {
   usuario: UsuarioAutenticado | null;
-  usuarioLogueado?: UsuarioAutenticado | null;
   cargandoUsuario: boolean;
   cerrarSesion: () => void | Promise<void>;
-  token: string | null;
+  mensajeExito: boolean;
+  setMensajeExito: React.Dispatch<React.SetStateAction<boolean>>;
+  manejarInicioSesion: (e: React.FormEvent, correo: string, contrasena: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,16 +34,24 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const { usuario, cargandoUsuario, cerrarSesion, token } = useAutenticacion();
+  const {
+    usuario,
+    cargandoUsuario,
+    cerrarSesion,
+    mensajeExito,
+    setMensajeExito,
+    manejarInicioSesion,
+  } = useAutenticacion();
 
   return (
     <AuthContext.Provider
       value={{
         usuario,
-        usuarioLogueado: usuario,
         cargandoUsuario,
         cerrarSesion,
-        token,
+        mensajeExito,
+        setMensajeExito,
+        manejarInicioSesion,
       }}
     >
       {children}

@@ -7,6 +7,7 @@ import {
 } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsuariosService } from '../../usuarios/usuarios.service';
+import { Request } from 'express';
 
 interface JwtPayload {
   sub: number;
@@ -40,7 +41,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     const options: StrategyOptionsWithoutRequest = {
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request: Request) => {
+          return request?.cookies?.jwt || null;
+        },
+      ]),
       secretOrKey: jwtSecret,
       passReqToCallback: false,
     };

@@ -3,11 +3,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-interface DatosInicioSesion {
-  correo: string;
-  contrasena: string;
-}
-
 interface UsuarioAutenticado {
   id: number;
   nombreCompleto: string;
@@ -24,43 +19,20 @@ interface UsuarioAutenticado {
 }
 
 export const useAutenticacion = () => {
-  const [datosInicioSesion, setDatosInicioSesion] = useState<DatosInicioSesion>({
-    correo: "",
-    contrasena: "",
-  });
-
-  const [mensajeExito, setMensajeExito] = useState(false);
   const [usuario, setUsuario] = useState<UsuarioAutenticado | null>(null);
   const [cargandoUsuario, setCargandoUsuario] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
-
+  const [mensajeExito, setMensajeExito] = useState(false);
   const router = useRouter();
 
-  const manejarCambio = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setDatosInicioSesion((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const obtenerDatosUsuario = useCallback(async (token: string): Promise<UsuarioAutenticado | null> => {
-    if (!token) {
-      setUsuario(null);
-      return null;
-    }
+  const obtenerDatosUsuario = useCallback(async (): Promise<UsuarioAutenticado | null> => {
     try {
       const respuesta = await fetch("http://localhost:3001/auth/profile", {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
+        credentials: "include",
       });
 
       if (!respuesta.ok) {
         if (respuesta.status === 401) {
-          localStorage.removeItem("token");
           setUsuario(null);
         }
         return null;
@@ -70,13 +42,16 @@ export const useAutenticacion = () => {
       return userData;
 
     } catch (error) {
-      localStorage.removeItem("token");
       setUsuario(null);
       return null;
     }
   }, []);
 
-  const manejarInicioSesion = async (e: React.FormEvent): Promise<boolean> => {
+  const manejarInicioSesion = async (
+    e: React.FormEvent,
+    correo: string,
+    contrasena: string
+  ): Promise<boolean> => {
     e.preventDefault();
 
     try {
@@ -85,9 +60,10 @@ export const useAutenticacion = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
-          correoElectronico: datosInicioSesion.correo,
-          password: datosInicioSesion.contrasena,
+          correoElectronico: correo,
+          password: contrasena,
         }),
       });
 
@@ -97,87 +73,57 @@ export const useAutenticacion = () => {
         return false;
       }
 
-      const data = await respuesta.json();
-      const newToken = data.access_token;
-      localStorage.setItem("token", newToken);
-      setToken(newToken);
+      const usuarioLogeado = await obtenerDatosUsuario();
 
-      const usuarioLogeado = await obtenerDatosUsuario(newToken);
       if (usuarioLogeado) {
+        setUsuario(usuarioLogeado);
         setMensajeExito(true);
-        window.location.href = '/';
+        router.push("/");
         return true;
       } else {
-        alert("Inicio de sesión exitoso, pero no se pudieron cargar los datos del usuario. Intente recargar la página.");
-        localStorage.removeItem("token");
+        alert("Inicio de sesión exitoso, pero no se pudo obtener el perfil.");
         return false;
       }
 
     } catch (error) {
-      alert("Error al conectar con el servidor o al iniciar sesión.");
+      alert("Error al conectar con el servidor o iniciar sesión.");
       return false;
     }
   };
 
   const cerrarSesion = useCallback(async () => {
-    const currentToken = localStorage.getItem("token");
-    if (currentToken) {
-      try {
-        await fetch("http://localhost:3001/auth/logout", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${currentToken}`,
-            "Content-Type": "application/json",
-          },
-        });
-      } catch (error) {
-        console.error("Error al notificar logout al backend:", error);
-      }
+    try {
+      await fetch("http://localhost:3001/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
     }
 
-    localStorage.removeItem("token");
-    setToken(null);
     setUsuario(null);
     setMensajeExito(false);
-    router.push("/");
+    router.push("/login");
     router.refresh();
   }, [router]);
 
   useEffect(() => {
-    const loadUserFromToken = async () => {
-      const storedToken = localStorage.getItem("token");
-      if (storedToken) {
-        setToken(storedToken);
-        setCargandoUsuario(true);
-        const loadedUser = await obtenerDatosUsuario(storedToken);
-        setUsuario(loadedUser);
-        setCargandoUsuario(false);
-      } else {
-        setCargandoUsuario(false);
-      }
+    const loadUser = async () => {
+      setCargandoUsuario(true);
+      const user = await obtenerDatosUsuario();
+      setUsuario(user);
+      setCargandoUsuario(false);
     };
 
-    loadUserFromToken();
-
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'token' || event.key === null) {
-        loadUserFromToken();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    loadUser();
   }, [obtenerDatosUsuario]);
 
   return {
-    datosInicioSesion,
-    manejarCambio,
-    manejarInicioSesion,
-    mensajeExito,
-    setMensajeExito,
     usuario,
     cargandoUsuario,
+    mensajeExito,
+    setMensajeExito,
+    manejarInicioSesion,
     cerrarSesion,
-    token,
   };
 };

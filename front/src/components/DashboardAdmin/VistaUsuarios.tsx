@@ -16,12 +16,12 @@ export default function VistaUsuarios() {
   const [busqueda, setBusqueda] = useState('');
   const [usuarioEditando, setUsuarioEditando] = useState<Usuario | null>(null);
   const socket = useSocket();
-  const { token, usuarioLogueado } = useAuth();
+  const { usuario } = useAuth();
 
   const fetchUsuarios = async () => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/admin/users`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
 
       if (!res.ok) throw new Error(await res.text());
@@ -35,8 +35,8 @@ export default function VistaUsuarios() {
   };
 
   useEffect(() => {
-    if (token) fetchUsuarios();
-  }, [token]);
+    fetchUsuarios();
+  }, []);
 
   useEffect(() => {
     if (!socket) return;
@@ -76,7 +76,7 @@ export default function VistaUsuarios() {
 
   return (
     <div className="p-4 flex-1 overflow-auto">
-      <EncabezadoUsuarios nombreUsuario={usuarioLogueado?.nombreCompleto || 'Usuario'} />
+      <EncabezadoUsuarios nombreUsuario={usuario?.nombreCompleto || 'Usuario'} />
 
       <div className="flex flex-wrap items-center justify-between gap-4 my-4">
         <div className="flex items-center gap-2 flex-wrap">
