@@ -14,7 +14,10 @@ import BotonConEfecto from '../Botones/BotonConEfecto';
 export default function Navbar() {
   const { usuario, cargandoUsuario, cerrarSesion } = useAuth();
 
+
   useEffect(() => {
+    console.log("NAVBAR - Usuario:", usuario);
+    console.log("NAVBAR - CargandoUsuario:", cargandoUsuario);
   }, [usuario, cargandoUsuario]);
 
   return (
@@ -61,7 +64,6 @@ export default function Navbar() {
                 >
                   Cerrar sesión
                 </button>
-             
               </div>
             </div>
           ) : (
