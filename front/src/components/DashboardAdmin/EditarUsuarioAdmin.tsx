@@ -21,29 +21,28 @@ export default function EditarUsuarioAdmin({ usuario, onCerrar, onActualizar }: 
     : null;
 
   const handleGuardar = async () => {
-    setGuardando(true);
-    try {
-      const token = localStorage.getItem('token') || '';
-      const res = await fetch(`http://localhost:3001/usuarios/${usuario.id}`, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ telefono, tipoUsuario, nombreCompleto }),
-      });
+  setGuardando(true);
+  try {
+    const res = await fetch(`http://localhost:3001/usuarios/${usuario.id}`, {
+      method: 'PATCH',
+      credentials: 'include', // ✅ Usar cookies HttpOnly
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ telefono, tipoUsuario, nombreCompleto }),
+    });
 
-      if (!res.ok) throw new Error('Error al actualizar');
+    if (!res.ok) throw new Error('Error al actualizar');
 
-      const actualizado: Usuario = await res.json();
-      onActualizar(actualizado);
-      onCerrar();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setGuardando(false);
-    }
-  };
+    const actualizado: Usuario = await res.json();
+    onActualizar(actualizado);
+    onCerrar();
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setGuardando(false);
+  }
+};
 
   return (
     <div className="p-6 bg-white rounded-xl shadow-xl w-full max-w-lg mx-auto space-y-4">
