@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Usuario } from '@/app/types/auth';
 
 interface Props {
@@ -15,34 +15,64 @@ export default function EditarUsuarioAdmin({ usuario, onCerrar, onActualizar }: 
   const [nombreCompleto, setNombreCompleto] = useState(usuario.nombreCompleto);
   const [guardando, setGuardando] = useState(false);
 
+  // Referencia al input teléfono para poder hacer focus programáticamente
+  const telefonoRef = useRef<HTMLInputElement>(null);
 
   const urlFotoPerfil = usuario.fotoPerfil
     ? `http://localhost:3001/uploads/perfiles/${usuario.fotoPerfil}`
     : null;
 
   const handleGuardar = async () => {
-  setGuardando(true);
-  try {
-    const res = await fetch(`http://localhost:3001/usuarios/${usuario.id}`, {
-      method: 'PATCH',
-      credentials: 'include', // ✅ Usar cookies HttpOnly
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ telefono, tipoUsuario, nombreCompleto }),
-    });
+    setGuardando(true);
+    try {
+      const res = await fetch(`http://localhost:3001/usuarios/${usuario.id}`, {
+        method: 'PATCH',
+        credentials: 'include', // ✅ Usar cookies HttpOnly
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ telefono, tipoUsuario, nombreCompleto }),
+      });
 
-    if (!res.ok) throw new Error('Error al actualizar');
+      if (!res.ok) throw new Error('Error al actualizar');
 
-    const actualizado: Usuario = await res.json();
-    onActualizar(actualizado);
-    onCerrar();
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setGuardando(false);
-  }
-};
+      const actualizado: Usuario = await res.json();
+      onActualizar(actualizado);
+      onCerrar();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  // Detectar tecla ESC para cerrar editor
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onCerrar();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onCerrar]);
+
+  // Handler para nombreCompleto: al presionar Enter baja foco a teléfono
+  const handleKeyDownNombre = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      telefonoRef.current?.focus();
+    }
+  };
+
+  // Handler para teléfono: al presionar Enter guarda la info
+  const handleKeyDownTelefono = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleGuardar();
+    }
+  };
 
   return (
     <div className="p-6 bg-white rounded-xl shadow-xl w-full max-w-lg mx-auto space-y-4">
@@ -68,6 +98,7 @@ export default function EditarUsuarioAdmin({ usuario, onCerrar, onActualizar }: 
           type="text"
           value={nombreCompleto}
           onChange={(e) => setNombreCompleto(e.target.value)}
+          onKeyDown={handleKeyDownNombre}
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-yellow-400"
         />
 
@@ -76,6 +107,8 @@ export default function EditarUsuarioAdmin({ usuario, onCerrar, onActualizar }: 
           type="text"
           value={telefono}
           onChange={(e) => setTelefono(e.target.value)}
+          onKeyDown={handleKeyDownTelefono}
+          ref={telefonoRef}
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-yellow-400"
         />
 
