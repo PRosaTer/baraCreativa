@@ -9,15 +9,16 @@ import {
   NotFoundException,
   UploadedFile,
   UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-
 import { CursosService } from './cursos.service';
 import { CrearCursoDto } from './crear-curso.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
-@Controller('api/cursos')
+@Controller('api/cursos') 
 export class CursosController {
   constructor(private readonly cursosService: CursosService) {}
 
@@ -26,7 +27,7 @@ export class CursosController {
     return this.cursosService.obtenerCursos();
   }
 
-  @Get(':id')
+  @Get(':id') 
   async obtenerCursoPorId(@Param('id') id: string) {
     const curso = await this.cursosService.obtenerCursoPorId(+id);
     if (!curso) {
@@ -35,72 +36,53 @@ export class CursosController {
     return curso;
   }
 
-
-  @Post()
-  @UseInterceptors(
-    FileInterceptor('imagenCurso', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-          return cb(new Error('Solo se permiten imágenes jpg, jpeg, png, gif'), false);
-        }
-        cb(null, true);
-      },
-      limits: { fileSize: 5 * 1024 * 1024 },
-    }),
-  )
-  async crearCurso(
-    @UploadedFile() imagenCurso: Express.Multer.File,
-    @Body() crearCursoDto: CrearCursoDto,
-  ) {
-    
-    if (imagenCurso) {
-      crearCursoDto.imagenCurso = imagenCurso.filename;
-    }
+  @Post() 
+  crearCurso(@Body() crearCursoDto: CrearCursoDto) {
     return this.cursosService.crearCurso(crearCursoDto);
   }
 
-  
   @Patch(':id')
+  actualizarCurso(@Param('id') id: string, @Body() datos: Partial<CrearCursoDto>) {
+    return this.cursosService.actualizarCurso(+id, datos);
+  }
+
+  @Delete(':id') 
+  eliminarCurso(@Param('id') id: string) {
+    return this.cursosService.eliminarCurso(+id);
+  }
+
+  @Post(':id/imagen')
   @UseInterceptors(
-    FileInterceptor('imagenCurso', {
+    FileInterceptor('imagen', {
       storage: diskStorage({
-        destination: './uploads',
+        destination: join(process.cwd(), 'uploads', 'imagenes-cursos'),
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+          const uniqueName = uuidv4() + extname(file.originalname);
+          cb(null, uniqueName);
         },
       }),
       fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-          return cb(new Error('Solo se permiten imágenes jpg, jpeg, png, gif'), false);
+        if (file.mimetype.startsWith('image/')) {
+          cb(null, true);
+        } else {
+          cb(new BadRequestException('Solo imágenes permitidas'), false);
         }
-        cb(null, true);
       },
       limits: { fileSize: 5 * 1024 * 1024 },
     }),
   )
-  async actualizarCurso(
-    @Param('id') id: string,
-    @UploadedFile() imagenCurso: Express.Multer.File,
-    @Body() datos: Partial<CrearCursoDto>,
-  ) {
-    if (imagenCurso) {
-      datos.imagenCurso = imagenCurso.filename;
+  async subirImagenCurso(@Param('id') id: string, @UploadedFile() imagen: Express.Multer.File) {
+    if (!imagen) {
+      throw new BadRequestException('Imagen requerida');
     }
-    return this.cursosService.actualizarCurso(+id, datos);
-  }
 
-  @Delete(':id')
-  eliminarCurso(@Param('id') id: string) {
-    return this.cursosService.eliminarCurso(+id);
+    
+    const cursoActualizado = await this.cursosService.actualizarCurso(+id, { imagenCurso: imagen.filename });
+
+    return {
+      message: 'Imagen subida y curso actualizado correctamente',
+      curso: cursoActualizado,
+      rutaImagen: `/uploads/imagenes-cursos/${imagen.filename}`,
+    };
   }
 }

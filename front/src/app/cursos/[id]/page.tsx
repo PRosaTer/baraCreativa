@@ -275,7 +275,7 @@ export default async function CursoDetailPage({ params }: CursoDetailPageProps) 
       {curso.imagenCurso && (
         <div className="w-full h-64 relative mb-6 rounded-lg overflow-hidden">
           <Image
-            src={`http://localhost:3001/uploads/${curso.imagenCurso}`}
+            src={`http://localhost:3001/uploads/imagenes-cursos/${curso.imagenCurso}`}
             alt={curso.titulo}
             layout="fill"
             objectFit="cover"
