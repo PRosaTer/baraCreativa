@@ -15,7 +15,7 @@ export default function EditarUsuarioAdmin({ usuario, onCerrar, onActualizar }: 
   const [nombreCompleto, setNombreCompleto] = useState(usuario.nombreCompleto);
   const [guardando, setGuardando] = useState(false);
 
-  // Referencia al input teléfono para poder hacer focus programáticamente
+
   const telefonoRef = useRef<HTMLInputElement>(null);
 
   const urlFotoPerfil = usuario.fotoPerfil
@@ -27,7 +27,7 @@ export default function EditarUsuarioAdmin({ usuario, onCerrar, onActualizar }: 
     try {
       const res = await fetch(`http://localhost:3001/usuarios/${usuario.id}`, {
         method: 'PATCH',
-        credentials: 'include', // ✅ Usar cookies HttpOnly
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -46,7 +46,7 @@ export default function EditarUsuarioAdmin({ usuario, onCerrar, onActualizar }: 
     }
   };
 
-  // Detectar tecla ESC para cerrar editor
+  
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -58,7 +58,7 @@ export default function EditarUsuarioAdmin({ usuario, onCerrar, onActualizar }: 
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onCerrar]);
 
-  // Handler para nombreCompleto: al presionar Enter baja foco a teléfono
+
   const handleKeyDownNombre = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -66,7 +66,6 @@ export default function EditarUsuarioAdmin({ usuario, onCerrar, onActualizar }: 
     }
   };
 
-  // Handler para teléfono: al presionar Enter guarda la info
   const handleKeyDownTelefono = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
