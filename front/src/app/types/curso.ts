@@ -1,9 +1,17 @@
 export interface Modulo {
-  id: number; 
+  id: number;
   titulo: string;
   descripcion: string;
   videoUrl?: string;
-  pdfUrl?: string;
+  pdfUrl?: string;  
+}
+
+
+export interface ModuloForm {
+  titulo: string;
+  descripcion: string;
+  videoUrl?: string | null;
+  pdfUrl?: string | null;
 }
 
 
@@ -19,13 +27,20 @@ export interface Curso {
   certificadoDisponible: boolean;
   badgeDisponible: boolean;
   imagenCurso: string | null;
-  modulos?: Modulo[];
-  // badges?: Badge[];
-  // carritos?: Carrito[];
-  // certificados?: Certificado[];
-  // equiposAsignados?: EquipoEmpresaMiembro[];
-  // inscripciones?: Inscripcion[];
-  // pagos?: Pago[];
-  // reportesProgreso?: ReporteProgreso[];
-  // resenas?: Resena[];
+  modulos?: Modulo[]; 
+}
+
+
+export interface CursoForm {
+  titulo: string;
+  descripcion: string;
+  tipo: 'Docentes' | 'Empresas';
+  categoria: string;
+  duracionHoras: number;
+  precio: number;
+  modalidad: 'en vivo' | 'grabado' | 'mixto';
+  certificadoDisponible: boolean;
+  badgeDisponible: boolean;
+  imagenCurso?: File | null;
+  modulos: ModuloForm[];
 }
