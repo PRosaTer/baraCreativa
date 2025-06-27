@@ -1,17 +1,31 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsBoolean } from 'class-validator';
-import { ModalidadCurso, TipoCurso } from '../entidades/curso.entity';
+import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum, ValidateNested, IsArray } from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class CrearCursoDto {
-  @IsNotEmpty() @IsString()
+class ModuloDto {
+  @IsString()
   titulo: string;
 
-  @IsNotEmpty() @IsString()
+  @IsString()
   descripcion: string;
 
-  @IsEnum(TipoCurso)
-  tipo: TipoCurso;
+  @IsOptional()
+  videoUrl?: string;
 
-  @IsNotEmpty() @IsString()
+  @IsOptional()
+  pdfUrl?: string;
+}
+
+export class CrearCursoDto {
+  @IsString()
+  titulo: string;
+
+  @IsString()
+  descripcion: string;
+
+  @IsEnum(['Docentes', 'Empresas'])
+  tipo: 'Docentes' | 'Empresas';
+
+  @IsString()
   categoria: string;
 
   @IsNumber()
@@ -20,15 +34,20 @@ export class CrearCursoDto {
   @IsNumber()
   precio: number;
 
-  @IsEnum(ModalidadCurso)
-  modalidad: ModalidadCurso;
-
-  @IsOptional() @IsString()
-  imagenCurso?: string;
+  @IsEnum(['en vivo', 'grabado', 'mixto'])
+  modalidad: 'en vivo' | 'grabado' | 'mixto';
 
   @IsBoolean()
   certificadoDisponible: boolean;
 
   @IsBoolean()
   badgeDisponible: boolean;
+
+  @IsOptional()
+  imagenCurso?: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ModuloDto)
+  modulos: ModuloDto[];
 }

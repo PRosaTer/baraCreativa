@@ -1,22 +1,22 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Curso } from './curso.entity';
+import { Curso } from '../entidades/curso.entity';
 
 @Entity('modulos')
-export class Modulo {
+export class ModuloEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   titulo: string;
 
-  @Column('text')
+  @Column()
   descripcion: string;
-
-  @Column('int')
-  orden: number;
 
   @Column({ nullable: true })
   videoUrl?: string;
+
+  @Column({ nullable: true })
+  pdfUrl?: string;
 
   @ManyToOne(() => Curso, (curso) => curso.modulos, { onDelete: 'CASCADE' })
   curso: Curso;

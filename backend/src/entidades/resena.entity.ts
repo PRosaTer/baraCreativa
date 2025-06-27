@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, CreateDateColumn } from 'typeorm';
 import { Usuario } from './usuario.entity';
 import { Curso } from './curso.entity';
 
@@ -7,18 +7,18 @@ export class Resena {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Usuario, (usuario) => usuario.resenas, { eager: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => Usuario, (usuario) => usuario.resenas, { onDelete: 'CASCADE' })
   usuario: Usuario;
 
-  @ManyToOne(() => Curso, (curso) => curso.resenas, { eager: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => Curso, (curso) => curso.resenas, { onDelete: 'CASCADE' })
   curso: Curso;
 
-  @Column('int')
-  puntuacion: number; // 1 a 5
+  @Column({ type: 'int', default: 5 })
+  puntaje: number;
 
-  @Column('text')
+  @Column({ type: 'text', nullable: true })
   comentario: string;
 
   @CreateDateColumn()
-  fechaResena: Date;
+  creadoEn: Date;
 }
