@@ -16,6 +16,7 @@ const TablaUsuarios: React.FC<Props> = ({ usuarios, onEditar }) => {
           <th className="p-2 border-r border-gray-300">Email</th>
           <th className="p-2 border-r border-gray-300">Tipo</th>
           <th className="p-2 border-r border-gray-300">Estado</th>
+          <th className="p-2 border-r border-gray-300">Última sesión</th>
           <th className="p-2">Conectado</th>
         </tr>
       </thead>
@@ -31,6 +32,11 @@ const TablaUsuarios: React.FC<Props> = ({ usuarios, onEditar }) => {
             <td className="p-2 border-r border-gray-300">{u.correoElectronico}</td>
             <td className="p-2 border-r border-gray-300">{u.tipoUsuario}</td>
             <td className="p-2 border-r border-gray-300">{u.estadoCuenta}</td>
+            <td className="p-2 border-r border-gray-300">
+              {u.ultimaSesion
+                ? new Date(u.ultimaSesion).toLocaleString()
+                : 'Sin registro'}
+            </td>
             <td className={`p-2 ${u.estaConectado ? 'text-green-600' : 'text-gray-400'}`}>
               {u.estaConectado ? '🟢 Conectado' : '⚪ Desconectado'}
             </td>
@@ -38,7 +44,7 @@ const TablaUsuarios: React.FC<Props> = ({ usuarios, onEditar }) => {
         ))}
         {usuarios.length === 0 && (
           <tr>
-            <td colSpan={6} className="text-center p-4 text-gray-500">
+            <td colSpan={7} className="text-center p-4 text-gray-500">
               No hay usuarios para mostrar.
             </td>
           </tr>
