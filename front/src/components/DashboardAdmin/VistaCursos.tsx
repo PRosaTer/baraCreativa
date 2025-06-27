@@ -1,9 +1,14 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import TablaCursosAdmin from './TablaCursosAdmin';
-import CrearCursoForm from '../CrearCursoForm/CrearCursoForm';
+import CrearCursoForm, { CursoForm } from '../CrearCursoForm/CrearCursoForm';
 import { Curso } from '@/app/types/curso';
+
+interface ErrorResponse {
+  message?: string;
+}
 
 export default function VistaCursos() {
   const [cursos, setCursos] = useState<Curso[]>([]);
@@ -12,21 +17,32 @@ export default function VistaCursos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  
+  const extraerMensajeError = async (response: Response): Promise<string> => {
+    try {
+      const data = (await response.json()) as ErrorResponse;
+      return data.message || 'Error desconocido';
+    } catch {
+      return 'Error desconocido';
+    }
+  };
+
   const fetchCursos = async () => {
     setLoading(true);
     setError(null);
     try {
       const res = await fetch('http://localhost:3001/api/cursos');
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Error al obtener cursos');
+        const mensaje = await extraerMensajeError(res);
+        throw new Error(mensaje);
       }
       const data = await res.json();
       if (Array.isArray(data)) setCursos(data);
       else if (Array.isArray(data.cursos)) setCursos(data.cursos);
-    } catch (err: any) {
-      setError(err.message);
-      console.error('Error al cargar cursos:', err);
+    } catch (error: unknown) {
+      if (error instanceof Error) setError(error.message);
+      else setError('Error desconocido');
+      console.error('Error al cargar cursos:', error);
     } finally {
       setLoading(false);
     }
@@ -36,39 +52,61 @@ export default function VistaCursos() {
     fetchCursos();
   }, []);
 
-  const handleGuardar = async (formData: FormData) => {
+  const handleGuardar = async (cursoData: CursoForm) => {
+    setLoading(true);
     try {
+      const url = cursoSeleccionado
+        ? `http://localhost:3001/api/cursos/${cursoSeleccionado.id}`
+        : 'http://localhost:3001/api/cursos';
+
+      const method = cursoSeleccionado ? 'PATCH' : 'POST';
+
+      const formData = new FormData();
+
+      formData.append('titulo', cursoData.titulo);
+      formData.append('descripcion', cursoData.descripcion);
+      formData.append('tipo', cursoData.tipo);
+      formData.append('categoria', cursoData.categoria);
+      formData.append('duracionHoras', cursoData.duracionHoras.toString());
+      formData.append('precio', cursoData.precio.toString());
+      formData.append('modalidad', cursoData.modalidad);
+      formData.append('certificadoDisponible', cursoData.certificadoDisponible ? 'true' : 'false');
+      formData.append('badgeDisponible', cursoData.badgeDisponible ? 'true' : 'false');
+
+      if (cursoData.imagenCurso) {
+        formData.append('imagenCurso', cursoData.imagenCurso);
+      }
+
+      formData.append('modulos', JSON.stringify(cursoData.modulos));
+
+      const res = await fetch(url, {
+        method,
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const mensaje = await extraerMensajeError(res);
+        throw new Error(mensaje);
+      }
+
+      const resultado: Curso = await res.json();
+
       if (cursoSeleccionado) {
-        const res = await fetch(`http://localhost:3001/api/cursos/${cursoSeleccionado.id}`, {
-          method: 'PATCH',
-          body: formData,
-        });
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.message || 'Error al actualizar curso');
-        }
-        const actualizado: Curso = await res.json();
-        setCursos((prev) => prev.map((c) => (c.id === actualizado.id ? actualizado : c)));
+        setCursos((prev) =>
+          prev.map((c) => (c.id === resultado.id ? resultado : c))
+        );
         alert('Curso actualizado con éxito!');
       } else {
-        const res = await fetch('http://localhost:3001/api/cursos', {
-          method: 'POST',
-          body: formData,
-        });
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.message || 'Error al crear curso');
-        }
-        const creado: Curso = await res.json();
-        setCursos((prev) => [...prev, creado]);
+        setCursos((prev) => [...prev, resultado]);
         alert('Curso creado con éxito!');
       }
 
       setCursoSeleccionado(null);
       setMostrarFormulario(false);
       fetchCursos();
-    } catch (err: any) {
-      alert(`Error al guardar el curso: ${err.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) alert(`Error al guardar el curso: ${error.message}`);
+      else alert('Error al guardar el curso: Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -82,25 +120,31 @@ export default function VistaCursos() {
         method: 'DELETE',
       });
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Error al eliminar curso');
+        const mensaje = await extraerMensajeError(res);
+        throw new Error(mensaje);
       }
       setCursos((prev) => prev.filter((c) => c.id !== id));
       alert('Curso eliminado con éxito!');
-    } catch (err: any) {
-      alert(`Error al eliminar el curso: ${err.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) alert(`Error al eliminar el curso: ${error.message}`);
+      else alert('Error al eliminar el curso: Error desconocido');
     } finally {
       setLoading(false);
     }
   };
 
-
-  if (loading && !mostrarFormulario) return <p className="text-center text-lg mt-10">Cargando cursos...</p>;
-  if (error && !mostrarFormulario) return <p className="text-red-600 text-center text-lg mt-10">Error: {error}</p>;
+  if (loading && !mostrarFormulario)
+    return <p className="text-center text-lg mt-10">Cargando cursos...</p>;
+  if (error && !mostrarFormulario)
+    return (
+      <p className="text-red-600 text-center text-lg mt-10">Error: {error}</p>
+    );
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
-      <h2 className="text-3xl font-bold mb-6 text-[var(--primary)] text-center">Gestión de Cursos y Servicios</h2>
+      <h2 className="text-3xl font-bold mb-6 text-[var(--primary)] text-center">
+        Gestión de Cursos y Servicios
+      </h2>
 
       {!mostrarFormulario && (
         <button

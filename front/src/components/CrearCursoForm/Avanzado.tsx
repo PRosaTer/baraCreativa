@@ -1,8 +1,6 @@
 'use client';
 
 import React, { ChangeEvent } from 'react';
-import { CursoForm } from './CrearCursoForm';
-
 
 interface ModuloForm {
   titulo: string;
@@ -11,7 +9,7 @@ interface ModuloForm {
   pdfFile?: File;
 }
 
-interface AvanzadoProps {
+interface Props {
   modulos: ModuloForm[];
   setModulos: React.Dispatch<React.SetStateAction<ModuloForm[]>>;
   imagenCurso: File | null;
@@ -21,15 +19,7 @@ interface AvanzadoProps {
   guardando: boolean;
 }
 
-export default function Avanzado({
-  modulos,
-  setModulos,
-  imagenCurso,
-  setImagenCurso,
-  onAnterior,
-  onSubmit,
-  guardando,
-}: AvanzadoProps) {
+export default function Avanzado({ modulos, setModulos, imagenCurso, setImagenCurso, onAnterior, onSubmit, guardando }: Props) {
   const handleModuloChange = (index: number, field: keyof ModuloForm, value: any) => {
     const newModulos = [...modulos];
     newModulos[index] = { ...newModulos[index], [field]: value };
@@ -49,101 +39,83 @@ export default function Avanzado({
   const handleImagenChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setImagenCurso(e.target.files[0]);
-    } else {
-      setImagenCurso(null);
     }
   };
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-6">
-      <h2 className="text-2xl font-bold mb-4 text-[var(--primary)]">Crear Nuevo Curso - Paso 2: Contenido y Archivos</h2>
-
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-6 max-w-4xl mx-auto p-4 bg-white rounded shadow">
+      <h2 className="text-2xl font-bold mb-4">Crear Nuevo Curso - Paso 2</h2>
 
       <div>
-        <label htmlFor="imagenCurso" className="block text-sm font-medium text-gray-700">
-          Imagen Principal del Curso
+        <label htmlFor="imagenCurso" className="block text-lg font-medium text-gray-700 mb-2">
+          Imagen del Curso:
         </label>
         <input
           type="file"
           id="imagenCurso"
           accept="image/*"
           onChange={handleImagenChange}
-          className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50 focus:outline-none"
+          className="block w-full text-sm text-gray-500
+            file:mr-4 file:py-2 file:px-4
+            file:rounded-full file:border-0
+            file:text-sm file:font-semibold
+            file:bg-blue-50 file:text-blue-700
+            hover:file:bg-blue-100"
         />
         {imagenCurso && (
           <p className="mt-2 text-sm text-gray-500">Archivo seleccionado: {imagenCurso.name}</p>
         )}
       </div>
 
-
-      <div className="space-y-4 border border-gray-200 p-4 rounded-md bg-gray-50">
-        <h3 className="text-xl font-semibold mb-3 text-gray-800">Módulos del Curso</h3>
+      <h3 className="text-xl font-semibold mt-6 mb-4">Módulos del Curso</h3>
+      <div className="space-y-4">
         {modulos.map((modulo, i) => (
-          <div key={i} className="border border-gray-300 p-4 rounded-md bg-white shadow-sm space-y-3">
-            <h4 className="text-lg font-medium text-gray-700">Módulo {i + 1}</h4>
-            <div>
-              <label htmlFor={`modulo-titulo-${i}`} className="block text-sm font-medium text-gray-700">Título del Módulo</label>
-              <input
-                type="text"
-                id={`modulo-titulo-${i}`}
-                value={modulo.titulo}
-                onChange={(e) => handleModuloChange(i, 'titulo', e.target.value)}
-                placeholder="Título del módulo"
-                required
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              />
-            </div>
-            <div>
-              <label htmlFor={`modulo-descripcion-${i}`} className="block text-sm font-medium text-gray-700">Descripción del Módulo</label>
-              <textarea
-                id={`modulo-descripcion-${i}`}
-                value={modulo.descripcion}
-                onChange={(e) => handleModuloChange(i, 'descripcion', e.target.value)}
-                placeholder="Descripción del módulo"
-                rows={2}
-                required
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              ></textarea>
-            </div>
-
-            <div>
-              <label htmlFor={`modulo-video-${i}`} className="block text-sm font-medium text-gray-700">
-                Video del Módulo (opcional)
-              </label>
+          <div key={i} className="p-4 border rounded-lg bg-gray-50">
+            <h4 className="font-medium text-lg mb-2">Módulo {i + 1}</h4>
+            <input
+              type="text"
+              value={modulo.titulo}
+              onChange={(e) => handleModuloChange(i, 'titulo', e.target.value)}
+              placeholder="Título del módulo"
+              required
+              className="w-full border p-2 rounded mb-2"
+            />
+            <textarea
+              value={modulo.descripcion}
+              onChange={(e) => handleModuloChange(i, 'descripcion', e.target.value)}
+              placeholder="Descripción del módulo"
+              required
+              className="w-full border p-2 rounded mb-2"
+            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Video:
               <input
                 type="file"
-                id={`modulo-video-${i}`}
                 accept="video/*"
-                onChange={(e) => e.target.files && handleModuloChange(i, 'videoFile', e.target.files[0])}
-                className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50 focus:outline-none"
+                onChange={(e) =>
+                  e.target.files && handleModuloChange(i, 'videoFile', e.target.files[0])
+                }
+                className="block mt-1"
               />
-              {modulo.videoFile && (
-                <p className="mt-2 text-sm text-gray-500">Archivo seleccionado: {modulo.videoFile.name}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor={`modulo-pdf-${i}`} className="block text-sm font-medium text-gray-700">
-                PDF del Módulo (opcional)
-              </label>
+            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              PDF:
               <input
                 type="file"
-                id={`modulo-pdf-${i}`}
                 accept="application/pdf"
-                onChange={(e) => e.target.files && handleModuloChange(i, 'pdfFile', e.target.files[0])}
-                className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-md shadow-sm p-2"
+                onChange={(e) =>
+                  e.target.files && handleModuloChange(i, 'pdfFile', e.target.files[0])
+                }
+                className="block mt-1"
               />
-              {modulo.pdfFile && (
-                <p className="mt-2 text-sm text-gray-500">Archivo seleccionado: {modulo.pdfFile.name}</p>
-              )}
-            </div>
+            </label>
 
             <button
               type="button"
               onClick={() => eliminarModulo(i)}
-              className="mt-2 px-3 py-1 text-red-600 border border-red-600 rounded-md hover:bg-red-50 transition-colors duration-200"
+              className="mt-2 text-red-600 hover:text-red-800"
             >
-              Eliminar Módulo
+              Eliminar módulo
             </button>
           </div>
         ))}
@@ -151,9 +123,9 @@ export default function Avanzado({
         <button
           type="button"
           onClick={agregarModulo}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200"
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
         >
-          Agregar Módulo
+          Agregar módulo
         </button>
       </div>
 
@@ -161,7 +133,7 @@ export default function Avanzado({
         <button
           type="button"
           onClick={onAnterior}
-          className="px-6 py-3 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors duration-200"
+          className="px-6 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
         >
           Anterior
         </button>
@@ -169,7 +141,7 @@ export default function Avanzado({
         <button
           type="submit"
           disabled={guardando}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
         >
           {guardando ? 'Guardando...' : 'Guardar Curso'}
         </button>

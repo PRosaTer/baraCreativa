@@ -1,3 +1,4 @@
+
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,6 +17,7 @@ export class CursosService {
   }
 
   async obtenerCursoPorId(id: number): Promise<Curso | null> {
+    
     return this.cursosRepository.findOne({ where: { id }, relations: ['modulos'] });
   }
 
@@ -26,6 +28,7 @@ export class CursosService {
 
   async actualizarCurso(id: number, datosActualizar: Partial<CrearCursoDto>): Promise<Curso | null> {
     await this.cursosRepository.update(id, datosActualizar);
+    
     return this.cursosRepository.findOne({ where: { id }, relations: ['modulos'] });
   }
 

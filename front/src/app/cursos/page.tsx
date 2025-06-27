@@ -45,8 +45,9 @@
 //   );
 // }
 
+
 import CardsList from '@/components/tarjetas/cursos/page';
-import { Curso } from '@/app/types/curso'; 
+import { Curso } from '@/app/types/curso';
 
 
 async function fetchCursos(): Promise<Curso[]> {

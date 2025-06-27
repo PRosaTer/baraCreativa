@@ -193,8 +193,9 @@
 //   );
 // }
 
+
 import { notFound } from 'next/navigation';
-import Image from 'next/image'; 
+import Image from 'next/image';
 
 
 interface Modulo {
@@ -204,7 +205,6 @@ interface Modulo {
   videoUrl?: string | null;
   pdfUrl?: string | null;
 }
-
 
 interface Curso {
   id: number;
@@ -218,14 +218,15 @@ interface Curso {
   certificadoDisponible: boolean;
   badgeDisponible: boolean;
   imagenCurso?: string | null;
-  modulos?: Modulo[];
+  modulos?: Modulo[]; 
 }
 
 interface CursoDetailPageProps {
   params: {
-    id: string; 
+    id: string;
   };
 }
+
 
 async function getCursoById(id: string): Promise<Curso | null> {
   try {
@@ -246,11 +247,13 @@ async function getCursoById(id: string): Promise<Curso | null> {
   }
 }
 
+
 export default async function CursoDetailPage({ params }: CursoDetailPageProps) {
   const curso = await getCursoById(params.id);
   if (!curso) {
     notFound();
   }
+
 
   let precioNumerico: number;
   if (typeof curso.precio === 'string') {
@@ -264,8 +267,11 @@ export default async function CursoDetailPage({ params }: CursoDetailPageProps) 
 
 
   const precioFormateado = !isNaN(precioNumerico) ? precioNumerico.toFixed(2) : 'N/A';
+ 
+
   return (
     <div className="container mx-auto p-4 max-w-4xl bg-white shadow-lg rounded-lg my-8">
+   
       {curso.imagenCurso && (
         <div className="w-full h-64 relative mb-6 rounded-lg overflow-hidden">
           <Image
@@ -290,7 +296,7 @@ export default async function CursoDetailPage({ params }: CursoDetailPageProps) 
           <p className="text-gray-700 mb-2"><strong>Tipo:</strong> {curso.tipo}</p>
           <p className="text-gray-700 mb-2"><strong>Categoría:</strong> {curso.categoria}</p>
           <p className="text-gray-700 mb-2"><strong>Duración:</strong> {curso.duracionHoras} horas</p>
-          <p className="text-gray-700 mb-2"><strong>Precio:</strong> ${precioFormateado}</p> {/* Usa el precio ya formateado */}
+          <p className="text-gray-700 mb-2"><strong>Precio:</strong> ${precioFormateado}</p>
           <p className="text-gray-700 mb-2"><strong>Modalidad:</strong> {curso.modalidad}</p>
           <p className="text-gray-700 mb-2"><strong>Certificado Disponible:</strong> {curso.certificadoDisponible ? 'Sí' : 'No'}</p>
           <p className="text-gray-700 mb-2"><strong>Badge Disponible:</strong> {curso.badgeDisponible ? 'Sí' : 'No'}</p>
