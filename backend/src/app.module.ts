@@ -6,7 +6,7 @@ import { join } from 'path';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { PasswordModule } from './password/password.module';
 import { AuthModule } from './auth/auth.module';
-import { CursosModule } from './cursos/cursos.module';
+import { CursosModule } from './cursos/cursos.module'; // <--- ¡Importante!
 
 @Module({
   imports: [
@@ -23,13 +23,13 @@ import { CursosModule } from './cursos/cursos.module';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
         entities: [join(__dirname, '**', '*.entity.{ts,js}')],
-        synchronize: true,
+        synchronize: true, // ¡Solo para desarrollo! Considera 'migrations' para producción
       }),
     }),
     UsuariosModule,
     PasswordModule,
     AuthModule,
-    CursosModule,
+    CursosModule, // <--- ¡Asegúrate de que esté aquí!
   ],
 })
 export class AppModule {}

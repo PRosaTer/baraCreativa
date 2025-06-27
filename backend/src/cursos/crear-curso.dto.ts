@@ -1,31 +1,38 @@
-import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum, ValidateNested, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsOptional, IsBoolean, IsIn, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class ModuloDto {
   @IsString()
+  @IsNotEmpty()
   titulo: string;
 
   @IsString()
+  @IsNotEmpty()
   descripcion: string;
 
   @IsOptional()
+  @IsString()
   videoUrl?: string;
 
   @IsOptional()
+  @IsString()
   pdfUrl?: string;
 }
 
 export class CrearCursoDto {
   @IsString()
+  @IsNotEmpty()
   titulo: string;
 
   @IsString()
+  @IsNotEmpty()
   descripcion: string;
 
-  @IsEnum(['Docentes', 'Empresas'])
+  @IsIn(['Docentes', 'Empresas'])
   tipo: 'Docentes' | 'Empresas';
 
   @IsString()
+  @IsNotEmpty()
   categoria: string;
 
   @IsNumber()
@@ -34,7 +41,7 @@ export class CrearCursoDto {
   @IsNumber()
   precio: number;
 
-  @IsEnum(['en vivo', 'grabado', 'mixto'])
+  @IsIn(['en vivo', 'grabado', 'mixto'])
   modalidad: 'en vivo' | 'grabado' | 'mixto';
 
   @IsBoolean()
@@ -44,10 +51,17 @@ export class CrearCursoDto {
   badgeDisponible: boolean;
 
   @IsOptional()
+  @IsString()
   imagenCurso?: string;
 
-  @IsArray()
+  @IsOptional()
+  @IsString()
+  archivoCurso?: string;
+
+
+  @IsOptional()
+  @IsArray() 
   @ValidateNested({ each: true })
   @Type(() => ModuloDto)
-  modulos: ModuloDto[];
+  modulos?: ModuloDto[];
 }

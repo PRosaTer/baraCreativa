@@ -20,7 +20,7 @@ export default function CardsList({ cursos }: CardsListProps) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4 sm:px-6 lg:px-8">
       {cursos.map((curso) => {
         const urlImagen = curso.imagenCurso
-          ? `http://localhost:3001/uploads/${curso.imagenCurso}`
+          ? `http://localhost:3001/uploads/imagenes-cursos/${curso.imagenCurso}`
           : 'https://placehold.co/400x200/cccccc/333333?text=Sin+Imagen';
         return (
           <Link href={`/cursos/${curso.id}`} key={curso.id} className="block">
