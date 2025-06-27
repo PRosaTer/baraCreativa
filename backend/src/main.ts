@@ -10,13 +10,16 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.enableCors({
-    origin: 'http://localhost:3000', 
-    credentials: true, 
+    origin: 'http://localhost:3000',
+    credentials: true,
   });
 
   app.use(cookieParser());
 
+
   app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
+
+
   app.useWebSocketAdapter(new IoAdapter(app));
 
   await app.listen(3001);

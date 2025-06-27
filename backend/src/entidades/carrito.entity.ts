@@ -1,12 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, CreateDateColumn } from 'typeorm';
 import { Usuario } from './usuario.entity';
 import { Curso } from './curso.entity';
-
-export enum EstadoCarrito {
-  Activo = 'activo',
-  Abandonado = 'abandonado',
-  Comprado = 'comprado',
-}
 
 @Entity('carritos')
 export class Carrito {
@@ -16,21 +10,18 @@ export class Carrito {
   @ManyToOne(() => Usuario, (usuario) => usuario.carritos, { onDelete: 'CASCADE' })
   usuario: Usuario;
 
-  @ManyToMany(() => Curso)
-  @JoinTable({
-    name: 'carrito_cursos',
-    joinColumn: { name: 'carrito_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'curso_id', referencedColumnName: 'id' },
-  })
-  cursos: Curso[];
+  @ManyToOne(() => Curso, (curso) => curso.carritos, { onDelete: 'CASCADE' })
+  curso: Curso;
+
+  @Column()
+  producto: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  precio: number;
+
+  @Column({ default: 1 })
+  cantidad: number;
 
   @CreateDateColumn()
-  fechaCreacion: Date;
-
-  @Column({
-    type: 'enum',
-    enum: EstadoCarrito,
-    default: EstadoCarrito.Activo,
-  })
-  estado: EstadoCarrito;
+  creadoEn: Date;
 }

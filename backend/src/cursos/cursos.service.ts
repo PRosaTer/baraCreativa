@@ -1,51 +1,35 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Curso } from '../entidades/curso.entity';
 import { CrearCursoDto } from './crear-curso.dto';
-import { EditarCursoDto } from './editar-curso.dto';
-import * as fs from 'fs';
-import * as path from 'path';
 
 @Injectable()
 export class CursosService {
   constructor(
     @InjectRepository(Curso)
-    private readonly cursoRepository: Repository<Curso>,
+    private cursosRepository: Repository<Curso>,
   ) {}
 
-  async obtenerTodos(): Promise<Curso[]> {
-    return this.cursoRepository.find();
+  async obtenerCursos(): Promise<Curso[]> {
+    return this.cursosRepository.find({ relations: ['modulos'] });
   }
 
-  async crearCurso(dto: CrearCursoDto, archivoImagen?: Express.Multer.File): Promise<Curso> {
-    const nuevoCurso = this.cursoRepository.create(dto);
-
-    if (archivoImagen) {
-      const nombreArchivo = Date.now() + '-' + archivoImagen.originalname;
-      const rutaArchivo = path.join(process.cwd(), 'uploads', nombreArchivo);
-      fs.writeFileSync(rutaArchivo, archivoImagen.buffer);
-      nuevoCurso.imagenCurso = nombreArchivo;
-    }
-
-    return this.cursoRepository.save(nuevoCurso);
+  async obtenerCursoPorId(id: number): Promise<Curso | null> {
+    return this.cursosRepository.findOne({ where: { id }, relations: ['modulos'] });
   }
 
-  async editarCurso(id: number, dto: EditarCursoDto, archivoImagen?: Express.Multer.File): Promise<Curso> {
-    const curso = await this.cursoRepository.findOneBy({ id });
-    if (!curso) {
-      throw new NotFoundException(`Curso con id ${id} no encontrado`);
-    }
+  async crearCurso(crearCursoDto: CrearCursoDto): Promise<Curso> {
+    const nuevoCurso = this.cursosRepository.create(crearCursoDto);
+    return this.cursosRepository.save(nuevoCurso);
+  }
 
-    Object.assign(curso, dto);
+  async actualizarCurso(id: number, datosActualizar: Partial<CrearCursoDto>): Promise<Curso | null> {
+    await this.cursosRepository.update(id, datosActualizar);
+    return this.cursosRepository.findOne({ where: { id }, relations: ['modulos'] });
+  }
 
-    if (archivoImagen) {
-      const nombreArchivo = Date.now() + '-' + archivoImagen.originalname;
-      const rutaArchivo = path.join(process.cwd(), 'uploads', nombreArchivo);
-      fs.writeFileSync(rutaArchivo, archivoImagen.buffer);
-      curso.imagenCurso = nombreArchivo;
-    }
-
-    return this.cursoRepository.save(curso);
+  async eliminarCurso(id: number): Promise<void> {
+    await this.cursosRepository.delete(id);
   }
 }

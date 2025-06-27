@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, CreateDateColumn } from 'typeorm';
 import { Usuario } from './usuario.entity';
 import { Curso } from './curso.entity';
 
@@ -7,21 +7,18 @@ export class Certificado {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Usuario, (usuario) => usuario.certificados, { eager: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => Usuario, (usuario) => usuario.certificados, { onDelete: 'CASCADE' })
   usuario: Usuario;
 
-  @ManyToOne(() => Curso, (curso) => curso.certificados, { eager: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => Curso, (curso) => curso.certificados, { onDelete: 'CASCADE' })
   curso: Curso;
 
-  @Column({ unique: true })
-  codigoUnico: string;
-
-  @CreateDateColumn()
-  fechaEmision: Date;
+  @Column()
+  nombreCurso: string;
 
   @Column()
-  urlDescarga: string;
+  fechaEmision: Date;
 
-  @Column({ default: false })
-  verificado: boolean;
+  @CreateDateColumn()
+  creadoEn: Date;
 }

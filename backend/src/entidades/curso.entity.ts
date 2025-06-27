@@ -1,61 +1,45 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
-import { Modulo } from './modulo.entity';
-import { Inscripcion } from './inscripcion.entity';
-import { Badge } from './badge.entity';
-import { Certificado } from './certificado.entity';
-import { Pago } from './pago.entity';
-import { Resena } from './resena.entity';
-import { EquipoEmpresaMiembro } from './equipo-empresa.entity';
-import { ReporteProgreso } from './reporte-progreso.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+} from 'typeorm';
 
-export enum TipoCurso {
-  Docentes = 'Docentes',
-  Empresas = 'Empresas',
-}
-
-export enum ModalidadCurso {
-  EnVivo = 'en vivo',
-  Grabado = 'grabado',
-  Mixto = 'mixto',
-}
+import { ModuloEntity } from '../entidades/modulo.entity';
+import { BadgeEntity } from '../entidades/badge.entity';
+import { Carrito } from '../entidades/carrito.entity';
+import { Certificado } from '../entidades/certificado.entity';
+import { EquipoEmpresaMiembro } from '../entidades/equipo-empresa.entity';
+import { Inscripcion } from '../entidades/inscripcion.entity';
+import { Pago } from '../entidades/pago.entity';
+import { ReporteProgresoEntity } from '../entidades/reporte-progreso.entity';
+import { Resena } from '../entidades/resena.entity';
 
 @Entity('cursos')
 export class Curso {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ default: 'Título del Curso' })
   titulo: string;
 
-  @Column('text')
+  @Column({ default: 'Descripción del curso por defecto' })
   descripcion: string;
 
-  @Column({
-    type: 'enum',
-    enum: TipoCurso,
-  })
-  tipo: TipoCurso;
+  @Column({ default: 'Docentes' })
+  tipo: 'Docentes' | 'Empresas';
 
-  @Column()
+  @Column({ default: 'General' })
   categoria: string;
 
-  @Column('int')
+  @Column({ type: 'int', default: 0 })
   duracionHoras: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0.00 })
   precio: number;
 
-  @Column({
-    type: 'enum',
-    enum: ModalidadCurso,
-  })
-  modalidad: ModalidadCurso;
-
-  @CreateDateColumn()
-  fechaLanzamiento: Date;
-
-  @Column({ nullable: true })
-  imagenCurso: string;
+  @Column({ default: 'grabado' })
+  modalidad: 'en vivo' | 'grabado' | 'mixto';
 
   @Column({ default: false })
   certificadoDisponible: boolean;
@@ -63,28 +47,33 @@ export class Curso {
   @Column({ default: false })
   badgeDisponible: boolean;
 
+  @Column({ nullable: true })
+  imagenCurso?: string;
 
-  @OneToMany(() => Modulo, (modulo) => modulo.curso)
-  modulos: Modulo[];
+  @OneToMany(() => ModuloEntity, (modulo) => modulo.curso, { cascade: true })
+  modulos: ModuloEntity[];
 
-  @OneToMany(() => Inscripcion, (inscripcion) => inscripcion.curso)
-  inscripciones: Inscripcion[];
+  @OneToMany(() => BadgeEntity, (badge) => badge.curso)
+  badges: BadgeEntity[];
 
-  @OneToMany(() => Badge, (badge) => badge.curso)
-  badges: Badge[];
+  @OneToMany(() => Carrito, (carrito) => carrito.curso)
+  carritos: Carrito[];
 
   @OneToMany(() => Certificado, (certificado) => certificado.curso)
   certificados: Certificado[];
 
+  @OneToMany(() => EquipoEmpresaMiembro, (equipo) => equipo.curso)
+  equiposAsignados: EquipoEmpresaMiembro[];
+
+  @OneToMany(() => Inscripcion, (inscripcion) => inscripcion.curso)
+  inscripciones: Inscripcion[];
+
   @OneToMany(() => Pago, (pago) => pago.curso)
   pagos: Pago[];
 
+  @OneToMany(() => ReporteProgresoEntity, (reporte) => reporte.curso)
+  reportesProgreso: ReporteProgresoEntity[];
+
   @OneToMany(() => Resena, (resena) => resena.curso)
   resenas: Resena[];
-
-  @OneToMany(() => EquipoEmpresaMiembro, (miembro) => miembro.curso)
-  equiposAsignados: EquipoEmpresaMiembro[];
-
-  @OneToMany(() => ReporteProgreso, (reporte) => reporte.curso)
-  reportesProgreso: ReporteProgreso[];
 }

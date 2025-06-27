@@ -1,25 +1,31 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  Column,
+  CreateDateColumn,
+} from 'typeorm';
+
 import { Usuario } from './usuario.entity';
 import { Curso } from './curso.entity';
-import { ReporteProgreso } from './reporte-progreso.entity';
 
-@Entity('equipo_empresa')
+@Entity('equipos_empresa')
 export class EquipoEmpresaMiembro {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Usuario, (usuario) => usuario.equipos, { eager: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => Usuario, (usuario) => usuario.equipos, { onDelete: 'CASCADE' })
   usuario: Usuario;
 
-  @Column()
-  nombreEmpresa: string;
-
-  @Column()
-  rolEnEmpresa: string;
-
   @ManyToOne(() => Curso, (curso) => curso.equiposAsignados, { nullable: true, onDelete: 'SET NULL' })
-  curso?: Curso;
+  curso: Curso;
 
-  @OneToMany(() => ReporteProgreso, (reporte) => reporte.equipo)
-  reportesProgreso: ReporteProgreso[];
+  @Column()
+  nombreEquipo: string;
+
+  @Column()
+  rol: string;
+
+  @CreateDateColumn()
+  creadoEn: Date;
 }
