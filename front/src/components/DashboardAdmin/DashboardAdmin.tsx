@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import MenuAdmin from './MenuAdmin';
 import VistaCursos from './VistaCursos';
-import VistaUsuarios from '@/components/DashboardAdmin/VistaUsuarios';
-import AgregarUsuario from '@/components/DashboardAdmin/AgregarUsuario';
+import VistaUsuarios from '@/components/DashboardAdmin/VistaUsuarios/VistaUsuarios';
+import AgregarUsuario from '@/components/DashboardAdmin/AgregarUsuario/AgregarUsuario';
 
 export default function DashboardAdmin() {
   const [vistaSeleccionada, setVistaSeleccionada] = useState<'usuarios' | 'cursos' | 'agregarUsuario'>('usuarios');

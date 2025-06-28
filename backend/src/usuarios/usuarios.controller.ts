@@ -79,7 +79,9 @@ export class UsuariosController {
     @Body() usuarioData: UpdateUsuarioDto,
     @UploadedFile() foto?: Express.Multer.File,
   ): Promise<Usuario> {
-    if (!usuarioAutenticado.esAdmin && usuarioAutenticado.id !== +id) {
+    const idNum = +id;
+
+    if (!usuarioAutenticado.esAdmin && usuarioAutenticado.id !== idNum) {
       throw new ForbiddenException('No tienes permiso para modificar este usuario');
     }
 
@@ -93,6 +95,6 @@ export class UsuariosController {
       usuarioData.fotoPerfil = foto.filename;
     }
 
-    return this.usuariosService.update(+id, usuarioData);
+    return this.usuariosService.update(idNum, usuarioData);
   }
 }

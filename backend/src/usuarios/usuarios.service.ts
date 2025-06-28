@@ -56,10 +56,7 @@ export class UsuariosService {
       usuarioData.password = await bcrypt.hash(usuarioData.password, salt);
     }
 
-    const resultado = await this.usuariosRepository.update(id, usuarioData);
-    if (resultado.affected === 0) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
-    }
+    await this.usuariosRepository.update(id, usuarioData);
     return this.findOne(id);
   }
 
