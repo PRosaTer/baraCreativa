@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import TablaCursosAdmin from './TablaCursosAdmin';
-import CrearCursoForm from '../CrearCursoForm/CrearCursoForm';
+import CrearCursoForm from '../CrearCursoForm/CursoForm/CrearCursoForm';
 import { Curso } from '@/app/types/curso';
 
 export default function VistaCursos() {
@@ -25,7 +25,6 @@ export default function VistaCursos() {
   }, []);
 
   const handleCursoCreado = async (cursoCreado: Curso) => {
-    // Para asegurarnos que tenemos la última info del curso con la imagen, volvemos a traer la lista completa
     await fetchCursos();
     setMostrarFormulario(false);
   };

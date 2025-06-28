@@ -3,7 +3,8 @@ import "./globals.css";
 import WhatsApp from "../components/whatsapp/WhatsApp";
 import Footer from "@/components/Footer/Footer";
 import ChatbotFlotante from "@/components/ChatSimple/ChatbotFlotante";
-import RootLayoutContent from './RootLayoutContent';
+import RootLayoutContent from "./RootLayoutContent";
+import { Providers } from "./provider/Provider";
 
 export const metadata: Metadata = {
   title: "Bara Creativa - Edtech Hondureña",
@@ -38,12 +39,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <body className="antialiased flex flex-col min-h-screen bg-background text-foreground">
-        <RootLayoutContent>
-          {children}
-        </RootLayoutContent>
-        <WhatsApp />
-        <ChatbotFlotante />
-        <Footer />
+        <Providers>
+          <RootLayoutContent>
+            {children}
+          </RootLayoutContent>
+          <WhatsApp />
+          <ChatbotFlotante />
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

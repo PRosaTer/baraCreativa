@@ -5,6 +5,9 @@ import { validatePassword, validateEmail } from "../../utils/validation";
 import { registerUser } from "../../services/authService";
 import { RegisterFormData, RegisterApiData } from "../../types/auth";
 
+interface ErrorConMensaje extends Error {
+  message: string;
+}
 
 export const useRegisterForm = () => {
   const router = useRouter();
@@ -50,7 +53,6 @@ export const useRegisterForm = () => {
       fotoPerfil,
     } = formData;
 
-
     if (nombreCompleto.length < 4) {
       Swal.fire(
         "Error",
@@ -94,12 +96,13 @@ export const useRegisterForm = () => {
       telefono: numeroTelefono || undefined,
       tipoUsuario: tipoUsuario,
       nombreEmpresa: tipoUsuario === "Empresa" ? nombreEmpresa : undefined,
-      fotoPerfil: fotoPerfil || undefined, 
+      fotoPerfil: fotoPerfil || undefined,
     };
 
-
-
-    console.log("Datos que se enviarán al backend (desde el frontend):", dataToSend);
+    console.log(
+      "Datos que se enviarán al backend (desde el frontend):",
+      dataToSend
+    );
 
     try {
       await registerUser(dataToSend);
@@ -107,11 +110,15 @@ export const useRegisterForm = () => {
       Swal.fire("Éxito", "Usuario registrado exitosamente", "success").then(() => {
         router.push("/login");
       });
-    } catch (error: any) {
-      console.error("Error en la solicitud de registro (capturado en hook):", error);
+    } catch (error) {
+      const e = error as Partial<ErrorConMensaje>;
+      console.error(
+        "Error en la solicitud de registro (capturado en hook):",
+        e
+      );
       Swal.fire(
         "Error",
-        error.message || "Ocurrió un error inesperado. Intenta de nuevo más tarde.",
+        e.message || "Ocurrió un error inesperado. Intenta de nuevo más tarde.",
         "error"
       );
     } finally {

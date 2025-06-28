@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { confirmarRestablecimientoPassword } from '@/app/lib/service/auth';
 
-const RestablecerPassword: React.FC = () => {
+const RestablecerPasswordPage: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -28,23 +29,18 @@ const RestablecerPassword: React.FC = () => {
     setError("");
 
     try {
-      const respuesta = await fetch("http://localhost:3001/password/confirmar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password }),
-      });
-
-      const data = await respuesta.json();
-
-      if (!respuesta.ok) {
-        setError(data.message || "Error al restablecer la contraseña");
+      const data = await confirmarRestablecimientoPassword(token, password);
+      
+      if (data.error) {
+        setError(data.error ?? "Error desconocido al restablecer la contraseña."); 
         return;
       }
 
-      setMensaje(data.mensaje);
+      
+      setMensaje(data.mensaje ?? "Contraseña restablecida correctamente."); 
       setPassword("");
       setTimeout(() => router.push("/login"), 2500);
-    } catch {
+    } catch (err) {
       setError("Error de conexión con el servidor");
     }
   };
@@ -80,4 +76,4 @@ const RestablecerPassword: React.FC = () => {
   );
 };
 
-export default RestablecerPassword;
+export default RestablecerPasswordPage;
