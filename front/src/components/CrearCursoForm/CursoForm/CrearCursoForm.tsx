@@ -1,82 +1,92 @@
-"use client";
+'use client';
 
-import React from 'react';
-import InputField from './InputField';
-import TextareaField from './TextareaField';
-import SelectField from './SelectField';
-import CheckboxField from './CheckboxField';
-import ImagenCurso from './ImagenCurso';
-import SeccionModulos from './SeccionModulos';
-import FormContainer from './FormContainer';
-import TituloFormulario from './TituloFormulario';
-import BotonesFormulario from './BotonesFormulario';
-import useCursoForm from '@/app/hooks/CursosForm/useCursoForm';
-import { Curso } from '@/app/types/curso';
-
-export interface CursoForm {
-  titulo: string;
-  descripcion: string;
-  tipo: 'Docentes' | 'Empresas';
-  categoria: string;
-  duracionHoras: number;
-  precio: number;
-  modalidad: 'en vivo' | 'grabado' | 'mixto';
-  certificadoDisponible: boolean;
-  badgeDisponible: boolean;
-  imagenCurso?: File | null;
-  modulos: any[];
-}
+import React, { useState } from 'react';
+import CrearCursoPaso1 from '../../DashboardAdmin/EditarCursos/FormularioCursoPaso1';
+import CrearCursoPaso2 from '../../DashboardAdmin/EditarCursos/FormularioCursoPaso2';
+import { ModuloForm, Curso } from '@/app/types/curso';
 
 interface Props {
-  cursoInicial?: Curso;
-  onCursoCreado: (curso: Curso) => void;
+  onCursoCreado: () => void;
   onCancelar: () => void;
 }
 
-export default function CrearCursoForm({ cursoInicial, onCursoCreado, onCancelar }: Props) {
-  const {
-    datos,
-    guardando,
-    imagenPreview,
-    handleChange,
-    handleFileChange,
-    agregarModulo,
-    handleModuloChange,
-    eliminarModulo,
-    handleSubmit,
-  } = useCursoForm(cursoInicial, onCursoCreado);
+export default function CrearCursoForm({ onCursoCreado, onCancelar }: Props) {
+  const [paso, setPaso] = useState<number>(1);
+  const [datos, setDatos] = useState<Omit<Curso, 'id' | 'modulos'>>({
+    titulo: '',
+    descripcion: '',
+    precio: 0,
+    duracionHoras: 0,
+    tipo: '',
+    modalidad: '',
+    categoria: '',
+    certificadoDisponible: false,
+    badgeDisponible: false,
+    imagenCurso: null,
+    archivoScorm: null,
+    videoCurso: null,
+    pdfCurso: null,
+  });
+  const [imagenArchivo, setImagenArchivo] = useState<File | null>(null);
+  const [modulos, setModulos] = useState<ModuloForm[]>([]);
+
+  const handleSubmit = async () => {
+    try {
+      const formData = new FormData();
+
+      formData.append('titulo', datos.titulo);
+      formData.append('descripcion', datos.descripcion);
+      formData.append('precio', datos.precio.toString());
+      formData.append('duracionHoras', datos.duracionHoras.toString());
+      formData.append('tipo', datos.tipo);
+      formData.append('modalidad', datos.modalidad);
+      formData.append('categoria', datos.categoria);
+      formData.append('certificadoDisponible', datos.certificadoDisponible ? 'true' : 'false');
+      formData.append('badgeDisponible', datos.badgeDisponible ? 'true' : 'false');
+
+      if (imagenArchivo) {
+        formData.append('imagenCurso', imagenArchivo);
+      }
+
+      modulos.forEach((mod, i) => {
+        formData.append(`modulos[${i}][titulo]`, mod.titulo);
+        formData.append(`modulos[${i}][descripcion]`, mod.descripcion);
+        if (mod.videoUrl) formData.append(`modulos[${i}][videoUrl]`, mod.videoUrl);
+        if (mod.pdfUrl) formData.append(`modulos[${i}][pdfUrl]`, mod.pdfUrl);
+      });
+
+      const res = await fetch('http://localhost:3001/api/cursos', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error('Error creando curso');
+
+      onCursoCreado();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
-    <FormContainer onSubmit={handleSubmit}>
-      <TituloFormulario esEdicion={!!cursoInicial} />
+    <div className="p-4 bg-white rounded shadow max-w-2xl mx-auto">
+      {paso === 1 && (
+        <CrearCursoPaso1
+          datos={datos}
+          setDatos={setDatos}
+          imagenArchivo={imagenArchivo}
+          setImagenArchivo={setImagenArchivo}
+          onNext={() => setPaso(2)}
+        />
+      )}
 
-      <InputField label="Título" name="titulo" value={datos.titulo} onChange={handleChange} />
-      <TextareaField label="Descripción" name="descripcion" value={datos.descripcion} onChange={handleChange} />
-      <SelectField label="Tipo" name="tipo" value={datos.tipo} options={['Docentes', 'Empresas']} onChange={handleChange} />
-      <InputField label="Categoría" name="categoria" value={datos.categoria} onChange={handleChange} />
+      {paso === 2 && (
+        <CrearCursoPaso2 modulos={modulos} setModulos={setModulos} onSubmit={handleSubmit} />
+      )}
 
-      <div className="grid grid-cols-2 gap-4">
-        <InputField label="Duración (horas)" name="duracionHoras" value={datos.duracionHoras} onChange={handleChange} type="number" min={1} />
-        <InputField label="Precio" name="precio" value={datos.precio} onChange={handleChange} type="number" min={0} step={0.01} />
-      </div>
-
-      <SelectField label="Modalidad" name="modalidad" value={datos.modalidad} options={['en vivo', 'grabado', 'mixto']} onChange={handleChange} />
-
-      <div className="flex space-x-6">
-        <CheckboxField label="Certificado Disponible" name="certificadoDisponible" checked={datos.certificadoDisponible} onChange={handleChange} />
-        <CheckboxField label="Badge Disponible" name="badgeDisponible" checked={datos.badgeDisponible} onChange={handleChange} />
-      </div>
-
-      <ImagenCurso handleFileChange={handleFileChange} imagenPreview={imagenPreview} />
-
-      <SeccionModulos
-        modulos={datos.modulos}
-        handleModuloChange={handleModuloChange}
-        eliminarModulo={eliminarModulo}
-        agregarModulo={agregarModulo}
-      />
-
-      <BotonesFormulario onCancelar={onCancelar} guardando={guardando} esEdicion={!!cursoInicial} />
-    </FormContainer>
+      <button onClick={onCancelar} className="mt-4 text-gray-600 underline">
+        Cancelar
+      </button>
+    </div>
   );
 }

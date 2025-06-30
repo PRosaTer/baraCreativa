@@ -1,47 +1,49 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsBoolean, IsIn, IsArray, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsBoolean,
+  IsNumber,
+  ValidateNested,
+  IsOptional,
+  IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
-class ModuloDto {
+export class ModuloDto {
   @IsString()
-  @IsNotEmpty()
   titulo: string;
 
   @IsString()
-  @IsNotEmpty()
   descripcion: string;
 
   @IsOptional()
   @IsString()
-  videoUrl?: string;
+  videoUrl?: string | null;
 
   @IsOptional()
   @IsString()
-  pdfUrl?: string;
+  pdfUrl?: string | null;
 }
 
 export class CrearCursoDto {
   @IsString()
-  @IsNotEmpty()
   titulo: string;
 
   @IsString()
-  @IsNotEmpty()
   descripcion: string;
-
-  @IsIn(['Docentes', 'Empresas'])
-  tipo: 'Docentes' | 'Empresas';
-
-  @IsString()
-  @IsNotEmpty()
-  categoria: string;
-
-  @IsNumber()
-  duracionHoras: number;
 
   @IsNumber()
   precio: number;
 
-  @IsIn(['en vivo', 'grabado', 'mixto'])
+  @IsNumber()
+  duracionHoras: number;
+
+  @IsString()
+  tipo: 'Docentes' | 'Empresas';
+
+  @IsString()
+  categoria: string;
+
+  @IsString()
   modalidad: 'en vivo' | 'grabado' | 'mixto';
 
   @IsBoolean()
@@ -55,13 +57,8 @@ export class CrearCursoDto {
   imagenCurso?: string;
 
   @IsOptional()
-  @IsString()
-  archivoCurso?: string;
-
-
-  @IsOptional()
-  @IsArray() 
   @ValidateNested({ each: true })
   @Type(() => ModuloDto)
+  @IsArray()
   modulos?: ModuloDto[];
 }
