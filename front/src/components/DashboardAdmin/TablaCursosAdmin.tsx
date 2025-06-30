@@ -5,10 +5,9 @@ interface Props {
   cursos: Curso[];
   onEditar: (curso: Curso) => void;
   onEliminar: (id: number) => void;
-  onSubirArchivo?: (cursoId: number, archivo: File, tipo: 'scorm' | 'video' | 'pdf') => Promise<any>;
 }
 
-export default function TablaCursosAdmin({ cursos, onEditar, onEliminar, onSubirArchivo }: Props) {
+export default function TablaCursosAdmin({ cursos, onEditar, onEliminar }: Props) {
   return (
     <table className="min-w-full border-collapse border border-gray-300">
       <thead>
