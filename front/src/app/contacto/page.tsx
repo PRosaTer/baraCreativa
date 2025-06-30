@@ -3,9 +3,10 @@
 import React from "react";
 import ContenedorFormularioContacto from "@/components/form-soporte/ContenedorFormularioContacto";
 import CampoEntrada from "@/components/form-soporte/campoEntrada";
-import CampoSelector from "@/components/form-soporte/CampoMensaje";
+import CampoSelector from "@/components/form-soporte/campoSelector";
 import CampoMensaje from "@/components/form-soporte/CampoMensaje";
 import BotonEnviar from "@/components/form-soporte/botonEnviar";
+import EnlaceFormulario from "@/components/form-soporte/enlaceFormulario";
 import { useSoporte } from "@/app/hooks/usarSoporte";
 
 const Contacto: React.FC = () => {
@@ -25,8 +26,10 @@ const Contacto: React.FC = () => {
 
   if (cargandoUsuario) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Cargando...
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 to-red-100">
+        <div className="text-xl font-semibold text-red-600 animate-pulse">
+          Cargando...
+        </div>
       </div>
     );
   }
@@ -42,7 +45,7 @@ const Contacto: React.FC = () => {
           onChange={manejarCambioContacto}
           requerido
           placeholder="Ej: usuario@ejemplo.com"
-          disabled={!!usuarioAutenticado} // Deshabilitado si hay usuario logueado
+          disabled={!!usuarioAutenticado}
         />
         <CampoSelector
           etiqueta="Tipo de Consulta"
@@ -62,6 +65,10 @@ const Contacto: React.FC = () => {
         />
         <BotonEnviar texto="Enviar Consulta" />
       </form>
+      <div className="text-sm text-center mt-6 text-gray-600">
+        ¿Quieres enviar otra consulta?{" "}
+        <EnlaceFormulario texto="Contáctanos de nuevo" href="/contacto" />
+      </div>
     </ContenedorFormularioContacto>
   );
 };

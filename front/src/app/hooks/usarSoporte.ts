@@ -30,7 +30,7 @@ export const useSoporte = () => {
         try {
             const respuesta = await fetch(`${API_URL}/auth/profile`, {
                 method: "GET",
-                credentials: "include", // Enviar cookies de sesión
+                credentials: "include",
             });
 
             if (!respuesta.ok) {
@@ -81,7 +81,7 @@ export const useSoporte = () => {
                 icon: "error",
                 title: "Error",
                 text: "Por favor, introduce un correo electrónico válido.",
-                confirmButtonColor: "#d33",
+                confirmButtonColor: "#ef4444", // Red-600
             });
             return;
         }
@@ -91,7 +91,7 @@ export const useSoporte = () => {
                 icon: "error",
                 title: "Error",
                 text: "El mensaje debe tener al menos 10 caracteres.",
-                confirmButtonColor: "#d33",
+                confirmButtonColor: "#ef4444",
             });
             return;
         }
@@ -119,7 +119,7 @@ export const useSoporte = () => {
                     text:
                         errorData.message ||
                         "Error al enviar la consulta. Intenta de nuevo más tarde.",
-                    confirmButtonColor: "#d33",
+                    confirmButtonColor: "#ef4444",
                 });
                 return;
             }
@@ -128,17 +128,17 @@ export const useSoporte = () => {
                 icon: "success",
                 title: "Éxito",
                 text: "Consulta enviada exitosamente.",
-                confirmButtonColor: "#3085d6",
+                confirmButtonColor: "#eab308", // Yellow-500
             }).then(() => {
                 setDatosContacto({ correo: usuarioAutenticado ? usuarioAutenticado.correoElectronico : "", tipoConsulta: "Técnica", mensaje: "" });
-                router.push("/");
+                router.push("/contacto");
             });
         } catch {
             Swal.fire({
                 icon: "error",
                 title: "Error",
                 text: "No se pudo conectar con el servidor. Verifica tu conexión.",
-                confirmButtonColor: "#d33",
+                confirmButtonColor: "#ef4444",
             });
         }
     };
