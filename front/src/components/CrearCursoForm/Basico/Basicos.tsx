@@ -1,7 +1,7 @@
 'use client';
 
 import React, { ChangeEvent } from 'react';
-import { CursoForm } from '../CursoForm/CrearCursoForm';
+import { CursoForm } from '@/app/types/curso';
 import FormularioInput from './FormularioInput';
 import FormularioTextarea from './FormularioTextarea';
 import FormularioSelect from './FormularioSelect';
@@ -26,7 +26,7 @@ export default function Basicos({ datos, setDatos, onSiguiente, onCancelar }: Ba
         ? target.checked
         : target.value;
 
-    setDatos((prev) => ({
+    setDatos((prev: CursoForm) => ({
       ...prev,
       [name]: value,
     }));

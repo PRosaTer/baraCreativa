@@ -1,85 +1,64 @@
-// import Link from "next/link";
-// import Card from "@/components/tarjetas/page";
+'use client';
 
-// // Importar solo los datos necesarios
-// import { additionalCourses, additionalServices } from "@/app/data/data-cursos";
-
-// export default function CoursesPage() {
-//   return (
-//     <div className="bg-[var(--background)] font-sans min-h-screen">
-//       {/* Sección de Cursos */}
-//       <section className="container mx-auto py-12">
-//         <h1 className="text-3xl font-bold text-center text-[var(--foreground)] mb-8">
-//           Todos Nuestros Cursos
-//         </h1>
-//         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4 sm:px-6 lg:px-8">
-//           {additionalCourses.map((course) => (
-//             <Link href={`/cursos/${course.id}`} key={course.id}>
-//               <Card
-//                 title={course.title}
-//                 image={course.image}
-//                 description={course.description}
-//               />
-//             </Link>
-//           ))}
-//         </div>
-//       </section>
-
-//       {/* Sección de Servicios */}
-//       <section className="container mx-auto py-12">
-//         <h1 className="text-3xl font-bold text-center text-[var(--foreground)] mb-8">
-//           Nuestros Servicios
-//         </h1>
-//         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4 sm:px-6 lg:px-8">
-//           {additionalServices.map((service) => (
-//             <Card
-//               key={service.title}
-//               title={service.title}
-//               image={service.image}
-//               description={service.description}
-//             />
-//           ))}
-//         </div>
-//       </section>
-//     </div>
-//   );
-// }
-
-
-import CardsList from '@/components/tarjetas/cursos/page';
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Curso } from '@/app/types/curso';
 
+export default function CursosPage() {
+  const [cursos, setCursos] = useState<Curso[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
 
-async function fetchCursos(): Promise<Curso[]> {
-  try {
-    const res = await fetch('http://localhost:3001/api/cursos', { cache: 'no-store' });
-    if (!res.ok) {
-      const errorData = await res.json();
-      console.error('Error al obtener cursos (fetchCursos):', res.status, res.statusText, errorData);
-      return [];
+  useEffect(() => {
+    async function fetchCursos() {
+      try {
+        setCargando(true);
+        const res = await fetch('http://localhost:3001/api/cursos');
+        if (!res.ok) throw new Error('Error al cargar cursos');
+        const data = await res.json();
+        setCursos(data);
+        setError('');
+      } catch {
+        setError('No se pudieron cargar los cursos');
+      } finally {
+        setCargando(false);
+      }
     }
-    const data: Curso[] = await res.json();
-    console.log('Cursos obtenidos del backend:', data);
-    return data;
-  } catch (error) {
-    console.error('Error fetching courses (fetchCursos):', error);
-    return [];
-  }
-}
+    fetchCursos();
+  }, []);
 
-export default async function CursosPage() {
-  const cursos = await fetchCursos();
+  if (cargando) return <p>Cargando cursos...</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
 
   return (
-    <main className="bg-[var(--background)] font-sans min-h-screen p-8">
-      <h1 className="text-4xl font-bold text-center text-[var(--foreground)] mb-12">
-        Todos Nuestros Cursos y Servicios
-      </h1>
-      {cursos.length === 0 ? (
-        <p className="text-center text-lg text-gray-600">No hay cursos disponibles en este momento.</p>
-      ) : (
-        <CardsList cursos={cursos} />
-      )}
-    </main>
+    <div className="max-w-7xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Cursos disponibles</h1>
+      <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {cursos.map((curso) => (
+          <li key={curso.id}>
+            <Link
+              href={`/cursos/${curso.id}`}
+              className="block border rounded overflow-hidden hover:shadow-lg bg-white transition-transform transform hover:-translate-y-1"
+            >
+              {curso.imagenCurso ? (
+                <img
+                  src={`http://localhost:3001/uploads/imagenes-cursos/${curso.imagenCurso}`}
+                  alt={curso.titulo}
+                  className="w-full h-48 object-cover"
+                />
+              ) : (
+                <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">
+                  Sin imagen
+                </div>
+              )}
+              <div className="p-4 flex flex-col">
+                <h2 className="text-lg font-semibold text-blue-600 mb-2">{curso.titulo}</h2>
+                <p className="text-sm text-gray-700">{curso.descripcion}</p>
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

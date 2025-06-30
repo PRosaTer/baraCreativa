@@ -9,14 +9,14 @@ export class ModuloEntity {
   @Column()
   titulo: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   descripcion: string;
 
-  @Column({ nullable: true })
-  videoUrl?: string;
+  @Column({ type: 'varchar', nullable: true })
+  videoUrl?: string | null;
 
-  @Column({ nullable: true })
-  pdfUrl?: string;
+  @Column({ type: 'varchar', nullable: true })
+  pdfUrl?: string | null;
 
   @ManyToOne(() => Curso, (curso) => curso.modulos, { onDelete: 'CASCADE' })
   curso: Curso;

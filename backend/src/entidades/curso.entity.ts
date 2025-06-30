@@ -4,21 +4,19 @@ import {
   Column,
   OneToMany,
 } from 'typeorm';
-
-import { ModuloEntity } from './modulo.entity'; 
+import { ModuloEntity } from './modulo.entity';
 import { BadgeEntity } from './badge.entity';
-import { Carrito } from './carrito.entity'; 
-import { Certificado } from './certificado.entity'; 
+import { Carrito } from './carrito.entity';
+import { Certificado } from './certificado.entity';
 import { EquipoEmpresaMiembro } from './equipo-empresa.entity';
-import { Inscripcion } from './inscripcion.entity'; 
-import { Pago } from './pago.entity'; 
+import { Inscripcion } from './inscripcion.entity';
+import { Pago } from './pago.entity';
 import { ReporteProgresoEntity } from './reporte-progreso.entity';
-import { Resena } from './resena.entity'; 
-
+import { Resena } from './resena.entity';
 
 @Entity('cursos')
 export class Curso {
-  @PrimaryGeneratedColumn() 
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ default: 'Título del Curso' })
@@ -60,10 +58,8 @@ export class Curso {
   @Column({ nullable: true })
   pdfCurso?: string;
 
-
   @OneToMany(() => ModuloEntity, (modulo) => modulo.curso, { cascade: true })
   modulos: ModuloEntity[];
-
 
   @OneToMany(() => BadgeEntity, (badge) => badge.curso)
   badges: BadgeEntity[];
@@ -88,5 +84,4 @@ export class Curso {
 
   @OneToMany(() => Resena, (resena) => resena.curso)
   resenas: Resena[];
-
 }

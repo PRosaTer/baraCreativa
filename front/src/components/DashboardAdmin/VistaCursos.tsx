@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import TablaCursosAdmin from './TablaCursosAdmin';
-import CrearCursoForm from '../CrearCursoForm/CursoForm/CrearCursoForm';
+import CrearCursoMultiStep from '../CrearCursoForm/CrearCursoMultiStep';
 import EditarCursoAdmin from '../DashboardAdmin/EditarCursos/EditarCursoAdmin';
 import { Curso } from '@/app/types/curso';
 import InlineToast from '@/components/DashboardUsuario/InlineToast';
@@ -28,9 +28,10 @@ export default function VistaCursos() {
     fetchCursos();
   }, []);
 
-  const handleCursoCreado = async (cursoCreado: Curso) => {
+  const handleCursoCreado = async () => {
     await fetchCursos();
     setMostrarFormulario(false);
+    setMensajeExito("Curso creado exitosamente");
   };
 
   const handleEliminar = async (id: number) => {
@@ -85,7 +86,7 @@ export default function VistaCursos() {
       )}
 
       {mostrarFormulario && (
-        <CrearCursoForm
+        <CrearCursoMultiStep
           onCursoCreado={handleCursoCreado}
           onCancelar={() => setMostrarFormulario(false)}
         />
