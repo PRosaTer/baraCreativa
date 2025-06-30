@@ -8,7 +8,7 @@ interface Props {
   usuarioEditando: Usuario | null;
   cerrarEditor: () => void;
   actualizarUsuarioEnLista: (usuario: Usuario) => void;
-  onExitoEdicion?: (mensaje: string) => void;  // <-- nueva prop opcional
+  onExitoEdicion?: (mensaje: string) => void; 
 }
 
 export default function ModalEditarUsuarioWrapper({
@@ -19,7 +19,7 @@ export default function ModalEditarUsuarioWrapper({
 }: Props) {
   if (!usuarioEditando) return null;
 
-  // Función que va a pasar a EditarUsuarioAdmin para llamar tras guardar con éxito
+ 
   const manejarActualizacionExitosa = (usuario: Usuario) => {
     actualizarUsuarioEnLista(usuario);
     if (onExitoEdicion) {
@@ -34,7 +34,7 @@ export default function ModalEditarUsuarioWrapper({
         <EditarUsuarioAdmin
           usuario={usuarioEditando}
           onCerrar={cerrarEditor}
-          onActualizar={manejarActualizacionExitosa} // <-- usamos esta función aquí
+          onActualizar={manejarActualizacionExitosa}
         />
       </div>
     </div>
