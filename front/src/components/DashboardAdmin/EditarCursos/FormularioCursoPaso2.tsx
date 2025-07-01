@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, ChangeEvent } from 'react';
+import React, { ChangeEvent } from 'react';
 import { ModuloForm } from '@/app/types/curso';
 
 interface Props {
@@ -9,189 +9,44 @@ interface Props {
   onSubmit: () => Promise<void>;
 }
 
-interface ArchivoModulo {
-  videoUrl?: string;
-  pdfUrl?: string;
-  imagenUrl?: string;
-  videoArchivo?: File | null;
-  pdfArchivo?: File | null;
-  imagenArchivo?: File | null;
-}
-
-export default function CrearCursoPaso2({ modulos, setModulos, onSubmit }: Props) {
-  const [archivos, setArchivos] = useState<ArchivoModulo[]>(
-    modulos.map(() => ({
-      videoUrl: '',
-      pdfUrl: '',
-      imagenUrl: '',
-      videoArchivo: null,
-      pdfArchivo: null,
-      imagenArchivo: null,
-    }))
-  );
-
+export default function FormularioCursoPaso2({ modulos, setModulos, onSubmit }: Props) {
+  const handleCambiarModulo = (index: number, campo: keyof ModuloForm, valor: string | File[] | null) => {
+    const copia = [...modulos];
+    if (campo === 'videos' || campo === 'pdfs' || campo === 'imagenes') {
+      if (Array.isArray(valor)) {
+        copia[index][campo] = valor;
+      }
+    } else if (campo === 'videoUrl' || campo === 'pdfUrl') {
+      copia[index][campo] = valor as string | null;
+    } else {
+      copia[index][campo] = valor as string;
+    }
+    setModulos(copia);
+  };
 
   const agregarModulo = () => {
-    setModulos([...modulos, { titulo: '', descripcion: '' }]);
-    setArchivos([
-      ...archivos,
-      {
-        videoUrl: '',
-        pdfUrl: '',
-        imagenUrl: '',
-        videoArchivo: null,
-        pdfArchivo: null,
-        imagenArchivo: null,
-      },
-    ]);
+    setModulos([...modulos, { titulo: '', descripcion: '', videos: [], pdfs: [], imagenes: [], videoUrl: null, pdfUrl: null }]);
   };
 
   const eliminarModulo = (index: number) => {
     setModulos(modulos.filter((_, i) => i !== index));
-    setArchivos(archivos.filter((_, i) => i !== index));
   };
 
-
-  const handleCambiarModulo = (index: number, campo: keyof ModuloForm, valor: string) => {
-    const copia = [...modulos];
-    copia[index] = { ...copia[index], [campo]: valor };
-    setModulos(copia);
-  };
-
-
-  const handleCambiarUrl = (
-    index: number,
-    tipo: 'videoUrl' | 'pdfUrl' | 'imagenUrl',
-    valor: string
-  ) => {
-    const copia = [...archivos];
-    copia[index][tipo] = valor;
-    setArchivos(copia);
-  };
-
-  const handleArchivoChange = (
+  const handleFilesChange = (
     e: ChangeEvent<HTMLInputElement>,
     index: number,
-    tipo: 'videoArchivo' | 'pdfArchivo' | 'imagenArchivo'
+    campo: 'videos' | 'pdfs' | 'imagenes'
   ) => {
-    const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
-    const copia = [...archivos];
-    copia[index][tipo] = file;
-    setArchivos(copia);
-
-
-    if (tipo === 'videoArchivo') copia[index].videoUrl = '';
-    if (tipo === 'pdfArchivo') copia[index].pdfUrl = '';
-    if (tipo === 'imagenArchivo') copia[index].imagenUrl = '';
-
-    setArchivos(copia);
-  };
-
-
-  const eliminarArchivo = (index: number, tipo: 'videoArchivo' | 'pdfArchivo' | 'imagenArchivo') => {
-    const copia = [...archivos];
-    copia[index][tipo] = null;
-    setArchivos(copia);
-  };
-
-
-  const renderArchivoPreview = (archivoModulo: ArchivoModulo, index: number) => {
-    return (
-      <div className="mb-2">
-        {(archivoModulo.imagenArchivo || archivoModulo.imagenUrl) && (
-          <div className="mb-2">
-            <strong>Imagen:</strong>{' '}
-            {archivoModulo.imagenArchivo ? (
-              <span>{archivoModulo.imagenArchivo.name}</span>
-            ) : (
-              <a
-                href={archivoModulo.imagenUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 underline"
-              >
-                {archivoModulo.imagenUrl}
-              </a>
-            )}
-            {archivoModulo.imagenArchivo && (
-              <button
-                type="button"
-                onClick={() => eliminarArchivo(index, 'imagenArchivo')}
-                className="ml-2 text-red-600 hover:underline"
-              >
-                Eliminar
-              </button>
-            )}
-          </div>
-        )}
-
-
-        {(archivoModulo.videoArchivo || archivoModulo.videoUrl) && (
-          <div className="mb-2">
-            <strong>Video:</strong>{' '}
-            {archivoModulo.videoArchivo ? (
-              <span>{archivoModulo.videoArchivo.name}</span>
-            ) : (
-              <a
-                href={archivoModulo.videoUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 underline"
-              >
-                {archivoModulo.videoUrl}
-              </a>
-            )}
-            {archivoModulo.videoArchivo && (
-              <button
-                type="button"
-                onClick={() => eliminarArchivo(index, 'videoArchivo')}
-                className="ml-2 text-red-600 hover:underline"
-              >
-                Eliminar
-              </button>
-            )}
-          </div>
-        )}
-
-   
-        {(archivoModulo.pdfArchivo || archivoModulo.pdfUrl) && (
-          <div className="mb-2">
-            <strong>PDF:</strong>{' '}
-            {archivoModulo.pdfArchivo ? (
-              <span>{archivoModulo.pdfArchivo.name}</span>
-            ) : (
-              <a
-                href={archivoModulo.pdfUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 underline"
-              >
-                {archivoModulo.pdfUrl}
-              </a>
-            )}
-            {archivoModulo.pdfArchivo && (
-              <button
-                type="button"
-                onClick={() => eliminarArchivo(index, 'pdfArchivo')}
-                className="ml-2 text-red-600 hover:underline"
-              >
-                Eliminar
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    );
+    if (!e.target.files) return;
+    const archivosArray = Array.from(e.target.files);
+    handleCambiarModulo(index, campo, archivosArray);
   };
 
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">Agregar Módulos</h2>
       {modulos.map((mod, index) => (
-        <div
-          key={index}
-          className="border rounded p-4 mb-4 bg-gray-50 relative"
-        >
+        <div key={index} className="border rounded p-4 mb-4 bg-gray-50 relative">
           <button
             type="button"
             onClick={() => eliminarModulo(index)}
@@ -222,77 +77,59 @@ export default function CrearCursoPaso2({ modulos, setModulos, onSubmit }: Props
             />
           </label>
 
-    
-          <label className="block mb-1 font-semibold">
-            URL Video:
-            <input
-              type="text"
-              value={archivos[index]?.videoUrl || ''}
-              onChange={(e) => handleCambiarUrl(index, 'videoUrl', e.target.value)}
-              className="mt-1 block w-full rounded border border-gray-300 p-2"
-              placeholder="https://..."
-            />
-          </label>
-
-     
-          <label className="block mb-2 font-semibold">
-            Subir archivo de video:
+          <label className="block font-semibold mb-1">
+            Videos (múltiples):
             <input
               type="file"
               accept="video/*"
-              onChange={(e) => handleArchivoChange(e, index, 'videoArchivo')}
+              multiple
+              onChange={(e) => handleFilesChange(e, index, 'videos')}
               className="mt-1 block w-full"
             />
           </label>
+          {mod.videos.length > 0 && (
+            <ul className="list-disc list-inside mb-4">
+              {mod.videos.map((file, i) => (
+                <li key={i}>{file.name}</li>
+              ))}
+            </ul>
+          )}
 
-      
-          <label className="block mb-1 font-semibold">
-            URL PDF:
-            <input
-              type="text"
-              value={archivos[index]?.pdfUrl || ''}
-              onChange={(e) => handleCambiarUrl(index, 'pdfUrl', e.target.value)}
-              className="mt-1 block w-full rounded border border-gray-300 p-2"
-              placeholder="https://..."
-            />
-          </label>
-
-  
-          <label className="block mb-2 font-semibold">
-            Subir archivo PDF:
+          <label className="block font-semibold mb-1">
+            PDFs (múltiples):
             <input
               type="file"
               accept="application/pdf"
-              onChange={(e) => handleArchivoChange(e, index, 'pdfArchivo')}
+              multiple
+              onChange={(e) => handleFilesChange(e, index, 'pdfs')}
               className="mt-1 block w-full"
             />
           </label>
+          {mod.pdfs.length > 0 && (
+            <ul className="list-disc list-inside mb-4">
+              {mod.pdfs.map((file, i) => (
+                <li key={i}>{file.name}</li>
+              ))}
+            </ul>
+          )}
 
-   
-          <label className="block mb-1 font-semibold">
-            URL Imagen:
-            <input
-              type="text"
-              value={archivos[index]?.imagenUrl || ''}
-              onChange={(e) => handleCambiarUrl(index, 'imagenUrl', e.target.value)}
-              className="mt-1 block w-full rounded border border-gray-300 p-2"
-              placeholder="https://..."
-            />
-          </label>
-
-   
-          <label className="block mb-2 font-semibold">
-            Subir archivo de imagen:
+          <label className="block font-semibold mb-1">
+            Imágenes (múltiples):
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => handleArchivoChange(e, index, 'imagenArchivo')}
+              multiple
+              onChange={(e) => handleFilesChange(e, index, 'imagenes')}
               className="mt-1 block w-full"
             />
           </label>
-
-    
-          {renderArchivoPreview(archivos[index], index)}
+          {mod.imagenes.length > 0 && (
+            <ul className="list-disc list-inside mb-4">
+              {mod.imagenes.map((file, i) => (
+                <li key={i}>{file.name}</li>
+              ))}
+            </ul>
+          )}
         </div>
       ))}
 

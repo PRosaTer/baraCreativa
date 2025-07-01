@@ -9,7 +9,7 @@ import { ModuloEntity } from '../entidades/modulo.entity';
   imports: [
     TypeOrmModule.forFeature([Curso, ModuloEntity])
   ],
-  controllers: [CursosController], 
+  controllers: [CursosController],
   providers: [CursosService],
 
 })

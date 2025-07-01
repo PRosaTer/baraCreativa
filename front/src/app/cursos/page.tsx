@@ -1,3 +1,4 @@
+// app/cursos/page.tsx (Sin cambios necesarios para la funcionalidad SCORM)
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -15,11 +16,12 @@ export default function CursosPage() {
         setCargando(true);
         const res = await fetch('http://localhost:3001/api/cursos');
         if (!res.ok) throw new Error('Error al cargar cursos');
-        const data = await res.json();
+        const data: Curso[] = await res.json(); // Tipar la data
         setCursos(data);
         setError('');
-      } catch {
+      } catch (err: unknown) { // Mejor manejo del tipo de error
         setError('No se pudieron cargar los cursos');
+        console.error('Error fetching courses:', err);
       } finally {
         setCargando(false);
       }
@@ -54,6 +56,12 @@ export default function CursosPage() {
               <div className="p-4 flex flex-col">
                 <h2 className="text-lg font-semibold text-blue-600 mb-2">{curso.titulo}</h2>
                 <p className="text-sm text-gray-700">{curso.descripcion}</p>
+                {/* Opcional: Aquí podrías añadir un indicador de SCORM si lo deseas */}
+                {/* {curso.archivoScorm && (
+                  <span className="text-xs font-semibold text-purple-600 mt-2">
+                    (SCORM)
+                  </span>
+                )} */}
               </div>
             </Link>
           </li>
