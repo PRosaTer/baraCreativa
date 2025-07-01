@@ -38,7 +38,7 @@ export class CursosService {
   async actualizarCurso(id: number, datos: Partial<CrearCursoDto> & { imagenCurso?: string }): Promise<Curso> {
     console.log(`[CursosService] Actualizando curso con ID: ${id}...`);
     const curso = await this.obtenerCursoPorId(id);
-    Object.assign(curso, datos); 
+    Object.assign(curso, datos);
     return this.cursosRepository.save(curso);
   }
 

@@ -18,7 +18,7 @@ import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-@Controller('api/cursos') 
+@Controller('api/cursos')
 export class CursosController {
   constructor(private readonly cursosService: CursosService) {}
 
@@ -27,7 +27,7 @@ export class CursosController {
     return this.cursosService.obtenerCursos();
   }
 
-  @Get(':id') 
+  @Get(':id')
   async obtenerCursoPorId(@Param('id') id: string) {
     const curso = await this.cursosService.obtenerCursoPorId(+id);
     if (!curso) {
@@ -36,7 +36,7 @@ export class CursosController {
     return curso;
   }
 
-  @Post() 
+  @Post()
   crearCurso(@Body() crearCursoDto: CrearCursoDto) {
     return this.cursosService.crearCurso(crearCursoDto);
   }
@@ -46,7 +46,7 @@ export class CursosController {
     return this.cursosService.actualizarCurso(+id, datos);
   }
 
-  @Delete(':id') 
+  @Delete(':id')
   eliminarCurso(@Param('id') id: string) {
     return this.cursosService.eliminarCurso(+id);
   }
@@ -76,7 +76,7 @@ export class CursosController {
       throw new BadRequestException('Imagen requerida');
     }
 
-    
+
     const cursoActualizado = await this.cursosService.actualizarCurso(+id, { imagenCurso: imagen.filename });
 
     return {

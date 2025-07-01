@@ -20,12 +20,11 @@ export default function ListaModulos({ modulos, onAgregar, onModificar, onElimin
             className="border p-1 w-full mb-2"
           />
           <textarea
-            value={modulo.descripcion}
+            value={modulo.descripcion ?? ''}
             onChange={(e) => onModificar(index, 'descripcion', e.target.value)}
             placeholder="Descripción"
             className="border p-1 w-full mb-2"
           />
-     
           <button onClick={() => onEliminar(index)} className="bg-red-500 text-white px-2 py-1 rounded">
             Eliminar
           </button>
