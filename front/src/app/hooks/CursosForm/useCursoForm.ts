@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import { Curso, Modulo } from '@/app/types/curso';
-import { CursoForm } from '@/components/CrearCursoForm/CursoForm/CrearCursoForm';
+import { Curso, ModuloForm, CursoForm } from '@/app/types/curso';
 
 export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curso: Curso) => void) {
   const [datos, setDatos] = useState<CursoForm>({
@@ -35,8 +34,19 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
         certificadoDisponible: cursoInicial.certificadoDisponible,
         badgeDisponible: cursoInicial.badgeDisponible,
         imagenCurso: null,
-        modulos: cursoInicial.modulos || [],
+        modulos: cursoInicial.modulos
+          ? cursoInicial.modulos.map((m) => ({
+              titulo: m.titulo,
+              descripcion: m.descripcion,
+              videos: [],
+              pdfs: [],
+              imagenes: [],
+              videoUrl: m.videoUrl ?? null,
+              pdfUrl: m.pdfUrl ?? null,
+            }))
+          : [],
       });
+
       if (cursoInicial.imagenCurso) {
         setImagenPreview(`http://localhost:3001/uploads/imagenes-cursos/${cursoInicial.imagenCurso}`);
       }
@@ -69,11 +79,22 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
   const agregarModulo = () => {
     setDatos((prev) => ({
       ...prev,
-      modulos: [...prev.modulos, { id: 0, titulo: '', descripcion: '' }],
+      modulos: [
+        ...prev.modulos,
+        {
+          titulo: '',
+          descripcion: '',
+          videos: [],
+          pdfs: [],
+          imagenes: [],
+          videoUrl: null,
+          pdfUrl: null,
+        },
+      ],
     }));
   };
 
-  const handleModuloChange = (index: number, field: 'titulo' | 'descripcion', value: string) => {
+  const handleModuloChange = (index: number, field: keyof ModuloForm, value: string | File[] | null) => {
     const nuevosModulos = [...datos.modulos];
     nuevosModulos[index] = { ...nuevosModulos[index], [field]: value };
     setDatos((prev) => ({ ...prev, modulos: nuevosModulos }));
@@ -99,7 +120,12 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
         modalidad: datos.modalidad,
         certificadoDisponible: datos.certificadoDisponible,
         badgeDisponible: datos.badgeDisponible,
-        modulos: datos.modulos.map(({ id, titulo, descripcion }) => ({ titulo, descripcion })),
+        modulos: datos.modulos.map((m) => ({
+          titulo: m.titulo,
+          descripcion: m.descripcion,
+          videoUrl: m.videoUrl ?? null,
+          pdfUrl: m.pdfUrl ?? null,
+        })),
       };
 
       let res;

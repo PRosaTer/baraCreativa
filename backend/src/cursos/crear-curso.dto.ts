@@ -17,7 +17,7 @@ export class ModuloDto {
 
   @IsOptional()
   @IsString()
-  videoUrl?: string | null;
+  videoUrl?: string | null; 
 
   @IsOptional()
   @IsString()
@@ -54,7 +54,11 @@ export class CrearCursoDto {
 
   @IsOptional()
   @IsString()
-  imagenCurso?: string;
+  imagenCurso?: string | null;
+
+  @IsOptional()
+  @IsString()
+  archivoScorm?: string | null;
 
   @IsOptional()
   @ValidateNested({ each: true })

@@ -3,14 +3,28 @@ export interface ModuloForm {
   descripcion: string;
   videoUrl?: string | null;
   pdfUrl?: string | null;
+
+
+  videos: File[];
+  pdfs: File[];
+  imagenes: File[];
 }
 
-export interface Modulo extends ModuloForm {
-  id: number;
+export interface Modulo {
+  id?: number;
+  titulo: string;
+  descripcion: string;
+  videoUrl?: string | null;
+  pdfUrl?: string | null;
+}
+
+
+export interface EditableModuloForm extends ModuloForm {
+  id?: number;
 }
 
 export interface Curso {
-  id: number;
+  id: number; 
   titulo: string;
   descripcion: string;
   tipo: 'Docentes' | 'Empresas' | '';
@@ -25,6 +39,9 @@ export interface Curso {
   videoCurso?: string | null;
   pdfCurso?: string | null;
   modulos?: Modulo[];
+
+  imagenUrl?: string | null;
+  certificacion?: boolean;
 }
 
 export interface CursoForm {
@@ -37,4 +54,6 @@ export interface CursoForm {
   modalidad: 'en vivo' | 'grabado' | 'mixto' | '';
   certificadoDisponible: boolean;
   badgeDisponible: boolean;
+  imagenCurso: File | null;
+  modulos: EditableModuloForm[]; 
 }

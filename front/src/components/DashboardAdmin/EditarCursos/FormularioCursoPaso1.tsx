@@ -4,8 +4,8 @@ import React, { Dispatch, SetStateAction, ChangeEvent } from 'react';
 import { Curso } from '@/app/types/curso';
 
 interface Props {
-  datos: Omit<Curso, 'id' | 'modulos'>;
-  setDatos: Dispatch<SetStateAction<Omit<Curso, 'id' | 'modulos'>>>;
+  datos: Omit<Curso, 'id' | 'modulos' | 'archivoScorm' | 'videoCurso' | 'pdfCurso'>;
+  setDatos: Dispatch<SetStateAction<Omit<Curso, 'id' | 'modulos' | 'archivoScorm' | 'videoCurso' | 'pdfCurso'>>>;
   imagenArchivo: File | null;
   setImagenArchivo: Dispatch<SetStateAction<File | null>>;
   onNext: () => void;
@@ -162,6 +162,19 @@ export default function CrearCursoPaso1({ datos, setDatos, imagenArchivo, setIma
         />
         <label htmlFor="certificadoDisponible" className="select-none">
           Certificado disponible
+        </label>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          id="badgeDisponible"
+          name="badgeDisponible"
+          checked={datos.badgeDisponible}
+          onChange={handleChange}
+        />
+        <label htmlFor="badgeDisponible" className="select-none">
+          Badge disponible
         </label>
       </div>
 

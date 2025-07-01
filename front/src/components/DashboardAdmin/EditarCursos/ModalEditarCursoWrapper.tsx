@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React from "react";
-import EditarCursoAdmin from "./EditarCursoAdmin";
-import { Curso } from "@/app/types/curso";
+import React from 'react';
+import { Curso } from '@/app/types/curso';
+import EditarCursoAdmin from './EditarCursoAdmin';
 
 interface Props {
   cursoEditando: Curso | null;
@@ -14,8 +14,8 @@ export default function ModalEditarCursoWrapper({ cursoEditando, cerrarEditor, a
   if (!cursoEditando) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center p-4 z-50">
-      <div className="bg-white rounded-xl p-6 shadow-xl max-w-lg w-full">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50 overflow-auto">
+      <div className="bg-white rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-auto">
         <EditarCursoAdmin
           curso={cursoEditando}
           onGuardar={actualizarCursoEnLista}
