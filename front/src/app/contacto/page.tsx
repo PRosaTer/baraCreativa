@@ -26,8 +26,8 @@ const Contacto: React.FC = () => {
 
   if (cargandoUsuario) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 to-red-100">
-        <div className="text-xl font-semibold text-red-600 animate-pulse">
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-2xl font-bold text-yellow-400 animate-pulse drop-shadow-lg">
           Cargando...
         </div>
       </div>
@@ -36,7 +36,7 @@ const Contacto: React.FC = () => {
 
   return (
     <ContenedorFormularioContacto titulo="Contáctenos">
-      <form onSubmit={manejarContacto} className="space-y-6">
+      <form onSubmit={manejarContacto} className="space-y-4">
         <CampoEntrada
           etiqueta="Correo Electrónico"
           tipo="email"
@@ -61,11 +61,11 @@ const Contacto: React.FC = () => {
           valor={datosContacto.mensaje}
           onChange={manejarCambioContacto}
           requerido
-          placeholder="Describe tu consulta aquí..."
+          placeholder="Describe tu consulta..."
         />
         <BotonEnviar texto="Enviar Consulta" />
       </form>
-      <div className="text-sm text-center mt-6 text-gray-600">
+      <div className="text-sm text-center mt-4 text-yellow-300 drop-shadow-md">
         ¿Quieres enviar otra consulta?{" "}
         <EnlaceFormulario texto="Contáctanos de nuevo" href="/contacto" />
       </div>

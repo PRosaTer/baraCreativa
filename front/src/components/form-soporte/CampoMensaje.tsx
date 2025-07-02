@@ -19,14 +19,16 @@ const CampoMensaje: React.FC<PropsCampoMensaje> = ({
 }) => {
   return (
     <div className="flex flex-col space-y-2">
-      <label className="text-sm font-medium text-yellow-600">{etiqueta}</label>
+      <label className="block font-bold text-yellow-400 drop-shadow-md">
+        {etiqueta}
+      </label>
       <textarea
         name={nombre}
         value={valor}
         onChange={onChange}
         required={requerido}
         placeholder={placeholder}
-        className="w-full px-4 py-3 border border-red-300 rounded-lg bg-yellow-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 resize-y min-h-[120px]"
+        className="w-full p-3 border-2 border-red-500/70 rounded-lg bg-gray-800 text-white placeholder-yellow-300/70 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition duration-300 resize-y min-h-[140px] hover:bg-gray-700 hover:scale-[1.02]"
       />
     </div>
   );
