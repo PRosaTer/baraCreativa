@@ -19,16 +19,22 @@ const CampoSelector: React.FC<PropsCampoSelector> = ({
 }) => {
   return (
     <div className="flex flex-col space-y-2">
-      <label className="text-sm font-medium text-yellow-600">{etiqueta}</label>
+      <label className="block font-bold text-yellow-400 drop-shadow-md">
+        {etiqueta}
+      </label>
       <select
         name={nombre}
         value={valor}
         onChange={onChange}
         required={requerido}
-        className="w-full px-4 py-3 border border-red-300 rounded-lg bg-yellow-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200"
+        className="w-full p-3 border-2 border-red-500/70 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition duration-300 hover:bg-gray-700 hover:scale-[1.02]"
       >
         {opciones.map((opcion) => (
-          <option key={opcion.valor} value={opcion.valor}>
+          <option
+            key={opcion.valor}
+            value={opcion.valor}
+            className="bg-gray-900 text-white"
+          >
             {opcion.texto}
           </option>
         ))}
