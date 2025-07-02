@@ -1,5 +1,5 @@
 import React from 'react';
-import { Curso } from '@/app/types/curso'; // Asegúrate de que esta ruta sea correcta
+import { Curso } from '@/app/types/curso';
 
 interface Props {
   cursos: Curso[];
@@ -62,14 +62,14 @@ export default function TablaCursosAdmin({ cursos, onEditar, onEliminar }: Props
                 >
                   Eliminar
                 </button>
-                {curso.archivoScorm && (
+                {/* {curso.archivoScorm && (
                   <button
                     onClick={() => handleLaunchScorm(curso.archivoScorm as string)}
                     className="text-blue-600 hover:text-blue-900"
                   >
                     Lanzar SCORM
                   </button>
-                )}
+                )} */}
               </td>
             </tr>
           ))}

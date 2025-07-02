@@ -46,13 +46,14 @@ export class CursosController {
   }
 
   @Patch(':id')
-  actualizarCurso(@Param('id') id: string, @Body() datos: Partial<CrearCursoDto>) {
+  async actualizarCurso(@Param('id') id: string, @Body() datos: Partial<CrearCursoDto>) {
     return this.cursosService.actualizarCurso(+id, datos);
   }
 
   @Delete(':id')
-  eliminarCurso(@Param('id') id: string) {
-    return this.cursosService.eliminarCurso(+id);
+  async eliminarCurso(@Param('id') id: string) {
+    await this.cursosService.eliminarCurso(+id);
+    return { message: `Curso con ID ${id} eliminado correctamente` };
   }
 
   @Post(':id/imagen')
@@ -79,43 +80,12 @@ export class CursosController {
     if (!imagen) {
       throw new BadRequestException('Imagen requerida');
     }
-    const cursoActualizado = await this.cursosService.actualizarCurso(+id, { imagenCurso: imagen.filename });
+    const imagenCursoPath = `/uploads/imagenes-cursos/${imagen.filename}`;
+    const cursoActualizado = await this.cursosService.actualizarCurso(+id, { imagenCurso: imagenCursoPath });
     return {
       message: 'Imagen subida y curso actualizado correctamente',
       curso: cursoActualizado,
-      rutaImagen: `/uploads/imagenes-cursos/${imagen.filename}`,
-    };
-  }
-
-  @Post(':id/scorm')
-  @UseInterceptors(
-    FileInterceptor('scormFile', {
-      storage: diskStorage({
-        destination: join(process.cwd(), 'uploads', 'scorm'),
-        filename: (req, file, cb) => {
-          const uniqueName = uuidv4() + extname(file.originalname);
-          cb(null, uniqueName);
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        if (file.mimetype === 'application/zip' || file.mimetype === 'application/x-zip-compressed') {
-          cb(null, true);
-        } else {
-          cb(new BadRequestException('Solo archivos .zip permitidos'), false);
-        }
-      },
-      limits: { fileSize: 50 * 1024 * 1024 },
-    }),
-  )
-  async subirScorm(@Param('id') id: string, @UploadedFile() scormFile: Express.Multer.File) {
-    if (!scormFile) {
-      throw new BadRequestException('Archivo SCORM requerido');
-    }
-    const cursoActualizado = await this.cursosService.actualizarCurso(+id, { archivoScorm: scormFile.filename });
-    return {
-      message: 'SCORM subido y curso actualizado correctamente',
-      curso: cursoActualizado,
-      rutaScorm: `/uploads/scorm/${scormFile.filename}`,
+      rutaImagen: imagenCursoPath,
     };
   }
 
@@ -147,7 +117,7 @@ export class CursosController {
     const scormZipPath = scormFile.path;
     const uniqueFolderName = uuidv4();
     const destinationPath = join(process.cwd(), 'uploads', 'scorm_unzipped_courses', uniqueFolderName);
-    let entryPoint = '';
+    let scormEntryPoint = '';
 
     try {
       const zip = new AdmZip(scormZipPath);
@@ -166,7 +136,47 @@ export class CursosController {
 
       zip.extractAllTo(destinationPath, /*overwrite*/ true);
 
-      entryPoint = `/scorm_courses/${uniqueFolderName}/imsmanifest.xml`;
+ 
+      const configJsPath = join(destinationPath, 'config.js');
+      if (!fs.existsSync(configJsPath)) {
+        console.warn(`ADVERTENCIA: config.js no encontrado en el paquete SCORM. Creando un archivo por defecto.`);
+        fs.writeFileSync(configJsPath, 'var scormnext = "habilon.scormnext.es";');
+      }
+
+      const jqueryPath = join(destinationPath, 'jquery-1.6.1.min.js');
+      if (!fs.existsSync(jqueryPath)) {
+        console.warn(`ADVERTENCIA: jquery-1.6.1.min.js no encontrado en el paquete SCORM. Esto puede causar problemas si el SCORM lo necesita.`);
+  
+      }
+     
+
+      const imsManifestContent = imsManifestEntry.getData().toString('utf8');
+      const resourceHrefMatch = imsManifestContent.match(/<resource[^>]*href="([^"]+)"[^>]*>/);
+      
+      let foundEntryPointInManifest = false;
+      if (resourceHrefMatch && resourceHrefMatch[1]) {
+        let manifestHref = resourceHrefMatch[1];
+        const queryParamIndex = manifestHref.indexOf('?');
+        if (queryParamIndex !== -1) {
+          manifestHref = manifestHref.substring(0, queryParamIndex);
+        }
+        if (fs.existsSync(join(destinationPath, manifestHref))) {
+          scormEntryPoint = resourceHrefMatch[1];
+          foundEntryPointInManifest = true;
+        }
+      }
+
+      if (!foundEntryPointInManifest) {
+        if (fs.existsSync(join(destinationPath, 'proxy.html'))) {
+          scormEntryPoint = 'proxy.html';
+        } else if (fs.existsSync(join(destinationPath, 'index.html'))) {
+          scormEntryPoint = 'index.html';
+        } else {
+          throw new BadRequestException('No se pudo determinar el punto de entrada del SCORM (imsmanifest.xml, proxy.html o index.html no encontrados).');
+        }
+      }
+      
+      const scormDbPath = `/uploads/scorm_unzipped_courses/${uniqueFolderName}/${scormEntryPoint}`;
 
       const nuevoCurso = await this.cursosService.crearCurso({
         titulo: `Curso SCORM: ${scormFile.originalname.replace('.zip', '')}`,
@@ -178,7 +188,8 @@ export class CursosController {
         modalidad: 'grabado',
         certificadoDisponible: false,
         badgeDisponible: false,
-        archivoScorm: entryPoint,
+        imagenCurso: null,
+        archivoScorm: scormDbPath,
       });
 
       fs.unlinkSync(scormZipPath);
@@ -186,7 +197,7 @@ export class CursosController {
       return {
         message: 'Paquete SCORM subido, descomprimido y curso creado correctamente',
         curso: nuevoCurso,
-        rutaScormDescomprimido: entryPoint,
+        rutaScormDescomprimido: scormDbPath,
       };
     } catch (error) {
       if (fs.existsSync(scormZipPath)) {
@@ -196,10 +207,14 @@ export class CursosController {
       if (error instanceof BadRequestException) {
         throw error;
       }
+      if (fs.existsSync(destinationPath) && fs.readdirSync(destinationPath).length === 0) {
+        fs.rmdirSync(destinationPath);
+      } else if (fs.existsSync(destinationPath)) {
+        fs.rmSync(destinationPath, { recursive: true, force: true });
+      }
       throw new InternalServerErrorException('Error al procesar el paquete SCORM.');
     }
   }
-
 
   @Post('generate-scorm-from-modules')
   @UseInterceptors(AnyFilesInterceptor())

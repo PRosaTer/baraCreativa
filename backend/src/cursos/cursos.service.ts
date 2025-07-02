@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Curso } from '../entidades/curso.entity';
-import { Repository, DeepPartial } from 'typeorm'; 
+import { Repository, DeepPartial } from 'typeorm';
 import { CrearCursoDto, ModuloDto } from './crear-curso.dto';
 import { join, extname } from 'path';
 import * as fs from 'fs';
@@ -35,16 +35,22 @@ export class CursosService {
     return this.cursosRepository.save(curso);
   }
 
-  async actualizarCurso(id: number, datos: Partial<CrearCursoDto> & { imagenCurso?: string | null; archivoScorm?: string | null }): Promise<Curso> {
+  async actualizarCurso(id: number, datos: Partial<CrearCursoDto>): Promise<Curso> {
     const curso = await this.obtenerCursoPorId(id);
-    Object.assign(curso, datos as DeepPartial<Curso>);
+    for (const key in datos) {
+      if (Object.prototype.hasOwnProperty.call(datos, key)) {
+        curso[key] = datos[key];
+      }
+    }
     return this.cursosRepository.save(curso);
   }
 
   async eliminarCurso(id: number): Promise<void> {
-    await this.cursosRepository.delete(id);
+    const result = await this.cursosRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Curso con ID ${id} no encontrado`);
+    }
   }
-
 
   private parseFileFieldname(fieldname: string): { moduleIndex: number; fileType: 'videos' | 'pdfs' | 'imagenes' } | null {
     const match = fieldname.match(/modulos\[(\d+)\]\[(videos|pdfs|imagenes)\]/);
@@ -57,18 +63,11 @@ export class CursosService {
     return null;
   }
 
-  /**
-   
-   * @param courseData
-   * @param uploadedFiles
-   * @returns
-   */
   async generateScormPackage(courseData: CrearCursoDto, uploadedFiles: Array<Express.Multer.File>): Promise<{ scormPath: string; nuevoCurso: Curso }> {
     const uniqueCourseId = uuidv4();
     const scormTempDir = join(process.cwd(), 'uploads', 'scorm_temp', uniqueCourseId);
     const scormOutputZipPath = join(process.cwd(), 'uploads', 'scorm', `${uniqueCourseId}.zip`);
     const scormUnzippedPath = join(process.cwd(), 'uploads', 'scorm_unzipped_courses', uniqueCourseId);
-
 
     const moduleFilesMap = new Map<number, { videos: Express.Multer.File[]; pdfs: Express.Multer.File[]; imagenes: Express.Multer.File[]; }>();
 
@@ -84,14 +83,13 @@ export class CursosService {
     });
 
     try {
-
       fs.mkdirSync(scormTempDir, { recursive: true });
       fs.mkdirSync(scormUnzippedPath, { recursive: true });
 
       const manifestItems: string[] = [];
       const manifestResources: string[] = [];
       const moduleEntitiesToSave: ModuloDto[] = [];
-
+      let firstModuleHtmlFile = '';
 
       if (courseData.modulos) {
         for (const [index, module] of courseData.modulos.entries()) {
@@ -106,7 +104,6 @@ export class CursosService {
           const pdfUrlsInModule: string[] = [];
           const imageUrlsInModule: string[] = [];
 
-
           for (const videoFile of currentModuleFiles.videos) {
             const uniqueVideoName = `${uuidv4()}${extname(videoFile.originalname)}`;
             const destPath = join(modulePath, uniqueVideoName);
@@ -115,7 +112,6 @@ export class CursosService {
             moduleFilesForResource.push(`${moduleFolderName}/${uniqueVideoName}`);
             fs.unlinkSync(videoFile.path);
           }
-
 
           for (const pdfFile of currentModuleFiles.pdfs) {
             const uniquePdfName = `${uuidv4()}${extname(pdfFile.originalname)}`;
@@ -126,7 +122,6 @@ export class CursosService {
             fs.unlinkSync(pdfFile.path);
           }
 
-
           for (const imageFile of currentModuleFiles.imagenes) {
             const uniqueImageName = `${uuidv4()}${extname(imageFile.originalname)}`;
             const destPath = join(modulePath, uniqueImageName);
@@ -136,7 +131,6 @@ export class CursosService {
             fs.unlinkSync(imageFile.path);
           }
 
-  
           const moduleHtmlContent = `
             <!DOCTYPE html>
             <html>
@@ -167,25 +161,15 @@ export class CursosService {
 
                 ${imageUrlsInModule.length > 0 ? `<h2>Imágenes</h2>` : ''}
                 ${imageUrlsInModule.map(imageName => `<img src="${imageName}" alt="${imageName}">`).join('')}
-
-                <!-- Scripts de SCORM API (opcional, si necesitas seguimiento de progreso detallado) -->
-                <!-- Puedes incluir aquí los scripts de scormnext.es si tu curso se ejecutará dentro de su wrapper -->
-                <!-- <script src="https://backend.scormnext.es/connector/3.0/SCORM_API.js"></script> -->
-                <!-- <script>
-                  // var API = getAPI();
-                  // if (API) {
-                  //   API.LMSInitialize("");
-                  //   API.LMSSetValue("cmi.core.lesson_status", "completed");
-                  //   API.LMSCommit("");
-                  //   API.LMSFinish("");
-                  // }
-                </script> -->
             </body>
             </html>
           `;
           fs.writeFileSync(join(modulePath, 'index.html'), moduleHtmlContent);
           moduleFilesForResource.push(`${moduleFolderName}/index.html`);
 
+          if (index === 0) {
+            firstModuleHtmlFile = `${moduleFolderName}/index.html`;
+          }
 
           manifestItems.push(`
             <item identifier="ITEM-${uniqueCourseId}-${index + 1}" identifierref="RES-${uniqueCourseId}-${index + 1}" isvisible="true">
@@ -198,7 +182,6 @@ export class CursosService {
             </resource>
           `);
 
-
           moduleEntitiesToSave.push({
             titulo: module.titulo,
             descripcion: module.descripcion,
@@ -208,6 +191,22 @@ export class CursosService {
         }
       }
 
+      const launchHtmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>${courseData.titulo || 'Curso Generado'}</title>
+            <script>
+                window.location.href = '${firstModuleHtmlFile}';
+            </script>
+        </head>
+        <body>
+            Si no eres redirigido, haz clic <a href="${firstModuleHtmlFile}">aquí</a>.
+        </body>
+        </html>
+      `;
+      fs.writeFileSync(join(scormTempDir, 'launch.html'), launchHtmlContent);
 
 
       const imsManifestContent = `<?xml version="1.0" encoding="UTF-8"?>
@@ -228,26 +227,29 @@ export class CursosService {
         </organization>
     </organizations>
     <resources>
+        <resource identifier="RES-LAUNCH" type="webcontent" adlcp:scormtype="sco" href="launch.html">
+            <file href="launch.html"/>
+            ${manifestResources.map(res => res.replace(/<resource[^>]*href="([^"]+)"/g, (match, p1) => {
+                return match;
+            })).join('')}
+        </resource>
         ${manifestResources.join('')}
     </resources>
 </manifest>`;
       fs.writeFileSync(join(scormTempDir, 'imsmanifest.xml'), imsManifestContent);
 
-
       const zip = new AdmZip();
       zip.addLocalFolder(scormTempDir);
       zip.writeZip(scormOutputZipPath);
 
-
       const finalZip = new AdmZip(scormOutputZipPath);
       finalZip.extractAllTo(scormUnzippedPath, /*overwrite*/ true);
 
-
-      const scormPublicPath = `/scorm_courses/${uniqueCourseId}/imsmanifest.xml`;
+      const scormPublicPath = `/uploads/scorm_unzipped_courses/${uniqueCourseId}/launch.html`;
       const nuevoCurso = await this.crearCurso({
         titulo: courseData.titulo || 'Curso Generado SCORM',
         descripcion: courseData.descripcion || 'Curso generado a partir de módulos.',
-        precio: courseData.precio || 0, 
+        precio: courseData.precio || 0,
         duracionHoras: courseData.duracionHoras || 0,
         tipo: courseData.tipo || 'Docentes',
         categoria: courseData.categoria || 'Generado SCORM',
@@ -256,7 +258,7 @@ export class CursosService {
         badgeDisponible: courseData.badgeDisponible || false,
         imagenCurso: courseData.imagenCurso || null,
         archivoScorm: scormPublicPath,
-        modulos: moduleEntitiesToSave, 
+        modulos: moduleEntitiesToSave,
       });
 
       return { scormPath: scormPublicPath, nuevoCurso };
