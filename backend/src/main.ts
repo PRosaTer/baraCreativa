@@ -17,7 +17,6 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-
   const uploadPath = join(process.cwd(), 'uploads', 'imagenes-cursos');
   if (!fs.existsSync(uploadPath)) {
     fs.mkdirSync(uploadPath, { recursive: true });
@@ -30,17 +29,19 @@ async function bootstrap() {
     console.log(`✔️ Carpeta creada: ${scormUploadPath}`);
   }
 
-
   const scormUnzippedPath = join(process.cwd(), 'uploads', 'scorm_unzipped_courses');
   if (!fs.existsSync(scormUnzippedPath)) {
     fs.mkdirSync(scormUnzippedPath, { recursive: true });
     console.log(`✔️ Carpeta creada: ${scormUnzippedPath}`);
   }
 
+  const scormTempPath = join(process.cwd(), 'uploads', 'scorm_temp');
+  if (!fs.existsSync(scormTempPath)) {
+    fs.mkdirSync(scormTempPath, { recursive: true });
+    console.log(`✔️ Carpeta creada: ${scormTempPath}`);
+  }
 
   app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
-
-  
   app.use('/scorm_courses', express.static(scormUnzippedPath));
 
   app.useWebSocketAdapter(new IoAdapter(app));
