@@ -25,7 +25,7 @@ export default function CursoDetalle({ curso }: Props) {
       {curso.imagenCurso && (
         <div className="w-full h-64 relative mb-6 rounded-lg overflow-hidden">
           <Image
-            src={`http://localhost:3001/uploads/imagenes-cursos/${curso.imagenCurso}`}
+            src={`http://localhost:3001${curso.imagenCurso}`}
             alt={curso.titulo}
             fill
             style={{ objectFit: 'cover' }}
@@ -59,54 +59,13 @@ export default function CursoDetalle({ curso }: Props) {
               {curso.modulos.map((modulo: Modulo) => (
                 <li key={modulo.id} className="text-gray-700 border p-4 rounded shadow-sm">
                   <strong className="text-indigo-600">{modulo.titulo}:</strong> {modulo.descripcion}
-
-                  {modulo.videoUrl && (
-                    <video
-                      controls
-                      src={modulo.videoUrl.startsWith('http') ? modulo.videoUrl : `http://localhost:3001/uploads/cursos/${modulo.videoUrl}`}
-                      className="mt-2 w-full max-h-48 rounded"
-                    />
-                  )}
-
-                  {modulo.pdfUrl && (
-                    <iframe
-                      src={modulo.pdfUrl.startsWith('http') ? modulo.pdfUrl : `http://localhost:3001/uploads/cursos/${modulo.pdfUrl}`}
-                      width="100%"
-                      height="300"
-                      className="mt-2 border rounded"
-                      title={`PDF del módulo ${modulo.titulo}`}
-                    />
-                  )}
+                  {/* Si querés mostrar video o pdf desde módulos, podés agregar acá, pero si usás SCORM, se puede omitir */}
                 </li>
               ))}
             </ul>
           </div>
         )}
       </div>
-
-      {curso.videoCurso && (
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Video Principal del Curso</h2>
-          <video
-            controls
-            className="w-full rounded"
-            src={`http://localhost:3001/uploads/cursos/${curso.videoCurso}`}
-          />
-        </div>
-      )}
-
-      {curso.pdfCurso && (
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">PDF Principal del Curso</h2>
-          <iframe
-            src={`http://localhost:3001/uploads/cursos/${curso.pdfCurso}`}
-            width="100%"
-            height="600"
-            className="border rounded"
-            title="PDF principal del curso"
-          />
-        </div>
-      )}
 
       <div className="text-center mt-8">
         <a

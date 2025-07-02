@@ -1,59 +1,56 @@
-export interface ModuloForm {
-  titulo: string;
-  descripcion: string;
-  videoUrl?: string | null;
-  pdfUrl?: string | null;
-
-
-  videos: File[];
-  pdfs: File[];
-  imagenes: File[];
-}
-
 export interface Modulo {
   id?: number;
   titulo: string;
   descripcion: string;
   videoUrl?: string | null;
   pdfUrl?: string | null;
+  imageUrl?: string | null;
 }
 
+export interface ModuloFormBase {
+  titulo: string;
+  descripcion: string;
+  videoUrl?: string | null;
+  pdfUrl?: string | null;
+  imageUrl?: string | null;
+}
 
-export interface EditableModuloForm extends ModuloForm {
+export interface EditableModuloForm extends ModuloFormBase {
   id?: number;
+  videoFile?: File | null;
+  pdfFile?: File | null;
+  imageFile?: File | null;
 }
 
 export interface Curso {
-  id: number; 
+  id: number;
   titulo: string;
   descripcion: string;
-  tipo: 'Docentes' | 'Empresas' | '';
-  categoria: string;
+  precio: number;
   duracionHoras: number;
-  precio: number | string;
-  modalidad: 'en vivo' | 'grabado' | 'mixto' | '';
+  tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
+  categoria: string;
+  modalidad: 'en vivo' | 'grabado' | 'mixto';
   certificadoDisponible: boolean;
   badgeDisponible: boolean;
   imagenCurso?: string | null;
   archivoScorm?: string | null;
-  videoCurso?: string | null;
-  pdfCurso?: string | null;
-  modulos?: Modulo[];
-
-  imagenUrl?: string | null;
-  certificacion?: boolean;
+  modulos: Modulo[]; // ✅ Lo dejamos siempre definido (no opcional)
 }
 
 export interface CursoForm {
+  id?: number;
   titulo: string;
   descripcion: string;
-  tipo: 'Docentes' | 'Empresas' | '';
-  categoria: string;
-  duracionHoras: number | '';
   precio: number | '';
+  duracionHoras: number | '';
+  tipo: 'Docentes' | 'Estudiantes' | 'Empresas' | '';
+  categoria: string;
   modalidad: 'en vivo' | 'grabado' | 'mixto' | '';
   certificadoDisponible: boolean;
   badgeDisponible: boolean;
-  imagenCurso: File | null;
-  modulos: EditableModuloForm[]; 
+  imagenCurso?: File | string | null;
+  archivoScorm?: string | null; // ✅ La dejamos string | null (no File), porque se usa el newScormFile para el File
+  modulos: EditableModuloForm[]; // ✅ Lo dejamos siempre obligatorio (sin ?)
+  newScormFile?: File | null;
 }

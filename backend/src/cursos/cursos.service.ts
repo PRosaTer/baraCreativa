@@ -1,9 +1,13 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Curso } from '../entidades/curso.entity';
 import { Repository, DeepPartial } from 'typeorm';
-import { CrearCursoDto, ModuloDto } from './crear-curso.dto';
-import { join, extname } from 'path';
+import { CrearCursoDto } from './crear-curso.dto';
+import { join } from 'path';
 import * as fs from 'fs';
 import * as AdmZip from 'adm-zip';
 import { v4 as uuidv4 } from 'uuid';
@@ -35,10 +39,14 @@ export class CursosService {
     return this.cursosRepository.save(curso);
   }
 
-  async actualizarCurso(id: number, datos: Partial<CrearCursoDto>): Promise<Curso> {
+  async actualizarCurso(
+    id: number,
+    datos: Partial<CrearCursoDto>,
+  ): Promise<Curso> {
     const curso = await this.obtenerCursoPorId(id);
     for (const key in datos) {
       if (Object.prototype.hasOwnProperty.call(datos, key)) {
+        // @ts-ignore
         curso[key] = datos[key];
       }
     }
@@ -52,227 +60,101 @@ export class CursosService {
     }
   }
 
-  private parseFileFieldname(fieldname: string): { moduleIndex: number; fileType: 'videos' | 'pdfs' | 'imagenes' } | null {
-    const match = fieldname.match(/modulos\[(\d+)\]\[(videos|pdfs|imagenes)\]/);
-    if (match && match[1] && match[2]) {
-      return {
-        moduleIndex: parseInt(match[1], 10),
-        fileType: match[2] as 'videos' | 'pdfs' | 'imagenes',
-      };
-    }
-    return null;
-  }
+  async actualizarArchivoScorm(
+    id: number,
+    scormFile: Express.Multer.File,
+  ): Promise<Curso> {
+    const curso = await this.obtenerCursoPorId(id);
 
-  async generateScormPackage(courseData: CrearCursoDto, uploadedFiles: Array<Express.Multer.File>): Promise<{ scormPath: string; nuevoCurso: Curso }> {
-    const uniqueCourseId = uuidv4();
-    const scormTempDir = join(process.cwd(), 'uploads', 'scorm_temp', uniqueCourseId);
-    const scormOutputZipPath = join(process.cwd(), 'uploads', 'scorm', `${uniqueCourseId}.zip`);
-    const scormUnzippedPath = join(process.cwd(), 'uploads', 'scorm_unzipped_courses', uniqueCourseId);
-
-    const moduleFilesMap = new Map<number, { videos: Express.Multer.File[]; pdfs: Express.Multer.File[]; imagenes: Express.Multer.File[]; }>();
-
-    uploadedFiles.forEach(file => {
-      const parsed = this.parseFileFieldname(file.fieldname);
-      if (parsed) {
-        const { moduleIndex, fileType } = parsed;
-        if (!moduleFilesMap.has(moduleIndex)) {
-          moduleFilesMap.set(moduleIndex, { videos: [], pdfs: [], imagenes: [] });
-        }
-        moduleFilesMap.get(moduleIndex)?.[fileType].push(file);
-      }
-    });
+    const scormZipPath = scormFile.path;
+    const uniqueFolderName = uuidv4();
+    const destinationPath = join(
+      process.cwd(),
+      'uploads',
+      'scorm_unzipped_courses',
+      uniqueFolderName,
+    );
 
     try {
-      fs.mkdirSync(scormTempDir, { recursive: true });
-      fs.mkdirSync(scormUnzippedPath, { recursive: true });
+      // Crear carpeta destino si no existe
+      if (!fs.existsSync(destinationPath)) {
+        fs.mkdirSync(destinationPath, { recursive: true });
+      }
 
-      const manifestItems: string[] = [];
-      const manifestResources: string[] = [];
-      const moduleEntitiesToSave: ModuloDto[] = [];
-      let firstModuleHtmlFile = '';
+      // Abrir zip y verificar imsmanifest.xml
+      const zip = new AdmZip(scormZipPath);
+      const imsManifestEntry = zip.getEntry('imsmanifest.xml');
 
-      if (courseData.modulos) {
-        for (const [index, module] of courseData.modulos.entries()) {
-          const moduleFolderName = `module_${index + 1}`;
-          const modulePath = join(scormTempDir, moduleFolderName);
-          fs.mkdirSync(modulePath, { recursive: true });
+      if (!imsManifestEntry) {
+        fs.unlinkSync(scormZipPath);
+        throw new BadRequestException(
+          'El archivo ZIP no es un paquete SCORM válido (falta imsmanifest.xml).',
+        );
+      }
 
-          const moduleFilesForResource: string[] = [];
-          const currentModuleFiles = moduleFilesMap.get(index) || { videos: [], pdfs: [], imagenes: [] };
+      zip.extractAllTo(destinationPath, true);
 
-          const videoUrlsInModule: string[] = [];
-          const pdfUrlsInModule: string[] = [];
-          const imageUrlsInModule: string[] = [];
+      // Leer imsmanifest.xml para determinar archivo de entrada SCORM
+      const imsManifestContent = imsManifestEntry.getData().toString('utf8');
+      let scormEntryPoint = '';
 
-          for (const videoFile of currentModuleFiles.videos) {
-            const uniqueVideoName = `${uuidv4()}${extname(videoFile.originalname)}`;
-            const destPath = join(modulePath, uniqueVideoName);
-            fs.copyFileSync(videoFile.path, destPath);
-            videoUrlsInModule.push(uniqueVideoName);
-            moduleFilesForResource.push(`${moduleFolderName}/${uniqueVideoName}`);
-            fs.unlinkSync(videoFile.path);
+      const resourceHrefMatch = imsManifestContent.match(
+        /<resource[^>]*href="([^"]+)"[^>]*>/,
+      );
+
+      if (resourceHrefMatch && resourceHrefMatch[1]) {
+        scormEntryPoint = resourceHrefMatch[1];
+        // Limpiar query params y slash inicial
+        const queryParamIndex = scormEntryPoint.indexOf('?');
+        if (queryParamIndex !== -1) {
+          scormEntryPoint = scormEntryPoint.substring(0, queryParamIndex);
+        }
+        if (scormEntryPoint.startsWith('/')) {
+          scormEntryPoint = scormEntryPoint.slice(1);
+        }
+      } else if (fs.existsSync(join(destinationPath, 'index.html'))) {
+        scormEntryPoint = 'index.html';
+      } else if (fs.existsSync(join(destinationPath, 'proxy.html'))) {
+        scormEntryPoint = 'proxy.html';
+      } else {
+        throw new BadRequestException(
+          'No se pudo determinar el punto de entrada del SCORM.',
+        );
+      }
+
+      // Si ya había un SCORM anterior, eliminar la carpeta vieja
+      if (curso.archivoScorm) {
+        const prevParts = curso.archivoScorm.split('/');
+        const prevFolder = prevParts.length > 3 ? prevParts[3] : null;
+        if (prevFolder) {
+          const prevFullPath = join(
+            process.cwd(),
+            'uploads',
+            'scorm_unzipped_courses',
+            prevFolder,
+          );
+          if (fs.existsSync(prevFullPath)) {
+            fs.rmSync(prevFullPath, { recursive: true, force: true });
           }
-
-          for (const pdfFile of currentModuleFiles.pdfs) {
-            const uniquePdfName = `${uuidv4()}${extname(pdfFile.originalname)}`;
-            const destPath = join(modulePath, uniquePdfName);
-            fs.copyFileSync(pdfFile.path, destPath);
-            pdfUrlsInModule.push(uniquePdfName);
-            moduleFilesForResource.push(`${moduleFolderName}/${uniquePdfName}`);
-            fs.unlinkSync(pdfFile.path);
-          }
-
-          for (const imageFile of currentModuleFiles.imagenes) {
-            const uniqueImageName = `${uuidv4()}${extname(imageFile.originalname)}`;
-            const destPath = join(modulePath, uniqueImageName);
-            fs.copyFileSync(imageFile.path, destPath);
-            imageUrlsInModule.push(uniqueImageName);
-            moduleFilesForResource.push(`${moduleFolderName}/${uniqueImageName}`);
-            fs.unlinkSync(imageFile.path);
-          }
-
-          const moduleHtmlContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="utf-8">
-                <title>${module.titulo}</title>
-                <style>
-                  body { font-family: 'Inter', sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: auto; background-color: #f9fafb; color: #333; }
-                  h1 { color: #1e40af; border-bottom: 2px solid #bfdbfe; padding-bottom: 10px; margin-bottom: 20px; }
-                  h2 { color: #1e40af; margin-top: 30px; border-bottom: 1px solid #d1d5db; padding-bottom: 5px; }
-                  p { margin-bottom: 15px; }
-                  video, img { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-                  a { color: #2563eb; text-decoration: none; }
-                  a:hover { text-decoration: underline; }
-                  ul { list-style-type: disc; margin-left: 20px; margin-bottom: 15px; }
-                  li { margin-bottom: 5px; }
-                </style>
-            </head>
-            <body>
-                <h1>${module.titulo}</h1>
-                <p>${module.descripcion}</p>
-
-                ${videoUrlsInModule.length > 0 ? `<h2>Videos</h2>` : ''}
-                ${videoUrlsInModule.map(videoName => `<video controls src="${videoName}" style="width:100%;"></video>`).join('')}
-
-                ${pdfUrlsInModule.length > 0 ? `<h2>Documentos (PDF)</h2>` : ''}
-                ${pdfUrlsInModule.map(pdfName => `<p><a href="${pdfName}" target="_blank">${pdfName}</a></p>`).join('')}
-
-                ${imageUrlsInModule.length > 0 ? `<h2>Imágenes</h2>` : ''}
-                ${imageUrlsInModule.map(imageName => `<img src="${imageName}" alt="${imageName}">`).join('')}
-            </body>
-            </html>
-          `;
-          fs.writeFileSync(join(modulePath, 'index.html'), moduleHtmlContent);
-          moduleFilesForResource.push(`${moduleFolderName}/index.html`);
-
-          if (index === 0) {
-            firstModuleHtmlFile = `${moduleFolderName}/index.html`;
-          }
-
-          manifestItems.push(`
-            <item identifier="ITEM-${uniqueCourseId}-${index + 1}" identifierref="RES-${uniqueCourseId}-${index + 1}" isvisible="true">
-                <title>${module.titulo}</title>
-            </item>
-          `);
-          manifestResources.push(`
-            <resource identifier="RES-${uniqueCourseId}-${index + 1}" type="webcontent" adlcp:scormtype="sco" href="${moduleFolderName}/index.html">
-                ${moduleFilesForResource.map(file => `<file href="${file}"/>`).join('')}
-            </resource>
-          `);
-
-          moduleEntitiesToSave.push({
-            titulo: module.titulo,
-            descripcion: module.descripcion,
-            videoUrl: videoUrlsInModule.length > 0 ? videoUrlsInModule[0] : null,
-            pdfUrl: pdfUrlsInModule.length > 0 ? pdfUrlsInModule[0] : null,
-          });
         }
       }
 
-      const launchHtmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <title>${courseData.titulo || 'Curso Generado'}</title>
-            <script>
-                window.location.href = '${firstModuleHtmlFile}';
-            </script>
-        </head>
-        <body>
-            Si no eres redirigido, haz clic <a href="${firstModuleHtmlFile}">aquí</a>.
-        </body>
-        </html>
-      `;
-      fs.writeFileSync(join(scormTempDir, 'launch.html'), launchHtmlContent);
+      // Guardar la ruta completa del SCORM con el archivo de entrada detectado
+      const scormDbPath = `/uploads/scorm_unzipped_courses/${uniqueFolderName}/${scormEntryPoint}`;
 
+      curso.archivoScorm = scormDbPath;
+      await this.cursosRepository.save(curso);
 
-      const imsManifestContent = `<?xml version="1.0" encoding="UTF-8"?>
-<manifest identifier="MANIFEST-${uniqueCourseId}" version="1.0"
-    xmlns="http://www.imsproject.org/xsd/imscp_v1p1"
-    xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_v1p3"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_v1p1 imscp_v1p1.xsd
-                        http://www.adlnet.org/xsd/adlcp_v1p3 adlcp_v1p3.xsd">
-    <metadata>
-        <schema>ADL SCORM</schema>
-        <schemaversion>1.2</schemaversion>
-    </metadata>
-    <organizations default="ORG-${uniqueCourseId}">
-        <organization identifier="ORG-${uniqueCourseId}">
-            <title>${courseData.titulo || 'Curso Generado'}</title>
-            ${manifestItems.join('')}
-        </organization>
-    </organizations>
-    <resources>
-        <resource identifier="RES-LAUNCH" type="webcontent" adlcp:scormtype="sco" href="launch.html">
-            <file href="launch.html"/>
-            ${manifestResources.map(res => res.replace(/<resource[^>]*href="([^"]+)"/g, (match, p1) => {
-                return match;
-            })).join('')}
-        </resource>
-        ${manifestResources.join('')}
-    </resources>
-</manifest>`;
-      fs.writeFileSync(join(scormTempDir, 'imsmanifest.xml'), imsManifestContent);
+      // Borrar el zip original después de extraer
+      fs.unlinkSync(scormZipPath);
 
-      const zip = new AdmZip();
-      zip.addLocalFolder(scormTempDir);
-      zip.writeZip(scormOutputZipPath);
-
-      const finalZip = new AdmZip(scormOutputZipPath);
-      finalZip.extractAllTo(scormUnzippedPath, /*overwrite*/ true);
-
-      const scormPublicPath = `/uploads/scorm_unzipped_courses/${uniqueCourseId}/launch.html`;
-      const nuevoCurso = await this.crearCurso({
-        titulo: courseData.titulo || 'Curso Generado SCORM',
-        descripcion: courseData.descripcion || 'Curso generado a partir de módulos.',
-        precio: courseData.precio || 0,
-        duracionHoras: courseData.duracionHoras || 0,
-        tipo: courseData.tipo || 'Docentes',
-        categoria: courseData.categoria || 'Generado SCORM',
-        modalidad: courseData.modalidad || 'grabado',
-        certificadoDisponible: courseData.certificadoDisponible || false,
-        badgeDisponible: courseData.badgeDisponible || false,
-        imagenCurso: courseData.imagenCurso || null,
-        archivoScorm: scormPublicPath,
-        modulos: moduleEntitiesToSave,
-      });
-
-      return { scormPath: scormPublicPath, nuevoCurso };
-
+      return curso;
     } catch (error) {
-      console.error('Error en generateScormPackage:', error);
-      if (fs.existsSync(scormTempDir)) {
-        fs.rmSync(scormTempDir, { recursive: true, force: true });
+      if (fs.existsSync(scormZipPath)) {
+        fs.unlinkSync(scormZipPath);
       }
-      if (fs.existsSync(scormOutputZipPath)) {
-        fs.unlinkSync(scormOutputZipPath);
-      }
-      if (fs.existsSync(scormUnzippedPath)) {
-        fs.rmSync(scormUnzippedPath, { recursive: true, force: true });
+      if (fs.existsSync(destinationPath)) {
+        fs.rmSync(destinationPath, { recursive: true, force: true });
       }
       throw error;
     }

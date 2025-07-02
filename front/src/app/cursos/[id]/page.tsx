@@ -1,15 +1,12 @@
 'use client';
 
-import React, { useEffect, useState, use } from 'react';
-import CursoDetalle from '@/components/Detalle-curso/CursoDetalle';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { Curso } from '@/app/types/curso';
 
-interface Props {
-  params: Promise<{ id: string }>;
-}
-
-export default function CursoPage({ params }: Props) {
-  const { id } = use(params);
+export default function CursoPage() {
+  const params = useParams();
+  const id = params?.id;
 
   const [curso, setCurso] = useState<Curso | null>(null);
   const [cargando, setCargando] = useState(true);
@@ -17,6 +14,8 @@ export default function CursoPage({ params }: Props) {
   const [pagado, setPagado] = useState(false);
 
   useEffect(() => {
+    if (!id) return;
+
     async function fetchCurso() {
       try {
         setCargando(true);
@@ -25,24 +24,23 @@ export default function CursoPage({ params }: Props) {
         const data: Curso = await res.json();
         setCurso(data);
         setError('');
-      } catch (err: unknown) {
+      } catch (err) {
         setError('No se pudo cargar el curso');
         console.error('Error fetching course:', err);
       } finally {
         setCargando(false);
       }
     }
-
-    if (id) {
-      fetchCurso();
-    }
+    fetchCurso();
   }, [id]);
 
   function handlePagoExitoso() {
     setPagado(true);
   }
 
-  const getScormLaunchUrl = (scormPath: string) => {
+  const getScormLaunchUrl = (scormPath?: string | null) => {
+    if (!scormPath || typeof scormPath !== 'string') return '';
+    // scormPath debe incluir el archivo HTML (ej: /uploads/scorm_unzipped_courses/uuid/index.html)
     return `http://localhost:3001${scormPath}`;
   };
 
@@ -70,7 +68,9 @@ export default function CursoPage({ params }: Props) {
           <p className="text-xl font-semibold text-green-700">Precio: ${curso.precio}</p>
 
           <p className="text-sm text-gray-600">
-            {curso.certificadoDisponible ? 'Incluye certificación al finalizar.' : 'No incluye certificación.'}
+            {curso.certificadoDisponible
+              ? 'Incluye certificación al finalizar.'
+              : 'No incluye certificación.'}
           </p>
 
           <button
@@ -84,29 +84,21 @@ export default function CursoPage({ params }: Props) {
         <div className="text-center space-y-6 border rounded-lg shadow p-6 bg-white">
           <h1 className="text-3xl font-bold mb-4">Contenido del Curso: {curso.titulo}</h1>
 
-          {curso.archivoScorm ? (
+          {curso.archivoScorm && curso.archivoScorm.indexOf('.html') !== -1 ? (
             <div className="mt-6 p-4 border border-blue-200 bg-blue-50 rounded-lg flex flex-col items-center">
-              <p className="text-lg font-semibold text-blue-800 mb-4">Iniciando curso SCORM...</p>
               <iframe
+                key={curso.archivoScorm}
                 src={getScormLaunchUrl(curso.archivoScorm)}
-                title={`Curso SCORM: ${curso.titulo}`}
-                className="w-full h-[600px] border-none rounded-md shadow-lg"
+                width="100%"
+                height="600px"
+                title={`SCORM Course: ${curso.titulo}`}
+                frameBorder="0"
                 allowFullScreen
-              ></iframe>
+              />
             </div>
           ) : (
-            <>
-              <p className="text-lg font-semibold mb-4">Contenido modular del curso:</p>
-              <CursoDetalle curso={curso} />
-            </>
+            <p className="text-gray-600">No hay contenido SCORM válido disponible para este curso.</p>
           )}
-
-          <button
-            onClick={() => setPagado(false)}
-            className="mt-6 px-4 py-2 bg-gray-300 text-gray-800 font-semibold rounded hover:bg-gray-400 transition"
-          >
-            Volver a detalles del curso
-          </button>
         </div>
       )}
     </div>

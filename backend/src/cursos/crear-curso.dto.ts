@@ -5,10 +5,28 @@ import {
   ValidateNested,
   IsOptional,
   IsArray,
+  IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
+// Mejor definir enums afuera para usarlos en IsEnum
+export enum TipoCurso {
+  DOCENTES = 'Docentes',
+  ESTUDIANTES = 'Estudiantes',
+  EMPRESAS = 'Empresas',
+}
+
+export enum ModalidadCurso {
+  EN_VIVO = 'en vivo',
+  GRABADO = 'grabado',
+  MIXTO = 'mixto',
+}
+
 export class ModuloDto {
+  @IsOptional()
+  @IsNumber()
+  id?: number;
+
   @IsString()
   titulo: string;
 
@@ -17,11 +35,15 @@ export class ModuloDto {
 
   @IsOptional()
   @IsString()
-  videoUrl?: string | null; 
+  videoUrl?: string | null;
 
   @IsOptional()
   @IsString()
   pdfUrl?: string | null;
+
+  @IsOptional()
+  @IsString()
+  imageUrl?: string | null;
 }
 
 export class CrearCursoDto {
@@ -37,14 +59,14 @@ export class CrearCursoDto {
   @IsNumber()
   duracionHoras: number;
 
-  @IsString()
-  tipo: 'Docentes' | 'Empresas';
+  @IsEnum(TipoCurso)
+  tipo: TipoCurso;
 
   @IsString()
   categoria: string;
 
-  @IsString()
-  modalidad: 'en vivo' | 'grabado' | 'mixto';
+  @IsEnum(ModalidadCurso)
+  modalidad: ModalidadCurso;
 
   @IsBoolean()
   certificadoDisponible: boolean;

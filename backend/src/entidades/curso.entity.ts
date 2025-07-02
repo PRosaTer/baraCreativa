@@ -1,3 +1,4 @@
+// src/entidades/curso.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -34,7 +35,7 @@ export class Curso {
   @Column({ type: 'int', default: 0 })
   duracionHoras: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0.00 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0.0 })
   precio: number;
 
   @Column({ default: 'grabado' })

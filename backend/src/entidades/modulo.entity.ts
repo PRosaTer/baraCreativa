@@ -1,3 +1,4 @@
+// src/entidades/modulo.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Curso } from './curso.entity';
 
