@@ -40,7 +40,6 @@ export default function CursoPage() {
 
   const getScormLaunchUrl = (scormPath?: string | null) => {
     if (!scormPath || typeof scormPath !== 'string') return '';
-    // scormPath debe incluir el archivo HTML (ej: /uploads/scorm_unzipped_courses/uuid/index.html)
     return `http://localhost:3001${scormPath}`;
   };
 

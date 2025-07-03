@@ -1,4 +1,3 @@
-// backend/script/actualizar-scorm-entrypoint.ts
 import { DataSource } from 'typeorm';
 import { Curso } from '../src/entidades/curso.entity';
 import { ModuloEntity } from '../src/entidades/modulo.entity';
@@ -42,7 +41,7 @@ async function main() {
 
   const cursoRepo = dataSource.getRepository(Curso);
 
-  const cursoId = 74; // Cambia si querés otro ID
+  const cursoId = 76; // Cambia si querés otro ID
   const curso = await cursoRepo.findOneBy({ id: cursoId });
 
   if (curso) {

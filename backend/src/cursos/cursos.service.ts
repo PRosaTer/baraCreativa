@@ -46,7 +46,7 @@ export class CursosService {
     const curso = await this.obtenerCursoPorId(id);
     for (const key in datos) {
       if (Object.prototype.hasOwnProperty.call(datos, key)) {
-        // @ts-ignore
+
         curso[key] = datos[key];
       }
     }
@@ -76,12 +76,11 @@ export class CursosService {
     );
 
     try {
-      // Crear carpeta destino si no existe
       if (!fs.existsSync(destinationPath)) {
         fs.mkdirSync(destinationPath, { recursive: true });
       }
 
-      // Abrir zip y verificar imsmanifest.xml
+
       const zip = new AdmZip(scormZipPath);
       const imsManifestEntry = zip.getEntry('imsmanifest.xml');
 
@@ -94,7 +93,7 @@ export class CursosService {
 
       zip.extractAllTo(destinationPath, true);
 
-      // Leer imsmanifest.xml para determinar archivo de entrada SCORM
+
       const imsManifestContent = imsManifestEntry.getData().toString('utf8');
       let scormEntryPoint = '';
 
@@ -104,7 +103,6 @@ export class CursosService {
 
       if (resourceHrefMatch && resourceHrefMatch[1]) {
         scormEntryPoint = resourceHrefMatch[1];
-        // Limpiar query params y slash inicial
         const queryParamIndex = scormEntryPoint.indexOf('?');
         if (queryParamIndex !== -1) {
           scormEntryPoint = scormEntryPoint.substring(0, queryParamIndex);
@@ -122,7 +120,7 @@ export class CursosService {
         );
       }
 
-      // Si ya había un SCORM anterior, eliminar la carpeta vieja
+   
       if (curso.archivoScorm) {
         const prevParts = curso.archivoScorm.split('/');
         const prevFolder = prevParts.length > 3 ? prevParts[3] : null;
@@ -139,13 +137,13 @@ export class CursosService {
         }
       }
 
-      // Guardar la ruta completa del SCORM con el archivo de entrada detectado
+   
       const scormDbPath = `/uploads/scorm_unzipped_courses/${uniqueFolderName}/${scormEntryPoint}`;
 
       curso.archivoScorm = scormDbPath;
       await this.cursosRepository.save(curso);
 
-      // Borrar el zip original después de extraer
+    
       fs.unlinkSync(scormZipPath);
 
       return curso;

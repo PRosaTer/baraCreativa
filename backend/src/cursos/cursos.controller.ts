@@ -111,7 +111,10 @@ export class CursosController {
       limits: { fileSize: 50 * 1024 * 1024 },
     }),
   )
-  async subirScormNuevo(@UploadedFile() scormFile: Express.Multer.File) {
+  async subirScormNuevo(
+    @UploadedFile() scormFile: Express.Multer.File,
+    @Body('cursoId', ParseIntPipe) cursoId: number,
+  ) {
     if (!scormFile) throw new BadRequestException('Archivo SCORM requerido');
 
     const scormZipPath = scormFile.path;
@@ -141,10 +144,16 @@ export class CursosController {
       zip.extractAllTo(destinationPath, true);
       fs.unlinkSync(scormZipPath);
 
+      const curso = await this.cursosService.obtenerCursoPorId(cursoId);
+      if (!curso) throw new NotFoundException('Curso no encontrado');
+
+      const proxyPath = `/uploads/scorm_unzipped_courses/${uniqueFolderName}/proxy.html`;
+      curso.archivoScorm = proxyPath;
+      await this.cursosService.actualizarCurso(cursoId, { archivoScorm: proxyPath });
+
       return {
-        message: 'Archivo SCORM subido y descomprimido correctamente',
-        folder: uniqueFolderName,
-        path: `/uploads/scorm_unzipped_courses/${uniqueFolderName}/`,
+        message: 'Archivo SCORM subido, descomprimido y curso actualizado automáticamente',
+        path: proxyPath,
       };
     } catch (error) {
       console.error('Error al descomprimir el archivo SCORM:', error);
@@ -154,45 +163,6 @@ export class CursosController {
       if (fs.existsSync(destinationPath)) fs.rmSync(destinationPath, { recursive: true, force: true });
 
       throw new InternalServerErrorException('Error al descomprimir el archivo SCORM');
-    }
-  }
-
-  @Patch(':id/scorm-file')
-  @UseInterceptors(
-    FileInterceptor('scormFile', {
-      storage: diskStorage({
-        destination: join(process.cwd(), 'uploads', 'scorm'),
-        filename: (req, file, cb) => {
-          const uniqueName = uuidv4() + extname(file.originalname);
-          cb(null, uniqueName);
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        if (
-          file.mimetype === 'application/zip' ||
-          file.mimetype === 'application/x-zip-compressed'
-        )
-          cb(null, true);
-        else cb(new BadRequestException('Solo archivos .zip permitidos'), false);
-      },
-      limits: { fileSize: 50 * 1024 * 1024 },
-    }),
-  )
-  async actualizarArchivoScorm(
-    @Param('id', ParseIntPipe) id: number,
-    @UploadedFile() scormFile: Express.Multer.File,
-  ) {
-    if (!scormFile) throw new BadRequestException('Archivo SCORM requerido');
-    try {
-      const cursoActualizado = await this.cursosService.actualizarArchivoScorm(id, scormFile);
-      return {
-        message: 'Archivo SCORM actualizado correctamente',
-        curso: cursoActualizado,
-      };
-    } catch (error) {
-      console.error(error);
-      if (error instanceof NotFoundException || error instanceof BadRequestException) throw error;
-      throw new InternalServerErrorException('Error al actualizar el archivo SCORM.');
     }
   }
 }

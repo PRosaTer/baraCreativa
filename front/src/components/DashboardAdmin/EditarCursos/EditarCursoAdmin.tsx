@@ -130,7 +130,6 @@ const EditarCursoAdmin: React.FC<Props> = ({ curso, onGuardar, onCancelar }) => 
       }
 
       setExito('Curso actualizado correctamente');
-      // Actualizamos el curso completo luego de guardar
       const cursoActualizado = await fetch(`/api/cursos/${curso.id}`).then(res => res.json());
       await onGuardar(cursoActualizado);
     } catch (error) {

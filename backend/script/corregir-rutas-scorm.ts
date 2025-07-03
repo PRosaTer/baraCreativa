@@ -10,7 +10,7 @@ import { Pago } from '../src/entidades/pago.entity';
 import { ReporteProgresoEntity } from '../src/entidades/reporte-progreso.entity';
 import { Resena } from '../src/entidades/resena.entity';
 import { Usuario } from '../src/entidades/usuario.entity';
-import { ContactoSoporte } from '../src/entidades/contacto-soporte.entity'; // <-- corregido
+import { ContactoSoporte } from '../src/entidades/contacto-soporte.entity';
 
 async function main() {
   const dataSource = new DataSource({

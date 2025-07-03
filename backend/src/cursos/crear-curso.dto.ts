@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-// Mejor definir enums afuera para usarlos en IsEnum
+
 export enum TipoCurso {
   DOCENTES = 'Docentes',
   ESTUDIANTES = 'Estudiantes',
