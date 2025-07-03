@@ -19,6 +19,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { SubirScormDto } from '../types/subir-scorm.dto';
 
 @Controller('api/cursos')
 export class CursosController {
@@ -36,7 +37,7 @@ export class CursosController {
     return curso;
   }
 
-  @Post()
+  @Post() 
   crearCurso(@Body() crearCursoDto: CrearCursoDto) {
     return this.cursosService.crearCurso(crearCursoDto);
   }
@@ -55,40 +56,6 @@ export class CursosController {
     return { message: `Curso con ID ${id} eliminado correctamente` };
   }
 
-  @Post(':id/imagen')
-  @UseInterceptors(
-    FileInterceptor('imagen', {
-      storage: diskStorage({
-        destination: join(process.cwd(), 'uploads', 'imagenes-cursos'),
-        filename: (req, file, cb) => {
-          const uniqueName = uuidv4() + extname(file.originalname);
-          cb(null, uniqueName);
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) cb(null, true);
-        else cb(new BadRequestException('Solo imágenes permitidas'), false);
-      },
-      limits: { fileSize: 5 * 1024 * 1024 },
-    }),
-  )
-  async subirImagenCurso(
-    @Param('id', ParseIntPipe) id: number,
-    @UploadedFile() imagen: Express.Multer.File,
-  ) {
-    if (!imagen) throw new BadRequestException('Imagen requerida');
-
-    const imagenCursoPath = `/uploads/imagenes-cursos/${imagen.filename}`;
-    const cursoActualizado = await this.cursosService.actualizarCurso(id, {
-      imagenCurso: imagenCursoPath,
-    });
-
-    return {
-      message: 'Imagen subida y curso actualizado correctamente',
-      curso: cursoActualizado,
-      rutaImagen: imagenCursoPath,
-    };
-  }
 
   @Post('scorm_unzipped_courses')
   @UseInterceptors(
@@ -113,8 +80,10 @@ export class CursosController {
   )
   async subirScormNuevo(
     @UploadedFile() scormFile: Express.Multer.File,
-    @Body('cursoId', ParseIntPipe) cursoId: number,
+    @Body() body: SubirScormDto,
   ) {
+    const { cursoId } = body;
+
     if (!scormFile) throw new BadRequestException('Archivo SCORM requerido');
 
     const scormZipPath = scormFile.path;
@@ -148,7 +117,6 @@ export class CursosController {
       if (!curso) throw new NotFoundException('Curso no encontrado');
 
       const proxyPath = `/uploads/scorm_unzipped_courses/${uniqueFolderName}/proxy.html`;
-      curso.archivoScorm = proxyPath;
       await this.cursosService.actualizarCurso(cursoId, { archivoScorm: proxyPath });
 
       return {
@@ -162,6 +130,9 @@ export class CursosController {
       if (fs.existsSync(scormZipPath)) fs.unlinkSync(scormZipPath);
       if (fs.existsSync(destinationPath)) fs.rmSync(destinationPath, { recursive: true, force: true });
 
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
       throw new InternalServerErrorException('Error al descomprimir el archivo SCORM');
     }
   }

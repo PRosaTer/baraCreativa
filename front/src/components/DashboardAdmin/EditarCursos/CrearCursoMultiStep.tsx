@@ -2,6 +2,7 @@
 
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { Curso, CursoForm } from '@/app/types/curso';
+import { ModuloDto, TipoCurso, ModalidadCurso } from '@/app/types/shared-backend-types';
 
 interface Props {
   curso?: Curso;
@@ -11,33 +12,32 @@ interface Props {
 
 const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) => {
   const [form, setForm] = useState<CursoForm>({
-  titulo: curso?.titulo || '',
-  descripcion: curso?.descripcion || '',
-  precio: curso?.precio || '',
-  duracionHoras: curso?.duracionHoras || '',
-  tipo: curso?.tipo || '',
-  categoria: curso?.categoria || '',
-  modalidad: curso?.modalidad || '',
-  certificadoDisponible: curso?.certificadoDisponible || false,
-  badgeDisponible: curso?.badgeDisponible || false,
-  imagenCurso: curso?.imagenCurso || null,
-  archivoScorm: curso?.archivoScorm || null,
-  modulos: curso?.modulos
-    ? curso.modulos.map((m) => ({
-        id: m.id,
-        titulo: m.titulo,
-        descripcion: m.descripcion,
-        videoUrl: m.videoUrl,
-        pdfUrl: m.pdfUrl,
-        imageUrl: m.imageUrl,
-        videoFile: null,
-        pdfFile: null,
-        imageFile: null,
-      }))
-    : [], 
-  newScormFile: null,
-});
-
+    titulo: curso?.titulo || '',
+    descripcion: curso?.descripcion || '',
+    precio: curso?.precio || '',
+    duracionHoras: curso?.duracionHoras || '',
+    tipo: curso?.tipo || TipoCurso.ESTUDIANTES, 
+    categoria: curso?.categoria || '',
+    modalidad: curso?.modalidad || ModalidadCurso.GRABADO, 
+    certificadoDisponible: curso?.certificadoDisponible || false,
+    badgeDisponible: curso?.badgeDisponible || false,
+    imagenCurso: curso?.imagenCurso || null,
+    archivoScorm: curso?.archivoScorm || null,
+    modulos: curso?.modulos
+      ? curso.modulos.map((m) => ({
+          id: m.id,
+          titulo: m.titulo,
+          descripcion: m.descripcion,
+          videoUrl: m.videoUrl,
+          pdfUrl: m.pdfUrl,
+          imageUrl: m.imageUrl,
+          videoFile: null,
+          pdfFile: null,
+          imageFile: null,
+        }))
+      : [],
+    newScormFile: null,
+  });
 
   const [error, setError] = useState('');
   const [exito, setExito] = useState('');
@@ -50,6 +50,18 @@ const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) 
       setForm(prev => ({ ...prev, [name]: target.checked }));
       return;
     }
+
+
+    if (name === 'tipo') {
+      setForm(prev => ({ ...prev, tipo: value as TipoCurso }));
+      return;
+    }
+    if (name === 'modalidad') {
+      setForm(prev => ({ ...prev, modalidad: value as ModalidadCurso }));
+      return;
+    }
+
+
     setForm(prev => ({
       ...prev,
       [name]: name === 'precio' || name === 'duracionHoras' ? (value === '' ? '' : Number(value)) : value,
@@ -84,27 +96,8 @@ const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) 
     setLoading(true);
 
     try {
-      let archivoScormPath = curso?.archivoScorm || null;
-
-      if (form.newScormFile) {
-        const formDataScorm = new FormData();
-        formDataScorm.append('scormFile', form.newScormFile);
-
-        const resScorm = await fetch('http://localhost:3001/api/cursos/scorm_unzipped_courses', {
-          method: 'POST',
-          body: formDataScorm,
-        });
-
-        if (!resScorm.ok) {
-          const errData = await resScorm.json();
-          throw new Error(errData.message || 'Error al subir archivo SCORM');
-        }
-
-        const scormResult = await resScorm.json();
-        archivoScormPath = scormResult.path;
-      }
-
-      const postData = {
+      let nuevoCurso: Curso; 
+      const courseDataForApi: Omit<Curso, 'id' | 'modulos' | 'videoCurso' | 'pdfCurso'> & { modulos?: ModuloDto[] } = {
         titulo: form.titulo,
         descripcion: form.descripcion,
         precio: Number(form.precio),
@@ -114,16 +107,27 @@ const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) 
         modalidad: form.modalidad,
         certificadoDisponible: form.certificadoDisponible,
         badgeDisponible: form.badgeDisponible,
-        archivoScorm: archivoScormPath,
+        archivoScorm: form.newScormFile ? null : (curso?.archivoScorm || null),
       };
 
-      let nuevoCurso: Curso;
 
-      if (curso) {
+      if (form.modulos) {
+        courseDataForApi.modulos = form.modulos.map(m => ({
+          id: m.id,
+          titulo: m.titulo,
+          descripcion: m.descripcion,
+          videoUrl: m.videoUrl,
+          pdfUrl: m.pdfUrl,
+          imageUrl: m.imageUrl,
+        }));
+      }
+
+   
+      if (curso) { 
         const resUpdate = await fetch(`http://localhost:3001/api/cursos/${curso.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(postData),
+          body: JSON.stringify(courseDataForApi),
         });
         if (!resUpdate.ok) {
           const errData = await resUpdate.json();
@@ -134,7 +138,7 @@ const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) 
         const resCreate = await fetch('http://localhost:3001/api/cursos', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(postData),
+          body: JSON.stringify(courseDataForApi),
         });
         if (!resCreate.ok) {
           const errData = await resCreate.json();
@@ -142,6 +146,24 @@ const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) 
         }
         nuevoCurso = await resCreate.json();
       }
+
+
+      if (form.newScormFile) {
+        const formDataScorm = new FormData();
+        formDataScorm.append('scormFile', form.newScormFile);
+        formDataScorm.append('cursoId', nuevoCurso.id.toString());
+
+        const resScorm = await fetch('http://localhost:3001/api/cursos/scorm_unzipped_courses', {
+          method: 'POST',
+          body: formDataScorm,
+        });
+
+        if (!resScorm.ok) {
+          const errData = await resScorm.json();
+          throw new Error(errData.message || 'Error al subir archivo SCORM');
+        }
+      }
+
 
       if (form.imagenCurso && form.imagenCurso instanceof File) {
         const formDataImagen = new FormData();
@@ -153,7 +175,7 @@ const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) 
         if (!resImg.ok) {
           const errData = await resImg.json();
           throw new Error(errData.message || 'Error al subir imagen del curso');
-        }
+        };
       }
 
       setExito('Curso guardado correctamente');

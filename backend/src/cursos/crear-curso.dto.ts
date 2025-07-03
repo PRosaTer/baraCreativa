@@ -9,7 +9,6 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-
 export enum TipoCurso {
   DOCENTES = 'Docentes',
   ESTUDIANTES = 'Estudiantes',
@@ -47,44 +46,44 @@ export class ModuloDto {
 }
 
 export class CrearCursoDto {
-  @IsString()
+  @IsString({ message: 'El título debe ser una cadena de texto.' })
   titulo: string;
 
-  @IsString()
+  @IsString({ message: 'La descripción debe ser una cadena de texto.' })
   descripcion: string;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'El precio debe ser un número válido.' })
   precio: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'La duración en horas debe ser un número válido.' })
   duracionHoras: number;
 
-  @IsEnum(TipoCurso)
+  @IsEnum(TipoCurso, { message: 'El tipo de curso no es válido.' })
   tipo: TipoCurso;
 
-  @IsString()
+  @IsString({ message: 'La categoría debe ser una cadena de texto.' })
   categoria: string;
 
-  @IsEnum(ModalidadCurso)
+  @IsEnum(ModalidadCurso, { message: 'La modalidad de curso no es válida.' })
   modalidad: ModalidadCurso;
 
-  @IsBoolean()
+  @IsBoolean({ message: 'El campo certificadoDisponible debe ser booleano.' })
   certificadoDisponible: boolean;
 
-  @IsBoolean()
+  @IsBoolean({ message: 'El campo badgeDisponible debe ser booleano.' })
   badgeDisponible: boolean;
 
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'La imagen del curso debe ser una cadena de texto (URL/ruta).' })
   imagenCurso?: string | null;
 
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'El archivo SCORM debe ser una cadena de texto (URL/ruta).' })
   archivoScorm?: string | null;
 
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => ModuloDto)
-  @IsArray()
+  @IsArray({ message: 'Los módulos deben ser un arreglo.' })
   modulos?: ModuloDto[];
 }
