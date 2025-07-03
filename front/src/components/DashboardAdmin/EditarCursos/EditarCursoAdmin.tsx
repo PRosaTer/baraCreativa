@@ -1,363 +1,280 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
-import { Curso, CursoForm, Modulo, EditableModuloForm, ModuloForm } from '@/app/types/curso';
-import ListaModulos from './ListaModulos';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
+import { CursoForm, Curso } from '@/app/types/curso';
 
 interface Props {
   curso: Curso;
-  onGuardar: (cursoGuardado: Curso) => void;
+  onGuardar: (curso: Curso) => Promise<void>;
   onCancelar: () => void;
 }
 
-export default function EditarCursoAdmin({ curso, onGuardar, onCancelar }: Props) {
-  const [formData, setFormData] = useState<CursoForm>({
+const EditarCursoAdmin: React.FC<Props> = ({ curso, onGuardar, onCancelar }) => {
+  const [form, setForm] = useState<CursoForm>({
     titulo: curso.titulo || '',
     descripcion: curso.descripcion || '',
+    precio: curso.precio || '',
+    duracionHoras: curso.duracionHoras || '',
     tipo: curso.tipo || '',
     categoria: curso.categoria || '',
-    duracionHoras: curso.duracionHoras || '',
-    precio: typeof curso.precio === 'string' ? (parseFloat(curso.precio) || '') : curso.precio,
     modalidad: curso.modalidad || '',
     certificadoDisponible: curso.certificadoDisponible || false,
     badgeDisponible: curso.badgeDisponible || false,
-    imagenCurso: null,
-    modulos: curso.modulos?.map(m => ({ 
-      id: m.id,
-      titulo: m.titulo,
-      descripcion: m.descripcion,
-      videoUrl: m.videoUrl || null,
-      pdfUrl: m.pdfUrl || null,
-      videos: [], 
-      pdfs: [],
-      imagenes: [],
-    })) || [],
+    imagenCurso: curso.imagenCurso || null,
+    archivoScorm: curso.archivoScorm || null,
+    modulos: curso.modulos || [],
+    newScormFile: null,
   });
 
+  const [error, setError] = useState('');
+  const [exito, setExito] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
 
-  useEffect(() => {
-    if (curso.imagenCurso) {
-      setExistingImageUrl(`http://localhost:3001/uploads/imagenes-cursos/${curso.imagenCurso}`);
-    } else {
-      setExistingImageUrl(null);
-    }
-
-    setFormData({
-      titulo: curso.titulo || '',
-      descripcion: curso.descripcion || '',
-      tipo: curso.tipo || '',
-      categoria: curso.categoria || '',
-      duracionHoras: curso.duracionHoras || '',
-      precio: typeof curso.precio === 'string' ? (parseFloat(curso.precio) || '') : curso.precio,
-      modalidad: curso.modalidad || '',
-      certificadoDisponible: curso.certificadoDisponible || false,
-      badgeDisponible: curso.badgeDisponible || false,
-      imagenCurso: null,
-      modulos: curso.modulos?.map((m: Modulo) => ({
-        id: m.id,
-        titulo: m.titulo,
-        descripcion: m.descripcion,
-        videoUrl: m.videoUrl || null,
-        pdfUrl: m.pdfUrl || null,
-        videos: [],
-        pdfs: [],
-        imagenes: [],
-      })) || [],
-    });
-  }, [curso]);
-
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } = e.target as HTMLInputElement;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setFormData((prev) => ({
+    if (type === 'checkbox') {
+      const target = e.target as HTMLInputElement;
+      setForm(prev => ({
         ...prev,
-        imagenCurso: e.target.files![0],
+        [name]: target.checked,
       }));
-      setExistingImageUrl(URL.createObjectURL(e.target.files![0]));
+      return;
     }
+
+    setForm(prev => ({
+      ...prev,
+      [name]:
+        name === 'precio' || name === 'duracionHoras'
+          ? value === '' ? '' : Number(value)
+          : value,
+    }));
   };
 
-  const handleModificarModulo = (index: number, campo: keyof ModuloForm, valor: string | File[] | string | null) => {
-    setFormData((prev) => {
-      const nuevosModulos: EditableModuloForm[] = [...prev.modulos];
-      const currentModulo = nuevosModulos[index];
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, files } = e.target;
+    if (!files || files.length === 0) return;
 
-      if (campo === 'videos' || campo === 'pdfs' || campo === 'imagenes') {
-        if (Array.isArray(valor)) {
-          currentModulo[campo] = valor;
-        } else {
-          console.error(`Tipo inesperado para ${campo}:`, valor);
-        }
-      } else if (campo === 'videoUrl' || campo === 'pdfUrl') {
-        currentModulo[campo] = valor as (string | null);
-      } else if (campo === 'titulo' || campo === 'descripcion') {
-        currentModulo[campo] = valor as string;
+    if (name === 'newScormFile') {
+      const file = files[0];
+      if (file.type !== 'application/zip' && file.type !== 'application/x-zip-compressed') {
+        setError('Solo archivos .zip permitidos para SCORM');
+        return;
       }
-
-      return { ...prev, modulos: nuevosModulos };
-    });
-  };
-
-  const handleAgregarModulo = () => {
-    setFormData((prev) => ({
-      ...prev,
-      modulos: [...prev.modulos, { titulo: '', descripcion: '', videos: [], pdfs: [], imagenes: [], videoUrl: null, pdfUrl: null }],
-    }));
-  };
-
-  const handleEliminarModulo = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      modulos: prev.modulos.filter((_, i) => i !== index),
-    }));
-  };
-
-
-  const handleGuardar = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-
-    const courseTextData: Partial<Curso> = {
-      titulo: formData.titulo,
-      descripcion: formData.descripcion,
-      tipo: formData.tipo,
-      categoria: formData.categoria,
-      duracionHoras: formData.duracionHoras === '' ? 0 : Number(formData.duracionHoras),
-      precio: formData.precio === '' ? 0 : Number(formData.precio),
-      modalidad: formData.modalidad,
-      certificadoDisponible: formData.certificadoDisponible,
-      badgeDisponible: formData.badgeDisponible,
-    };
-
-
-    if (!curso.archivoScorm && formData.modulos) {
-        courseTextData.modulos = formData.modulos.map((m: EditableModuloForm) => ({ 
-            id: m.id, 
-            titulo: m.titulo,
-            descripcion: m.descripcion,
-            videoUrl: m.videoUrl,
-            pdfUrl: m.pdfUrl,
-        }));
+      setForm(prev => ({ ...prev, newScormFile: file }));
+      setError('');
+    } else if (name === 'imagenCurso') {
+      const file = files[0];
+      if (!file.type.startsWith('image/')) {
+        setError('Solo imágenes permitidas para la imagen del curso');
+        return;
+      }
+      setForm(prev => ({ ...prev, imagenCurso: file }));
+      setError('');
     }
+  };
 
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setExito('');
+    setLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:3001/api/cursos/${curso.id}`, {
+      const patchData = {
+        titulo: form.titulo,
+        descripcion: form.descripcion,
+        precio: Number(form.precio),
+        duracionHoras: Number(form.duracionHoras),
+        tipo: form.tipo,
+        categoria: form.categoria,
+        modalidad: form.modalidad,
+        certificadoDisponible: form.certificadoDisponible,
+        badgeDisponible: form.badgeDisponible,
+      };
+
+      const resInfo = await fetch(`/api/cursos/${curso.id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(courseTextData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patchData),
       });
-
-      if (!response.ok) {
-        const errorData: { message?: string } = await response.json();
-        throw new Error(errorData.message || 'Error al actualizar el curso (datos de texto).');
+      if (!resInfo.ok) {
+        const errData = await resInfo.json();
+        throw new Error(errData.message || 'Error al actualizar información del curso');
       }
 
-      let updatedCurso: Curso = await response.json();
-
-      if (formData.imagenCurso) {
-        const imageFormData = new FormData();
-        imageFormData.append('imagen', formData.imagenCurso);
-
-        const imageResponse = await fetch(`http://localhost:3001/api/cursos/${curso.id}/imagen`, {
+      if (form.imagenCurso && form.imagenCurso instanceof File) {
+        const formDataImagen = new FormData();
+        formDataImagen.append('imagen', form.imagenCurso);
+        const resImg = await fetch(`/api/cursos/${curso.id}/imagen`, {
           method: 'POST',
-          body: imageFormData,
+          body: formDataImagen,
         });
-
-        if (!imageResponse.ok) {
-          const errorData: { message?: string } = await imageResponse.json();
-          throw new Error(errorData.message || 'Error al subir la imagen del curso.');
+        if (!resImg.ok) {
+          const errData = await resImg.json();
+          throw new Error(errData.message || 'Error al subir imagen del curso');
         }
-        const imageData: { curso: Curso } = await imageResponse.json();
-        updatedCurso = imageData.curso;
       }
 
-      onGuardar(updatedCurso);
-    } catch (error: unknown) {
-      console.error('Error al guardar el curso:', error);
-      if (error instanceof Error) {
-        alert(`Error al guardar el curso: ${error.message}`);
-      } else {
-        alert('Error al guardar el curso: Error desconocido');
+      if (form.newScormFile) {
+        const formDataScorm = new FormData();
+        formDataScorm.append('scormFile', form.newScormFile);
+        const resScorm = await fetch(`/api/cursos/${curso.id}/scorm-file`, {
+          method: 'PATCH',
+          body: formDataScorm,
+        });
+        if (!resScorm.ok) {
+          const errData = await resScorm.json();
+          throw new Error(errData.message || 'Error al subir archivo SCORM');
+        }
       }
+
+      setExito('Curso actualizado correctamente');
+      const cursoActualizado = await fetch(`/api/cursos/${curso.id}`).then(res => res.json());
+      await onGuardar(cursoActualizado);
+    } catch (error) {
+      if (error instanceof Error) setError(error.message);
+      else setError('Error inesperado');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="p-4 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">Editar Curso: {curso.titulo}</h2>
-      <form onSubmit={handleGuardar}>
-        <div className="mb-4">
-          <label htmlFor="titulo" className="block text-sm font-medium text-gray-700">Título</label>
-          <input
-            type="text"
-            id="titulo"
-            name="titulo"
-            value={formData.titulo}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">Descripción</label>
-          <textarea
-            id="descripcion"
-            name="descripcion"
-            value={formData.descripcion}
-            onChange={handleChange}
-            rows={3}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo</label>
-          <select
-            id="tipo"
-            name="tipo"
-            value={formData.tipo}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-          >
-            <option value="">Seleccione un tipo</option>
-            <option value="Docentes">Docentes</option>
-            <option value="Empresas">Empresas</option>
-          </select>
-        </div>
-        <div className="mb-4">
-          <label htmlFor="categoria" className="block text-sm font-medium text-gray-700">Categoría</label>
-          <input
-            type="text"
-            id="categoria"
-            name="categoria"
-            value={formData.categoria}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="duracionHoras" className="block text-sm font-medium text-gray-700">Duración (horas)</label>
-          <input
-            type="number"
-            id="duracionHoras"
-            name="duracionHoras"
-            value={formData.duracionHoras}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="precio" className="block text-sm font-medium text-gray-700">Precio</label>
-          <input
-            type="number"
-            id="precio"
-            name="precio"
-            value={formData.precio}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="modalidad" className="block text-sm font-medium text-gray-700">Modalidad</label>
-          <select
-            id="modalidad"
-            name="modalidad"
-            value={formData.modalidad}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-          >
-            <option value="">Seleccione una modalidad</option>
-            <option value="en vivo">En vivo</option>
-            <option value="grabado">Grabado</option>
-            <option value="mixto">Mixto</option>
-          </select>
-        </div>
-        <div className="mb-4 flex items-center">
-          <input
-            type="checkbox"
-            id="certificadoDisponible"
-            name="certificadoDisponible"
-            checked={formData.certificadoDisponible}
-            onChange={handleChange}
-            className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-          />
-          <label htmlFor="certificadoDisponible" className="ml-2 block text-sm font-medium text-gray-700">Certificado Disponible</label>
-        </div>
-        <div className="mb-4 flex items-center">
-          <input
-            type="checkbox"
-            id="badgeDisponible"
-            name="badgeDisponible"
-            checked={formData.badgeDisponible}
-            onChange={handleChange}
-            className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-          />
-          <label htmlFor="badgeDisponible" className="ml-2 block text-sm font-medium text-gray-700">Badge Disponible</label>
-        </div>
+    <form onSubmit={handleSubmit} style={formStyle}>
+      <h2 style={{ textAlign: 'center', marginBottom: 20 }}>Editar Curso SCORM</h2>
 
- 
-        <div className="mb-4">
-          <label htmlFor="imagenCurso" className="block text-sm font-medium text-gray-700">Imagen del Curso</label>
-          {existingImageUrl && (
-            <div className="mt-2 mb-4">
-              <p className="text-xs text-gray-500 mb-1">Imagen actual:</p>
-              <img src={existingImageUrl} alt="Imagen actual del curso" className="max-w-xs h-auto rounded-md shadow" />
-            </div>
-          )}
-          <input
-            type="file"
-            id="imagenCurso"
-            name="imagenCurso"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="mt-1 block w-full text-sm text-gray-500
-                       file:mr-4 file:py-2 file:px-4
-                       file:rounded-full file:border-0
-                       file:text-sm file:font-semibold
-                       file:bg-blue-50 file:text-blue-700
-                       hover:file:bg-blue-100"
-          />
-        </div>
+      <label style={labelStyle}>Título</label>
+      <input type="text" name="titulo" value={form.titulo} onChange={handleChange} required style={inputStyle} />
 
+      <label style={labelStyle}>Descripción</label>
+      <textarea name="descripcion" value={form.descripcion} onChange={handleChange} rows={4} required style={{ ...inputStyle, resize: 'vertical' }} />
 
-        {!curso.archivoScorm && (
-          <div className="mb-6">
-            <h3 className="text-xl font-bold mb-3">Módulos del Curso</h3>
-            <ListaModulos
-              modulos={formData.modulos}
-              onAgregar={handleAgregarModulo}
-              onModificar={handleModificarModulo}
-              onEliminar={handleEliminarModulo}
-            />
-          </div>
-        )}
+      <label style={labelStyle}>Precio</label>
+      <input type="number" name="precio" value={form.precio} onChange={handleChange} min={0} step={0.01} style={inputStyle} />
 
+      <label style={labelStyle}>Duración (horas)</label>
+      <input type="number" name="duracionHoras" value={form.duracionHoras} onChange={handleChange} min={0} step={1} style={inputStyle} />
 
-        <div className="flex justify-end gap-3 mt-6">
-          <button
-            type="button"
-            onClick={onCancelar}
-            className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Guardar Cambios
-          </button>
-        </div>
-      </form>
-    </div>
+      <label style={labelStyle}>Tipo</label>
+      <select name="tipo" value={form.tipo} onChange={handleChange} required style={inputStyle}>
+        <option value="">Seleccione tipo</option>
+        <option value="Docentes">Docentes</option>
+        <option value="Estudiantes">Estudiantes</option>
+        <option value="Empresas">Empresas</option>
+      </select>
+
+      <label style={labelStyle}>Categoría</label>
+      <input type="text" name="categoria" value={form.categoria} onChange={handleChange} required style={inputStyle} />
+
+      <label style={labelStyle}>Modalidad</label>
+      <select name="modalidad" value={form.modalidad} onChange={handleChange} required style={inputStyle}>
+        <option value="">Seleccione modalidad</option>
+        <option value="en vivo">En vivo</option>
+        <option value="grabado">Grabado</option>
+        <option value="mixto">Mixto</option>
+      </select>
+
+      <label style={checkboxLabelStyle}>
+        <input type="checkbox" name="certificadoDisponible" checked={form.certificadoDisponible} onChange={handleChange} style={{ marginRight: 8 }} />
+        Certificado disponible
+      </label>
+
+      <label style={checkboxLabelStyle}>
+        <input type="checkbox" name="badgeDisponible" checked={form.badgeDisponible} onChange={handleChange} style={{ marginRight: 8 }} />
+        Badge disponible
+      </label>
+
+      <label style={labelStyle}>Imagen del curso (archivo o URL actual)</label>
+      <input type="file" name="imagenCurso" accept="image/*" onChange={handleFileChange} style={{ marginBottom: 20 }} />
+      {typeof form.imagenCurso === 'string' && form.imagenCurso && (
+        <img src={form.imagenCurso} alt="Imagen curso" style={{ maxWidth: '100%', maxHeight: 180, marginBottom: 20, borderRadius: 10 }} />
+      )}
+
+      <label style={labelStyle}>Archivo SCORM (.zip)</label>
+      <input type="file" name="newScormFile" accept=".zip" onChange={handleFileChange} style={{ marginBottom: 20 }} />
+
+      {error && <p style={{ color: '#8b0000', fontWeight: '700', marginBottom: 20 }}>{error}</p>}
+      {exito && <p style={{ color: '#065f46', fontWeight: '700', marginBottom: 20 }}>{exito}</p>}
+
+      <button
+        type="submit"
+        disabled={loading}
+        style={buttonStyle}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#f59e0b';
+          (e.currentTarget as HTMLButtonElement).style.color = '#5a1a01';
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#b91c1c';
+          (e.currentTarget as HTMLButtonElement).style.color = 'white';
+        }}
+      >
+        {loading ? 'Guardando...' : 'Guardar Cambios'}
+      </button>
+
+      <button
+        type="button"
+        onClick={onCancelar}
+        style={{ ...buttonStyle, backgroundColor: '#6b7280', marginTop: 10 }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#4b5563';
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#6b7280';
+        }}
+      >
+        Cancelar
+      </button>
+    </form>
   );
-}
+};
+
+const formStyle: React.CSSProperties = {
+  maxWidth: 700,
+  margin: '2rem auto',
+  padding: 24,
+  borderRadius: 15,
+  background: 'linear-gradient(135deg, #ff6a00, #fddb92)',
+  boxShadow: '0 10px 25px rgba(255, 105, 0, 0.3)',
+  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  color: '#5a1a01',
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '0.6rem',
+  borderRadius: 8,
+  border: 'none',
+  marginBottom: 16,
+  fontSize: 16,
+  boxShadow: 'inset 0 0 5px rgba(0,0,0,0.1)',
+};
+
+const labelStyle: React.CSSProperties = {
+  fontWeight: 600,
+  marginBottom: 6,
+  display: 'block',
+};
+
+const checkboxLabelStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  marginBottom: 12,
+};
+
+const buttonStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '0.8rem',
+  borderRadius: 10,
+  border: 'none',
+  backgroundColor: '#b91c1c',
+  color: 'white',
+  fontWeight: 700,
+  fontSize: '1.1rem',
+  cursor: 'pointer',
+  boxShadow: '0 5px 15px rgba(185, 28, 28, 0.5)',
+  transition: 'background-color 0.3s ease',
+};
+
+export default EditarCursoAdmin;
