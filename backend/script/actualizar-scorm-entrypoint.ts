@@ -11,6 +11,9 @@ import { ReporteProgresoEntity } from '../src/entidades/reporte-progreso.entity'
 import { Resena } from '../src/entidades/resena.entity';
 import { Usuario } from '../src/entidades/usuario.entity';
 import { ContactoSoporte } from '../src/entidades/contacto-soporte.entity';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as xml2js from 'xml2js';
 
 async function main() {
   const dataSource = new DataSource({
@@ -38,19 +41,49 @@ async function main() {
   });
 
   await dataSource.initialize();
-
   const cursoRepo = dataSource.getRepository(Curso);
 
-  const cursoId = 76; // Cambia si querés otro ID
+  const cursoId = 78; 
   const curso = await cursoRepo.findOneBy({ id: cursoId });
 
-  if (curso) {
-    curso.archivoScorm = `/uploads/scorm_unzipped_courses/8980814d-2464-474b-badd-892e1af3d0b2/proxy.html`;
-    await cursoRepo.save(curso);
-    console.log(`✅ Curso ID ${cursoId} actualizado correctamente con proxy.html`);
-  } else {
+  if (!curso) {
     console.log(`❌ No se encontró el curso con ID ${cursoId}`);
+    await dataSource.destroy();
+    return;
   }
+
+
+  const folderPath = curso.archivoScorm?.split('/proxy.html')[0];
+  
+
+  const absoluteFolderPath = path.join(process.cwd(), folderPath || ''); 
+  const manifestPath = path.join(absoluteFolderPath, 'imsmanifest.xml');
+
+  if (!fs.existsSync(manifestPath)) {
+    console.log(`❌ No se encontró imsmanifest.xml en: ${manifestPath}`);
+    await dataSource.destroy();
+    return;
+  }
+
+  const xmlData = fs.readFileSync(manifestPath, 'utf8');
+  const parser = new xml2js.Parser();
+  const manifest = await parser.parseStringPromise(xmlData);
+
+
+  const manifestIdentifier = manifest.manifest.$.identifier;
+
+
+  const resources = manifest.manifest.resources[0].resource;
+  const resourceIdentifier = resources[0].$.identifier;
+
+  const dataParam = `${manifestIdentifier}/${resourceIdentifier}`;
+  console.log(`✅ Identificado data: ${dataParam}`);
+
+ 
+  curso.archivoScorm = `${folderPath}/proxy.html?data=${encodeURIComponent(dataParam)}`;
+  await cursoRepo.save(curso);
+
+  console.log(`✅ Curso ID ${cursoId} actualizado correctamente con ruta: ${curso.archivoScorm}`);
 
   await dataSource.destroy();
 }
