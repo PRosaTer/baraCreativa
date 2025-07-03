@@ -6,6 +6,7 @@ import * as cookieParser from 'cookie-parser';
 import { join } from 'path';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as fs from 'fs';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -16,6 +17,13 @@ async function bootstrap() {
   });
 
   app.use(cookieParser());
+
+
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    transform: true,
+    forbidNonWhitelisted: true,
+  }));
 
   const uploadPath = join(process.cwd(), 'uploads', 'imagenes-cursos');
   if (!fs.existsSync(uploadPath)) {

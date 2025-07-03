@@ -35,7 +35,7 @@ export interface Curso {
   badgeDisponible: boolean;
   imagenCurso?: string | null;
   archivoScorm?: string | null;
-  modulos: Modulo[]; // ✅ Lo dejamos siempre definido (no opcional)
+  modulos: Modulo[];
 }
 
 export interface CursoForm {
@@ -44,13 +44,13 @@ export interface CursoForm {
   descripcion: string;
   precio: number | '';
   duracionHoras: number | '';
-  tipo: 'Docentes' | 'Estudiantes' | 'Empresas' | '';
+  tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
   categoria: string;
-  modalidad: 'en vivo' | 'grabado' | 'mixto' | '';
+  modalidad: 'en vivo' | 'grabado' | 'mixto';
   certificadoDisponible: boolean;
   badgeDisponible: boolean;
   imagenCurso?: File | string | null;
-  archivoScorm?: string | null; // ✅ La dejamos string | null (no File), porque se usa el newScormFile para el File
-  modulos: EditableModuloForm[]; // ✅ Lo dejamos siempre obligatorio (sin ?)
+  archivoScorm?: string | null; 
+  modulos: EditableModuloForm[];
   newScormFile?: File | null;
 }
