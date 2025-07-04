@@ -1,49 +1,51 @@
-// src/lib/services/auth.ts
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-interface PasswordResetResponse {
-  mensaje?: string;
-  error?: string;
+
+export async function solicitarRestablecimientoPassword(email: string) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/request-password-reset`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorMessage = data.message || 'Error desconocido al solicitar el restablecimiento.';
+      return { error: errorMessage };
+    }
+
+    return { mensaje: data.message };
+  } catch (error) {
+    console.error('Error de red al solicitar restablecimiento:', error);
+    return { error: 'Error de conexión con el servidor.' };
+  }
 }
 
-export async function confirmarRestablecimientoPassword(
-  token: string,
-  password: string
-): Promise<PasswordResetResponse> {
-  const url = "http://localhost:3001/password/confirmar";
-  
-  const respuesta = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token, password }),
-  });
 
-  const data = await respuesta.json();
+export async function confirmarRestablecimientoPassword(token: string, password: string) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token, password }),
+    });
 
-  if (!respuesta.ok) {
-    return { error: data.message || "Error al restablecer la contraseña" };
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorMessage = data.message || 'Error desconocido al restablecer la contraseña.';
+      return { error: errorMessage };
+    }
+
+    return { mensaje: data.message };
+  } catch (error) {
+    console.error('Error de red al confirmar restablecimiento:', error);
+    return { error: 'Error de conexión con el servidor.' };
   }
-
-  return { mensaje: data.mensaje };
-}
-
-export async function solicitarRestablecimientoPassword(
-  correoElectronico: string
-): Promise<PasswordResetResponse> {
-  const url = "http://localhost:3001/password/solicitar";
-
-  const respuesta = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ correoElectronico }),
-  });
-
-  const data = await respuesta.json();
-
-  if (!respuesta.ok) {
-    return { error: data.message || "Error al solicitar recuperación" };
-  }
-
-  return { mensaje: data.mensaje };
 }
