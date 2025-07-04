@@ -12,7 +12,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Usuario } from '../entidades/usuario.entity';
 
 
-import { MailModule } from '../mail/templates/mail.module';
+import { MailModule } from '../mail/mail.module';
 
 
 @Module({

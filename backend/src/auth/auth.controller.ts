@@ -7,13 +7,18 @@ import {
   UseGuards,
   Req,
   Res,
+  HttpCode,
+  HttpStatus, 
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { UsuariosService } from '../usuarios/usuarios.service';
-import { Usuario } from '../entidades/usuario.entity';
+import { Usuario } from '../entidades/usuario.entity'; 
 import { SocketGateway } from '../socket/socket.gateway';
+import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+
 
 interface UserRequest extends Request {
   user: Usuario;
@@ -41,7 +46,6 @@ export class AuthController {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-  
     res.cookie('jwt', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -86,5 +90,18 @@ export class AuthController {
       throw new UnauthorizedException('Acceso no autorizado. Solo para administradores.');
     }
     return this.usuariosService.findAll();
+  }
+
+
+  @Post('request-password-reset')
+  @HttpCode(HttpStatus.OK) 
+  async requestPasswordReset(@Body() requestPasswordResetDto: RequestPasswordResetDto) {
+    return this.authService.requestPasswordReset(requestPasswordResetDto.email);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto.token, resetPasswordDto.password);
   }
 }

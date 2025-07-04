@@ -1,28 +1,32 @@
-import { useState } from "react";
-import { solicitarRestablecimientoPassword } from "@/app/lib/service/auth";
+import { useState } from 'react';
+import { solicitarRestablecimientoPassword } from '@/app/lib/service/auth';
 
 export const useResetPassword = () => {
-  const [correo, setCorreo] = useState("");
-  const [mensaje, setMensaje] = useState("");
-  const [error, setError] = useState("");
+  const [correo, setCorreo] = useState('');
+  const [mensaje, setMensaje] = useState('');
+  const [error, setError] = useState('');
+  const [cargando, setCargando] = useState(false);
 
   const manejarSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMensaje("");
-    setError("");
+    setMensaje('');
+    setError('');
+    setCargando(true);
 
     try {
-      const data = await solicitarRestablecimientoPassword(correo);
+      const result = await solicitarRestablecimientoPassword(correo);
 
-      if (data.error) {
-        setError(data.error ?? "Error desconocido al solicitar recuperación.");
-        return;
+      if (result.error) {
+        setError(result.error);
+      } else if (result.mensaje) {
+        setMensaje(result.mensaje);
+        setCorreo('');
       }
-
-      setMensaje(data.mensaje ?? "Enlace de recuperación enviado correctamente.");
-      setCorreo("");
     } catch (err) {
-      setError("Error de conexión con el servidor");
+      console.error('Error en el hook useResetPassword:', err);
+      setError('Error de conexión con el servidor.');
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -32,5 +36,6 @@ export const useResetPassword = () => {
     mensaje,
     error,
     manejarSubmit,
+    cargando,
   };
 };
