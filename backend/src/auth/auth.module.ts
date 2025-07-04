@@ -8,6 +8,13 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
 import { AuthService } from './auth.service';
 import { SocketModule } from '../socket/socket.module';
 
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Usuario } from '../entidades/usuario.entity';
+
+
+import { MailModule } from '../mail/templates/mail.module';
+
+
 @Module({
   imports: [
     PassportModule,
@@ -21,6 +28,8 @@ import { SocketModule } from '../socket/socket.module';
         signOptions: { expiresIn: '1h' },
       }),
     }),
+    TypeOrmModule.forFeature([Usuario]),
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

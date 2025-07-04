@@ -7,21 +7,25 @@ import { UsuariosModule } from './usuarios/usuarios.module';
 import { PasswordModule } from './password/password.module';
 import { AuthModule } from './auth/auth.module';
 import { CursosModule } from './cursos/cursos.module';
+import { PagosModule } from './pagos/pagos.module';
+
+import configuration, { AppConfig } from './config/configuration';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      load: [configuration],
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService): TypeOrmModuleOptions => ({
+      useFactory: (config: ConfigService<AppConfig>): TypeOrmModuleOptions => ({
         type: 'postgres',
-        host: config.get<string>('DB_HOST'),
-        port: parseInt(config.get<string>('DB_PORT') || '5432', 10),
-        username: config.get<string>('DB_USER'),
-        password: config.get<string>('DB_PASSWORD'),
-        database: config.get<string>('DB_NAME'),
+        host: config.get('database.host', { infer: true }),
+        port: config.get('database.port', { infer: true }),
+        username: config.get('database.user', { infer: true }),
+        password: config.get('database.password', { infer: true }),
+        database: config.get('database.name', { infer: true }),
         entities: [join(__dirname, '**', '*.entity.{ts,js}')],
         synchronize: true, 
       }),
@@ -30,6 +34,7 @@ import { CursosModule } from './cursos/cursos.module';
     PasswordModule,
     AuthModule,
     CursosModule,
+    PagosModule,
   ],
 })
 export class AppModule {}
