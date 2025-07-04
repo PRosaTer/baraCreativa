@@ -42,7 +42,11 @@ const CampoEntrada: React.FC<PropsCampoEntrada> = ({
         className={`w-full px-4 py-3 border rounded-lg bg-gray-50 text-gray-900 
                     placeholder-gray-400 focus:outline-none focus:ring-2 
                     transition duration-200
-                    ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'}
+                    ${
+                      error
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-200 focus:ring-blue-500"
+                    }
                     ${inputClassName}`}
         aria-invalid={error ? "true" : "false"}
         aria-describedby={error ? `${nombre}-error` : undefined}
