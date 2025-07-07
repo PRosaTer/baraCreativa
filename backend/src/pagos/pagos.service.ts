@@ -18,7 +18,6 @@ import {
   PayPalLink
 } from './interfaces/paypal.interface'; 
 
-import { AppConfig } from '../config/configuration'; 
 
 @Injectable()
 export class PagosService {
@@ -35,24 +34,23 @@ export class PagosService {
     @InjectRepository(Usuario)
     private readonly usuarioRepository: Repository<Usuario>,
     private readonly httpService: HttpService,
-    private readonly configService: ConfigService<AppConfig>, 
+    private readonly configService: ConfigService, 
   ) {
 
-    this.paypalClientId = this.configService.get('paypal.clientId', { infer: true })! as string;
-    this.paypalClientSecret = this.configService.get('paypal.clientSecret', { infer: true })! as string;
-    this.paypalApiBaseUrl = this.configService.get('paypal.apiBaseUrl', { infer: true })! as string;
+    this.paypalClientId = this.configService.get<string>('PAYPAL_CLIENT_ID')!;
+    this.paypalClientSecret = this.configService.get<string>('PAYPAL_CLIENT_SECRET')!;
+    this.paypalApiBaseUrl = this.configService.get<string>('PAYPAL_API_BASE_URL')!;
 
     if (!this.paypalClientId || !this.paypalClientSecret || !this.paypalApiBaseUrl) {
-  const missingVars: string[] = [];
-  
-  if (!this.paypalClientId) missingVars.push('PAYPAL_CLIENT_ID');
-  if (!this.paypalClientSecret) missingVars.push('PAYPAL_CLIENT_SECRET');
-  if (!this.paypalApiBaseUrl) missingVars.push('PAYPAL_API_BASE_URL');
+      const missingVars: string[] = [];
+      
+      if (!this.paypalClientId) missingVars.push('PAYPAL_CLIENT_ID');
+      if (!this.paypalClientSecret) missingVars.push('PAYPAL_CLIENT_SECRET');
+      if (!this.paypalApiBaseUrl) missingVars.push('PAYPAL_API_BASE_URL');
 
-  this.logger.error(`Faltan las siguientes variables de entorno de PayPal: ${missingVars.join(', ')}.`);
-  throw new Error('Las credenciales de PayPal no están configuradas correctamente. Verifique su archivo .env');
-}
-
+      this.logger.error(`Faltan las siguientes variables de entorno de PayPal: ${missingVars.join(', ')}.`);
+      throw new Error('Las credenciales de PayPal no están configuradas correctamente. Verifique su archivo .env');
+    }
   }
 
   private async getPaypalAccessToken(): Promise<string> {
@@ -93,7 +91,7 @@ export class PagosService {
 
     if (curso.precio !== createOrderDto.monto) {
       this.logger.warn(`Monto proporcionado (${createOrderDto.monto}) no coincide con precio del curso (${curso.precio}). Se usará el precio del curso.`);
-      createOrderDto.monto = curso.precio;
+      createOrderDto.monto = Number(curso.precio);
     }
 
     try {

@@ -3,6 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Curso, Modulo } from '@/app/types/curso';
+import {
+  PayPalScriptProvider,
+  PayPalButtons,
+} from '@paypal/react-paypal-js';
+import {
+  CreateOrderActions,
+  CreateOrderData,
+  OnApproveActions,
+  OnApproveData,
+} from '@paypal/paypal-js';
 
 export default function CursoPage() {
   const params = useParams();
@@ -13,6 +23,20 @@ export default function CursoPage() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [pagado, setPagado] = useState(false);
+  const [paypalError, setPaypalError] = useState<string | null>(null);
+
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'; 
+
+
+  const initialOptions = {
+    clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "sb",
+    currency: "USD",
+    intent: "capture" as const,
+  };
+
+
+  const [usuarioId, setUsuarioId] = useState<number | null>(1);
 
   useEffect(() => {
     if (!id) return;
@@ -20,7 +44,7 @@ export default function CursoPage() {
     async function fetchCurso() {
       try {
         setCargando(true);
-        const res = await fetch(`http://localhost:3001/api/cursos/${id}`);
+        const res = await fetch(`${apiUrl}/api/cursos/${id}`);
         if (!res.ok) throw new Error('Error al cargar curso');
         const data: Curso = await res.json();
         setCurso(data);
@@ -33,23 +57,97 @@ export default function CursoPage() {
       }
     }
     fetchCurso();
-  }, [id]);
+  }, [id, apiUrl]);
 
-  function handlePagoExitoso() {
-    setPagado(true);
-  }
+  /**
+   * Función para crear la orden de PayPal.
+   * Llama a tu backend para generar la orden.
+   * @param data Datos de la orden (no se usan directamente aquí, el backend los genera).
+   * @param actions Acciones proporcionadas por el SDK de PayPal.
+   * @returns Una promesa que resuelve con el ID de la orden de PayPal.
+   */
+  const handleCreateOrder = async (data: CreateOrderData, actions: CreateOrderActions) => {
+    if (!curso || !curso.precio || usuarioId === null) {
+      setPaypalError("Curso, precio o ID de usuario no disponible para crear la orden de PayPal.");
+      return Promise.reject("Curso, precio o ID de usuario no disponible");
+    }
 
+    const precioParaPaypal = typeof curso.precio === 'string' ? parseFloat(curso.precio) : curso.precio;
+
+    try {
+      const response = await fetch(`${apiUrl}/pagos/paypal/create-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          monto: precioParaPaypal,
+          currency_code: initialOptions.currency,
+          cursoId: curso.id,
+          usuarioId: usuarioId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al crear la orden en el backend.');
+      }
+
+      const orderData = await response.json();
+      console.log('Orden de PayPal creada en backend:', orderData);
+      
+
+      return orderData.orderId;
+
+    } catch (err: any) {
+      console.error('Error en handleCreateOrder (frontend):', err);
+      setPaypalError(`Error al iniciar el pago: ${err.message || 'Por favor, inténtalo de nuevo.'}`);
+      return Promise.reject(err);
+    }
+  };
+
+  /**
+   * Función que se ejecuta cuando el usuario aprueba el pago en PayPal.
+   * La captura y la redirección al SCORM se manejan en el backend.
+   * @param data Datos de la aprobación de PayPal.
+   * @param actions Acciones proporcionadas por el SDK de PayPal.
+   */
+  const onApprove = async (data: OnApproveData, actions: OnApproveActions) => {
+    console.log('Pago de PayPal aprobado por el usuario:', data);
+    setPaypalError(null);
+  };
+
+  /**
+   * Función que se ejecuta si hay un error en el proceso de PayPal.
+   * @param err Objeto de error de PayPal.
+   */
+  const onError = (err: Record<string, unknown>) => {
+    console.error('Error en PayPal:', err);
+    setPaypalError('El pago con PayPal no pudo completarse. Por favor, inténtalo de nuevo o contacta a soporte.');
+  };
+
+  /**
+   * Función que se ejecuta si el usuario cancela el pago en PayPal.
+   * @param data Datos de la cancelación de PayPal.
+   */
+  const onCancel = (data: Record<string, unknown>) => {
+    console.log('Pago de PayPal cancelado:', data);
+    setPaypalError('El pago fue cancelado.');
+  };
+
+ 
   const getScormLaunchUrl = (scormPath?: string | null) => {
     if (!scormPath || typeof scormPath !== 'string') return '';
-    return `http://localhost:3000${scormPath}`;
+    return `http://localhost:3000${scormPath}`; 
   };
 
   if (cargando) return <p className="p-6 text-center text-lg text-blue-400 animate-pulse">Cargando curso...</p>;
   if (error) return <p className="p-6 text-center text-red-500 text-lg">{error}</p>;
   if (!curso) return <p className="p-6 text-center text-lg text-blue-400">Curso no encontrado</p>;
 
+
   const imageUrl = curso.imagenCurso
-    ? `http://localhost:3001${curso.imagenCurso}`
+    ? `${apiUrl}${curso.imagenCurso}`
     : 'https://placehold.co/600x400/1e293b/64748b?text=Sin+Imagen';
 
 
@@ -100,7 +198,7 @@ export default function CursoPage() {
               {curso.modulos && curso.modulos.length > 0 && (
                 <div>
                   <h2 className="text-2xl font-semibold text-blue-300 mb-4">Módulos del Curso</h2>
-                  <ul className="list-none space-y-4"> 
+                  <ul className="list-none space-y-4">
                     {curso.modulos.map((modulo: Modulo) => (
                       <li key={modulo.id} className="text-gray-300 border border-blue-600/30 p-4 rounded-lg shadow-inner bg-gray-800 hover:bg-gray-700 transition duration-300 cursor-pointer">
                         <strong className="text-purple-400 block mb-1">{modulo.titulo}:</strong> <span className="text-gray-400">{modulo.descripcion}</span>
@@ -111,15 +209,23 @@ export default function CursoPage() {
               )}
             </div>
 
-            <button
-              onClick={handlePagoExitoso}
-              className="mt-6 px-10 py-4 bg-gradient-to-r from-green-500 to-blue-600 text-white font-bold rounded-full hover:from-green-600 hover:to-blue-700 transition duration-300 ease-in-out transform hover:scale-105 shadow-lg border border-transparent hover:border-white/50"
-            >
-              ¡Inscribirme ahora!
-            </button>
+  
+            {paypalError && (
+              <p className="text-red-500 text-lg mt-4">{paypalError}</p>
+            )}
 
-        
-            <div className="text-center mt-8">
+            <div className="mt-6 flex flex-col items-center space-y-4">
+              <PayPalScriptProvider options={initialOptions}>
+                <PayPalButtons
+                  style={{ layout: "vertical", color: "blue", shape: "pill", label: "pay" }}
+                  createOrder={handleCreateOrder}
+                  onApprove={onApprove}
+                  onError={onError}
+                  onCancel={onCancel}
+                />
+              </PayPalScriptProvider>
+              
+    
               <button
                 onClick={() => router.push('/cursos')}
                 className="inline-block bg-gray-700 text-blue-300 font-bold py-3 px-6 rounded-full hover:bg-gray-600 transition duration-300 ease-in-out shadow-md border border-gray-600 hover:border-blue-400"
@@ -129,10 +235,8 @@ export default function CursoPage() {
             </div>
           </div>
         ) : (
-
           <div className="text-center space-y-6 text-white">
             <h1 className="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">Contenido del Curso: {curso.titulo}</h1>
-
 
             <button
               onClick={() => router.push('/cursos')}
@@ -143,6 +247,7 @@ export default function CursoPage() {
               </svg>
               Volver a Cursos
             </button>
+
 
             {curso.archivoScorm && curso.archivoScorm.indexOf('.html') !== -1 ? (
               <div className="mt-6 p-4 border border-blue-700 bg-gray-800 rounded-lg flex flex-col items-center shadow-inner">
