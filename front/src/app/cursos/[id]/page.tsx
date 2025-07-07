@@ -19,13 +19,12 @@ interface HasMessage {
   message: string;
 }
 
-
 function isHasMessage(error: unknown): error is HasMessage {
   return (
     typeof error === 'object' &&
     error !== null &&
     'message' in error &&
-    typeof (error as HasMessage).message === 'string'
+    typeof (error as { message: unknown }).message === 'string' 
   );
 }
 
@@ -48,6 +47,7 @@ export default function CursoPage() {
     currency: "USD",
     intent: "capture" as const,
   };
+
 
   const [usuarioId, setUsuarioId] = useState<number | null>(1); 
 
@@ -118,7 +118,7 @@ export default function CursoPage() {
       if (err instanceof Error) {
         errorMessage = err.message;
       } else if (isHasMessage(err)) { 
-        errorMessage = err.message;
+        errorMessage = err.message; 
       }
       setPaypalError(`Error al iniciar el pago: ${errorMessage}`);
       return Promise.reject(err); 
@@ -243,8 +243,7 @@ export default function CursoPage() {
                   onCancel={onCancel}
                 />
               </PayPalScriptProvider>
-              
-         
+   
               <button
                 onClick={() => router.push('/cursos')}
                 className="inline-block bg-gray-700 text-blue-300 font-bold py-3 px-6 rounded-full hover:bg-gray-600 transition duration-300 ease-in-out shadow-md border border-gray-600 hover:border-blue-400"
@@ -268,11 +267,11 @@ export default function CursoPage() {
               Volver a Cursos
             </button>
 
-     
+ 
             {curso.archivoScorm && curso.archivoScorm.indexOf('.html') !== -1 ? (
               <div className="mt-6 p-4 border border-blue-700 bg-gray-800 rounded-lg flex flex-col items-center shadow-inner">
                 <iframe
-                  key={curso.archivoScorm}
+                  key={curso.archivoScorm} 
                   src={getScormLaunchUrl(curso.archivoScorm)}
                   width="100%"
                   height="600px"
