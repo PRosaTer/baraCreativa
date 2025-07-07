@@ -11,44 +11,64 @@ const RegisterForm = () => {
   const {
     formData,
     handleChange,
+    handleSubmit,
     showPassword,
     togglePasswordVisibility,
     isSubmitting,
   } = useRegisterForm();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br bg-gray-900 to-teal-900 overflow-hidden">
-      <div className="flex w-full max-w-6xl h-[80vh] rounded-2xl shadow-2xl overflow-hidden">
-        {/* Imagen a la izquierda con bombillo */}
-        <div
-          className="w-1/2 bg-cover bg-center bg-gray-950"
-          style={{ backgroundImage: 'url("/bombillo-blanco.png")' }}
-        ></div>
+    <div
+      className="min-h-screen flex items-center justify-center bg-gray-900 overflow-hidden"
+      style={{
+        backgroundImage: 'url("/bombillo-blanco.png")',
+        backgroundSize: "contain",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <form
+        onSubmit={handleSubmit}
+        className="bg-gray-950 w-full max-w-md p-8 rounded-2xl shadow-2xl transform transition-all duration-300 space-y-6"
+      >
+        <h2 className="text-3xl font-extrabold text-center text-red-600 mb-6 drop-shadow-[0_2px_4px_rgba(239,68,68,0.5)] animate-pulse">
+          Regístrate
+        </h2>
 
-        {/* Formulario a la derecha */}
-        <div className="w-1/2 bg-gray-900 p-8 flex flex-col justify-center space-y-6">
-          <h2 className="text-3xl font-extrabold text-center text-red-600 mb-6 drop-shadow-[0_2px_4px_rgba(239,68,68,0.5)] animate-pulse">
-            Regístrate
-          </h2>
+        <SelectorFotoPerfil
+          fotoPerfilInicial={undefined}
+          onFotoChange={(file) =>
+            handleChange({
+              target: { name: "fotoPerfil", value: file?.name || "" },
+            } as React.ChangeEvent<HTMLInputElement>)
+          }
+        />
 
-          <SelectorFotoPerfil
-            fotoPerfilInicial={undefined}
-            onFotoChange={(file) =>
-              handleChange({
-                target: { name: "fotoPerfil", value: file?.name || "" },
-              } as React.ChangeEvent<HTMLInputElement>)
-            }
-          />
-
+        <div className="flex flex-col space-y-2">
+          <label
+            htmlFor="nombreCompleto"
+            className="block font-bold text-yellow-400 drop-shadow-md"
+          >
+            Nombre Completo
+            <span className="text-red-500 ml-1">*</span>
+          </label>
           <InputTexto
             name="nombreCompleto"
             placeholder="Nombre Completo"
             value={formData.nombreCompleto}
             onChange={handleChange}
             required
-            className="w-full p-3 border-2 border-red-500/70 rounded-lg bg-gray-800 text-white placeholder-yellow-300/70 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition duration-300 disabled:bg-gray-600/50 disabled:cursor-not-allowed hover:bg-gray-700 hover:scale-[1.02]"
           />
+        </div>
 
+        <div className="flex flex-col space-y-2">
+          <label
+            htmlFor="correoElectronico"
+            className="block font-bold text-yellow-400 drop-shadow-md"
+          >
+            Correo Electrónico
+            <span className="text-red-500 ml-1">*</span>
+          </label>
           <InputTexto
             name="correoElectronico"
             type="email"
@@ -56,34 +76,65 @@ const RegisterForm = () => {
             value={formData.correoElectronico}
             onChange={handleChange}
             required
-            className="w-full p-3 border-2 border-red-500/70 rounded-lg bg-gray-800 text-white placeholder-yellow-300/70 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition duration-300 disabled:bg-gray-600/50 disabled:cursor-not-allowed hover:bg-gray-700 hover:scale-[1.02]"
           />
+        </div>
 
+        <div className="flex flex-col space-y-2">
+          <label
+            htmlFor="numeroTelefono"
+            className="block font-bold text-yellow-400 drop-shadow-md"
+          >
+            Teléfono
+          </label>
           <InputTexto
             name="numeroTelefono"
             placeholder="Teléfono"
             value={formData.numeroTelefono}
             onChange={handleChange}
-            className="w-full p-3 border-2 border-red-500/70 rounded-lg bg-gray-800 text-white placeholder-yellow-300/70 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition duration-300 disabled:bg-gray-600/50 disabled:cursor-not-allowed hover:bg-gray-700 hover:scale-[1.02]"
           />
+        </div>
 
+        <div className="flex flex-col space-y-2">
+          <label
+            htmlFor="tipoUsuario"
+            className="block font-bold text-yellow-400 drop-shadow-md"
+          >
+            Tipo de Usuario
+            <span className="text-red-500 ml-1">*</span>
+          </label>
           <SelectTipoUsuario
             value={formData.tipoUsuario}
             onChange={handleChange}
-            className="w-full p-3 border-2 border-red-500/70 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition duration-300 disabled:bg-gray-600/50 disabled:cursor-not-allowed hover:bg-gray-700 hover:scale-[1.02]"
           />
+        </div>
 
-          {formData.tipoUsuario === "Empresa" && (
+        {formData.tipoUsuario === "Empresa" && (
+          <div className="flex flex-col space-y-2">
+            <label
+              htmlFor="nombreEmpresa"
+              className="block font-bold text-yellow-400 drop-shadow-md"
+            >
+              Nombre de la Empresa
+              <span className="text-red-500 ml-1">*</span>
+            </label>
             <InputTexto
               name="nombreEmpresa"
               placeholder="Nombre de la Empresa"
               value={formData.nombreEmpresa}
               onChange={handleChange}
               required
-              className="w-full p-3 border-2 border-red-500/70 rounded-lg bg-gray-800 text-white placeholder-yellow-300/70 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition duration-300 disabled:bg-gray-600/50 disabled:cursor-not-allowed hover:bg-gray-700 hover:scale-[1.02]"
             />
-          )}
+          </div>
+        )}
 
+        <div className="flex flex-col space-y-2">
+          <label
+            htmlFor="contrasena"
+            className="block font-bold text-yellow-400 drop-shadow-md"
+          >
+            Contraseña
+            <span className="text-red-500 ml-1">*</span>
+          </label>
           <InputPassword
             name="contrasena"
             placeholder="Contraseña"
@@ -92,9 +143,17 @@ const RegisterForm = () => {
             showPassword={showPassword}
             togglePasswordVisibility={togglePasswordVisibility}
             required
-            className="w-full p-3 border-2 border-red-500/70 rounded-lg bg-gray-800 text-white placeholder-yellow-300/70 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition duration-300 disabled:bg-gray-600/50 disabled:cursor-not-allowed hover:bg-gray-700 hover:scale-[1.02] pr-10 relative"
           />
+        </div>
 
+        <div className="flex flex-col space-y-2">
+          <label
+            htmlFor="confirmContrasena"
+            className="block font-bold text-yellow-400 drop-shadow-md"
+          >
+            Confirmar Contraseña
+            <span className="text-red-500 ml-1">*</span>
+          </label>
           <InputPassword
             name="confirmContrasena"
             placeholder="Confirmar Contraseña"
@@ -103,18 +162,17 @@ const RegisterForm = () => {
             showPassword={showPassword}
             togglePasswordVisibility={togglePasswordVisibility}
             required
-            className="w-full p-3 border-2 border-red-500/70 rounded-lg bg-gray-800 text-white placeholder-yellow-300/70 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition duration-300 disabled:bg-gray-600/50 disabled:cursor-not-allowed hover:bg-gray-700 hover:scale-[1.02] pr-10 relative"
           />
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-indigo-900 text-yellow-300 py-3 rounded hover:bg-yellow-500 hover:text-indigo-900 transition"
-          >
-            {isSubmitting ? "Registrando..." : "Registrar"}
-          </button>
         </div>
-      </div>
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-black text-white py-3 rounded hover:bg-red-600 transition"
+        >
+          {isSubmitting ? "Registrando..." : "Registrar"}
+        </button>
+      </form>
     </div>
   );
 };
