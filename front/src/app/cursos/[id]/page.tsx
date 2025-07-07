@@ -14,6 +14,21 @@ import {
   OnApproveData,
 } from '@paypal/paypal-js';
 
+
+interface HasMessage {
+  message: string;
+}
+
+
+function isHasMessage(error: unknown): error is HasMessage {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as HasMessage).message === 'string'
+  );
+}
+
 export default function CursoPage() {
   const params = useParams();
   const router = useRouter();
@@ -28,15 +43,13 @@ export default function CursoPage() {
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'; 
 
-
   const initialOptions = {
-    clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "sb",
+    clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "sb", 
     currency: "USD",
     intent: "capture" as const,
   };
 
-
-  const [usuarioId, setUsuarioId] = useState<number | null>(1);
+  const [usuarioId, setUsuarioId] = useState<number | null>(1); 
 
   useEffect(() => {
     if (!id) return;
@@ -84,7 +97,7 @@ export default function CursoPage() {
           monto: precioParaPaypal,
           currency_code: initialOptions.currency,
           cursoId: curso.id,
-          usuarioId: usuarioId,
+          usuarioId: usuarioId, 
         }),
       });
 
@@ -99,10 +112,16 @@ export default function CursoPage() {
 
       return orderData.orderId;
 
-    } catch (err: any) {
+    } catch (err: unknown) { 
       console.error('Error en handleCreateOrder (frontend):', err);
-      setPaypalError(`Error al iniciar el pago: ${err.message || 'Por favor, inténtalo de nuevo.'}`);
-      return Promise.reject(err);
+      let errorMessage = 'Por favor, inténtalo de nuevo.';
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (isHasMessage(err)) { 
+        errorMessage = err.message;
+      }
+      setPaypalError(`Error al iniciar el pago: ${errorMessage}`);
+      return Promise.reject(err); 
     }
   };
 
@@ -135,11 +154,12 @@ export default function CursoPage() {
     setPaypalError('El pago fue cancelado.');
   };
 
- 
+
   const getScormLaunchUrl = (scormPath?: string | null) => {
     if (!scormPath || typeof scormPath !== 'string') return '';
     return `http://localhost:3000${scormPath}`; 
   };
+
 
   if (cargando) return <p className="p-6 text-center text-lg text-blue-400 animate-pulse">Cargando curso...</p>;
   if (error) return <p className="p-6 text-center text-red-500 text-lg">{error}</p>;
@@ -149,7 +169,6 @@ export default function CursoPage() {
   const imageUrl = curso.imagenCurso
     ? `${apiUrl}${curso.imagenCurso}`
     : 'https://placehold.co/600x400/1e293b/64748b?text=Sin+Imagen';
-
 
   let precioNumerico: number;
   if (typeof curso.precio === 'string') {
@@ -209,7 +228,7 @@ export default function CursoPage() {
               )}
             </div>
 
-  
+
             {paypalError && (
               <p className="text-red-500 text-lg mt-4">{paypalError}</p>
             )}
@@ -225,7 +244,7 @@ export default function CursoPage() {
                 />
               </PayPalScriptProvider>
               
-    
+         
               <button
                 onClick={() => router.push('/cursos')}
                 className="inline-block bg-gray-700 text-blue-300 font-bold py-3 px-6 rounded-full hover:bg-gray-600 transition duration-300 ease-in-out shadow-md border border-gray-600 hover:border-blue-400"
@@ -235,6 +254,7 @@ export default function CursoPage() {
             </div>
           </div>
         ) : (
+       
           <div className="text-center space-y-6 text-white">
             <h1 className="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">Contenido del Curso: {curso.titulo}</h1>
 
@@ -248,7 +268,7 @@ export default function CursoPage() {
               Volver a Cursos
             </button>
 
-
+     
             {curso.archivoScorm && curso.archivoScorm.indexOf('.html') !== -1 ? (
               <div className="mt-6 p-4 border border-blue-700 bg-gray-800 rounded-lg flex flex-col items-center shadow-inner">
                 <iframe
