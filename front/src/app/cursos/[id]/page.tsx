@@ -15,9 +15,11 @@ import {
 } from '@paypal/paypal-js';
 
 
+
 interface HasMessage {
   message: string;
 }
+
 
 function isHasMessage(error: unknown): error is HasMessage {
   return (
@@ -49,10 +51,29 @@ export default function CursoPage() {
   };
 
 
-  const [usuarioId, setUsuarioId] = useState<number | null>(1); 
+  const [usuarioId, setUsuarioId] = useState<number | null>(null); 
+  const [cargandoUsuario, setCargandoUsuario] = useState(true); 
+
 
   useEffect(() => {
-    if (!id) return;
+    const fetchLoggedInUserId = async () => {
+      try {
+        
+   
+        setUsuarioId(1);
+      } catch (err) {
+        console.error("Error al obtener el ID del usuario logeado:", err);
+        setUsuarioId(null);
+      } finally {
+        setCargandoUsuario(false); 
+      }
+    };
+
+    fetchLoggedInUserId();
+  }, []);
+
+  useEffect(() => {
+    if (!id || usuarioId === null) return;
 
     async function fetchCurso() {
       try {
@@ -70,7 +91,7 @@ export default function CursoPage() {
       }
     }
     fetchCurso();
-  }, [id, apiUrl]);
+  }, [id, apiUrl, usuarioId]);
 
   /**
    * Función para crear la orden de PayPal.
@@ -109,7 +130,6 @@ export default function CursoPage() {
       const orderData = await response.json();
       console.log('Orden de PayPal creada en backend:', orderData);
       
-
       return orderData.orderId;
 
     } catch (err: unknown) { 
@@ -161,9 +181,10 @@ export default function CursoPage() {
   };
 
 
-  if (cargando) return <p className="p-6 text-center text-lg text-blue-400 animate-pulse">Cargando curso...</p>;
+  if (cargando || cargandoUsuario) return <p className="p-6 text-center text-lg text-blue-400 animate-pulse">Cargando curso y usuario...</p>;
   if (error) return <p className="p-6 text-center text-red-500 text-lg">{error}</p>;
   if (!curso) return <p className="p-6 text-center text-lg text-blue-400">Curso no encontrado</p>;
+  if (usuarioId === null) return <p className="p-6 text-center text-red-500 text-lg">Debes iniciar sesión para comprar este curso.</p>;
 
 
   const imageUrl = curso.imagenCurso
@@ -228,7 +249,6 @@ export default function CursoPage() {
               )}
             </div>
 
-
             {paypalError && (
               <p className="text-red-500 text-lg mt-4">{paypalError}</p>
             )}
@@ -243,7 +263,7 @@ export default function CursoPage() {
                   onCancel={onCancel}
                 />
               </PayPalScriptProvider>
-   
+              
               <button
                 onClick={() => router.push('/cursos')}
                 className="inline-block bg-gray-700 text-blue-300 font-bold py-3 px-6 rounded-full hover:bg-gray-600 transition duration-300 ease-in-out shadow-md border border-gray-600 hover:border-blue-400"
@@ -253,7 +273,6 @@ export default function CursoPage() {
             </div>
           </div>
         ) : (
-       
           <div className="text-center space-y-6 text-white">
             <h1 className="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">Contenido del Curso: {curso.titulo}</h1>
 
@@ -267,7 +286,6 @@ export default function CursoPage() {
               Volver a Cursos
             </button>
 
- 
             {curso.archivoScorm && curso.archivoScorm.indexOf('.html') !== -1 ? (
               <div className="mt-6 p-4 border border-blue-700 bg-gray-800 rounded-lg flex flex-col items-center shadow-inner">
                 <iframe
