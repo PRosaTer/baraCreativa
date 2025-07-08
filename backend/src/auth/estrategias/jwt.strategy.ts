@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import {
   ExtractJwt,
@@ -8,29 +8,20 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { UsuariosService } from '../../usuarios/usuarios.service';
 import { Request } from 'express';
+import { Usuario } from '../../entidades/usuario.entity';
 
 interface JwtPayload {
   sub: number;
   correoElectronico: string;
 }
 
-interface UserFromJwtValidation {
-  id: number;
-  nombreCompleto: string;
-  correoElectronico: string;
-  telefono?: string;
-  tipoUsuario?: string;
-  nombreEmpresa?: string;
-  fotoPerfil?: string;
-  estadoCuenta?: string;
-  esAdmin: boolean;
-  creadoEn: Date;
-  actualizadoEn: Date;
-  ultimaSesion?: Date;
+interface UserFromJwtValidation extends Usuario {
 }
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
+  private readonly logger = new Logger(JwtStrategy.name);
+
   constructor(
     private configService: ConfigService,
     private usuariosService: UsuariosService,
@@ -43,6 +34,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const options: StrategyOptionsWithoutRequest = {
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
+          this.logger.debug(`Intentando extraer JWT de cookies. Cookies: ${JSON.stringify(request?.cookies)}`);
           return request?.cookies?.jwt || null;
         },
       ]),
@@ -54,25 +46,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<UserFromJwtValidation> {
+    this.logger.log(`[validate] Payload recibido: ${JSON.stringify(payload)}`);
+    this.logger.log(`[validate] Tipo de payload.sub: ${typeof payload.sub}, Valor: ${payload.sub}`);
+
+    if (typeof payload.sub !== 'number' || isNaN(payload.sub)) {
+      this.logger.error(`[validate] Token inválido: ID de usuario no numérico o NaN. Valor: ${payload.sub}`);
+      throw new UnauthorizedException('Token inválido: ID de usuario no numérico.');
+    }
+
     const usuario = await this.usuariosService.encontrarPorId(payload.sub);
 
     if (!usuario) {
+      this.logger.error(`[validate] Usuario con ID ${payload.sub} no encontrado en la base de datos.`);
       throw new UnauthorizedException('Token inválido o usuario no encontrado.');
     }
 
-    return {
-      id: usuario.id,
-      nombreCompleto: usuario.nombreCompleto,
-      correoElectronico: usuario.correoElectronico,
-      telefono: usuario.telefono,
-      tipoUsuario: usuario.tipoUsuario,
-      nombreEmpresa: usuario.nombreEmpresa,
-      fotoPerfil: usuario.fotoPerfil,
-      estadoCuenta: usuario.estadoCuenta,
-      esAdmin: usuario.esAdmin,
-      creadoEn: usuario.creadoEn,
-      actualizadoEn: usuario.actualizadoEn,
-      ultimaSesion: usuario.ultimaSesion,
-    };
+    return usuario as UserFromJwtValidation;
   }
 }
