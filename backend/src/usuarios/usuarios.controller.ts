@@ -9,6 +9,8 @@ import {
   UseInterceptors,
   UploadedFile,
   ForbiddenException,
+  BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -24,6 +26,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('usuarios')
 export class UsuariosController {
+  private readonly logger = new Logger(UsuariosController.name);
+
   constructor(private readonly usuariosService: UsuariosService) {}
 
   @Post()
@@ -49,14 +53,35 @@ export class UsuariosController {
     return this.usuariosService.create(datos);
   }
 
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  getMe(@UsuarioAutenticado() usuario: Usuario): Partial<Usuario> {
+    this.logger.log('Usuario autenticado recibido en /usuarios/me:', usuario);
+    const { password, ...usuarioSinPassword } = usuario;
+    return usuarioSinPassword;
+  }
+
   @Get()
   getAll(): Promise<Usuario[]> {
     return this.usuariosService.findAll();
   }
 
   @Get(':id')
-  getOne(@Param('id') id: string): Promise<Usuario> {
-    return this.usuariosService.findOne(+id);
+  async getOne(@Param('id') id: string): Promise<Usuario> {
+    this.logger.log(`ID recibido en GET /usuarios/:id -> ${id}`);
+
+    const idNum = Number(id);
+    if (isNaN(idNum)) {
+      this.logger.error(`ID inválido recibido: ${id}`);
+      throw new BadRequestException(`ID inválido: ${id}`);
+    }
+
+    const usuario = await this.usuariosService.findOne(idNum);
+    if (!usuario) {
+      this.logger.warn(`Usuario no encontrado con ID: ${idNum}`);
+      throw new BadRequestException(`Usuario con ID ${idNum} no encontrado`);
+    }
+    return usuario;
   }
 
   @Patch(':id')
@@ -79,7 +104,11 @@ export class UsuariosController {
     @Body() usuarioData: UpdateUsuarioDto,
     @UploadedFile() foto?: Express.Multer.File,
   ): Promise<Usuario> {
-    const idNum = +id;
+    const idNum = Number(id);
+    if (isNaN(idNum)) {
+      this.logger.error(`ID inválido recibido para actualización: ${id}`);
+      throw new BadRequestException(`ID inválido: ${id}`);
+    }
 
     if (!usuarioAutenticado.esAdmin && usuarioAutenticado.id !== idNum) {
       throw new ForbiddenException('No tienes permiso para modificar este usuario');
