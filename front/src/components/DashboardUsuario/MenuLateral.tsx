@@ -14,7 +14,7 @@ export default function MenuUsuario({ seleccionarVista, vistaActual, nombreUsuar
       <input
         value={nombreUsuario}
         disabled
-        className="py-2 px-4 rounded bg-yellow-300 text-white font-semibold text-center cursor-default"
+        className="py-2 px-4 rounded bg-amber-300 text-white font-semibold text-center cursor-default"
       />
 
       <button
