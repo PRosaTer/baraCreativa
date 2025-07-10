@@ -70,7 +70,7 @@ export class CursosController {
         if (file.mimetype.startsWith('image/')) cb(null, true);
         else cb(new BadRequestException('Solo imágenes permitidas'), false);
       },
-      limits: { fileSize: 5 * 1024 * 1024 },
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
     }),
   )
   async subirImagenCurso(
@@ -109,7 +109,7 @@ export class CursosController {
           cb(null, true);
         else cb(new BadRequestException('Solo archivos .zip permitidos'), false);
       },
-      limits: { fileSize: 50 * 1024 * 1024 },
+      limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
     }),
   )
   async subirScormNuevo(
@@ -135,7 +135,11 @@ export class CursosController {
       };
     } catch (error) {
       console.error('Error al procesar el archivo SCORM en el controlador:', error);
-      if (error instanceof NotFoundException || error instanceof BadRequestException || error instanceof InternalServerErrorException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException ||
+        error instanceof InternalServerErrorException
+      ) {
         throw error;
       }
       throw new InternalServerErrorException('Error al procesar el archivo SCORM');

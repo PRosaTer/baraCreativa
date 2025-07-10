@@ -1,1 +1,0 @@
-var scormnext = "habilon.scormnext.es";

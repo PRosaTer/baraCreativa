@@ -8,17 +8,16 @@ import {
   Req,
   Res,
   HttpCode,
-  HttpStatus, 
+  HttpStatus,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { AuthGuard } from '@nestjs/passport';
+import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { UsuariosService } from '../usuarios/usuarios.service';
-import { Usuario } from '../entidades/usuario.entity'; 
+import { Usuario } from '../entidades/usuario.entity';
 import { SocketGateway } from '../socket/socket.gateway';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 interface UserRequest extends Request {
   user: Usuario;
@@ -64,13 +63,13 @@ export class AuthController {
     return { message: 'Login exitoso' };
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Req() req: UserRequest) {
     return req.user;
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post('logout')
   async logout(@Req() req: UserRequest, @Res({ passthrough: true }) res: Response) {
     await this.usuariosService.actualizarEstado(req.user.id, false);
@@ -83,7 +82,7 @@ export class AuthController {
     return { message: 'Sesión cerrada correctamente' };
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get('admin/users')
   async getAllUsersForAdmin(@Req() req: UserRequest): Promise<Usuario[]> {
     if (!req.user.esAdmin) {
@@ -92,9 +91,8 @@ export class AuthController {
     return this.usuariosService.findAll();
   }
 
-
   @Post('request-password-reset')
-  @HttpCode(HttpStatus.OK) 
+  @HttpCode(HttpStatus.OK)
   async requestPasswordReset(@Body() requestPasswordResetDto: RequestPasswordResetDto) {
     return this.authService.requestPasswordReset(requestPasswordResetDto.email);
   }
