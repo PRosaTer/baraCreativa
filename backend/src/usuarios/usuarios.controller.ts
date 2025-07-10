@@ -115,8 +115,13 @@ export class UsuariosController {
     }
 
     if (!usuarioAutenticado.esAdmin) {
-      if ('tipoUsuario' in usuarioData || 'esAdmin' in usuarioData) {
-        throw new ForbiddenException('No puedes cambiar el rol o permisos de usuario');
+      if ('esAdmin' in usuarioData && usuarioData.esAdmin !== usuarioAutenticado.esAdmin) {
+        this.logger.warn(`Intento no autorizado de modificar permisos por usuario ${usuarioAutenticado.id}`);
+        throw new ForbiddenException('No puedes cambiar el permiso de administrador');
+      }
+      if ('tipoUsuario' in usuarioData && usuarioData.tipoUsuario === 'Admin') {
+        this.logger.warn(`Intento no autorizado de asignarse rol Admin por usuario ${usuarioAutenticado.id}`);
+        throw new ForbiddenException('No puedes asignarte el rol Admin');
       }
     }
 

@@ -15,9 +15,6 @@ interface JwtPayload {
   correoElectronico: string;
 }
 
-interface UserFromJwtValidation extends Usuario {
-}
-
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   private readonly logger = new Logger(JwtStrategy.name);
@@ -31,7 +28,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new Error('JWT_SECRET no está definido en las variables de entorno');
     }
 
-    const options: StrategyOptionsWithoutRequest = {
+    super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
           this.logger.debug(`Intentando extraer JWT de cookies. Cookies: ${JSON.stringify(request?.cookies)}`);
@@ -40,14 +37,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ]),
       secretOrKey: jwtSecret,
       passReqToCallback: false,
-    };
-
-    super(options);
+    });
   }
 
-  async validate(payload: JwtPayload): Promise<UserFromJwtValidation> {
+  async validate(payload: JwtPayload): Promise<Usuario> {
     this.logger.log(`[validate] Payload recibido: ${JSON.stringify(payload)}`);
-    this.logger.log(`[validate] Tipo de payload.sub: ${typeof payload.sub}, Valor: ${payload.sub}`);
 
     if (typeof payload.sub !== 'number' || isNaN(payload.sub)) {
       this.logger.error(`[validate] Token inválido: ID de usuario no numérico o NaN. Valor: ${payload.sub}`);
@@ -57,10 +51,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const usuario = await this.usuariosService.encontrarPorId(payload.sub);
 
     if (!usuario) {
-      this.logger.error(`[validate] Usuario con ID ${payload.sub} no encontrado en la base de datos.`);
+      this.logger.error(`[validate] Usuario con ID ${payload.sub} no encontrado.`);
       throw new UnauthorizedException('Token inválido o usuario no encontrado.');
     }
 
-    return usuario as UserFromJwtValidation;
+    return usuario;
   }
 }
