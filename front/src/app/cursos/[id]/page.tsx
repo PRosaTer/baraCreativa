@@ -41,54 +41,54 @@ export default function CursoDetalle() {
   }, [cursoId]);
 
   const crearOrden = async (): Promise<string> => {
-  if (!usuarioId) throw new Error('Usuario no autenticado');
- const res = await fetch('http://localhost:3001/pagos/paypal/create-order', {
-
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({
-      cursoId: Number(cursoId),
-      usuarioId,
-      // monto: Number(curso?.precio ?? 0), //Esto no hay que tocar
-
-      currency_code: 'USD', 
-    }),
-  });
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    console.error('Error al crear la orden:', errorText);
-    throw new Error(`Error al crear la orden: ${errorText}`);
-  }
-
-  const data = await res.json();
-  return data.orderId;
-};
-
-  const onApprove = async (data: OnApproveData) => {
-  try {
     if (!usuarioId) throw new Error('Usuario no autenticado');
+    const res = await fetch('http://localhost:3001/pagos/paypal/create-order', {
 
-    const res = await fetch('http://localhost:3001/pagos/paypal/capture-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({
-        orderId: data.orderID,
+        cursoId: Number(cursoId),
+        usuarioId,
+        // monto: Number(curso?.precio ?? 0), //Esto no hay que tocar
+
+        currency_code: 'USD',
       }),
     });
 
     if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.message || 'Error al capturar el pago');
+      const errorText = await res.text();
+      console.error('Error al crear la orden:', errorText);
+      throw new Error(`Error al crear la orden: ${errorText}`);
     }
 
-    router.push(`/cursos/${cursoId}/scorm`);
-  } catch (error) {
-    setError(error instanceof Error ? error.message : 'Error desconocido');
-  }
-};
+    const data = await res.json();
+    return data.orderId;
+  };
+
+  const onApprove = async (data: OnApproveData) => {
+    try {
+      if (!usuarioId) throw new Error('Usuario no autenticado');
+
+      const res = await fetch('http://localhost:3001/pagos/paypal/capture-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          orderId: data.orderID,
+        }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || 'Error al capturar el pago');
+      }
+
+      router.push(`/cursos/${cursoId}/scorm`);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Error desconocido');
+    }
+  };
 
   if (loading) return <p>Cargando curso...</p>;
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
@@ -195,7 +195,7 @@ export default function CursoDetalle() {
             currency: 'USD',
           }}
         >
-          <PayPalButtons
+         <PayPalButtons
             createOrder={() => crearOrden()}
             onApprove={onApprove}
             onError={(err) => {
@@ -203,6 +203,7 @@ export default function CursoDetalle() {
               setError('Hubo un problema con PayPal');
             }}
           />
+
         </PayPalScriptProvider>
       </div>
     </div>

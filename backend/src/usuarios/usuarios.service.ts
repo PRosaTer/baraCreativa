@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Usuario } from '../entidades/usuario.entity';
+import { Usuario, TipoUsuario } from '../entidades/usuario.entity';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -36,7 +36,6 @@ export class UsuariosService {
       const salt = await bcrypt.genSalt();
       usuarioData.password = await bcrypt.hash(usuarioData.password, salt);
     }
-
     const nuevoUsuario = this.usuariosRepository.create(usuarioData);
     return this.usuariosRepository.save(nuevoUsuario);
   }
@@ -47,15 +46,13 @@ export class UsuariosService {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
     }
 
-
     if (usuarioData.password) {
       const salt = await bcrypt.genSalt();
       usuarioData.password = await bcrypt.hash(usuarioData.password, salt);
     }
 
- 
     if (usuarioData.tipoUsuario) {
-      usuarioData.esAdmin = usuarioData.tipoUsuario === 'Admin';
+      usuarioData.esAdmin = usuarioData.tipoUsuario === TipoUsuario.Admin;
     }
 
     await this.usuariosRepository.update(id, usuarioData);
@@ -74,6 +71,12 @@ export class UsuariosService {
     if (resultado.affected === 0) {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado para actualizar estado.`);
     }
-    console.log(`UsuariosService: actualizado estado usuario ${id} a ${conectado}`);
+  }
+
+  async encontrarConPagosPorCorreo(correoElectronico: string): Promise<Usuario | null> {
+    return await this.usuariosRepository.findOne({
+      where: { correoElectronico },
+      relations: ['pagos', 'pagos.curso'],
+    });
   }
 }

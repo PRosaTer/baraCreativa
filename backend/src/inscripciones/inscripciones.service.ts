@@ -42,11 +42,15 @@ export class InscripcionesService {
     return this.inscripcionRepository.save(inscripcion);
   }
 
+  async save(inscripcion: Inscripcion): Promise<Inscripcion> {
+    return this.inscripcionRepository.save(inscripcion);
+  }
+
   async obtenerCursosPorUsuario(usuarioId: number) {
     const inscripciones = await this.inscripcionRepository.find({
       where: {
         usuario: { id: usuarioId },
-        estado: 'Pagado', 
+        estado: 'Pagado',
       },
       relations: ['curso'],
     });

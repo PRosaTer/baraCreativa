@@ -12,10 +12,11 @@ import { lastValueFrom } from 'rxjs';
 
 import { Pago } from '../entidades/pago.entity';
 import { Curso } from '../entidades/curso.entity';
-import { Usuario } from '../entidades/usuario.entity';
+import { Usuario, TipoUsuario } from '../entidades/usuario.entity';
 import { CreatePaypalOrderDto } from './dto/create-paypal-order.dto';
 import { CapturePaypalOrderDto } from './dto/capture-paypal-order.dto';
 import { InscripcionesService } from '../inscripciones/inscripciones.service';
+import { PurchaseNotificationData } from '../pagos/interfaces/purchase-notification-data.interface';
 import { MailService } from '../mail/mail.service';
 
 @Injectable()
@@ -75,6 +76,7 @@ export class PagosService {
     if (!usuario) throw new BadRequestException(`Usuario ID ${createOrderDto.usuarioId} no encontrado`);
 
     const monto = Number(curso.precio);
+
     const accessToken = await this.getPaypalAccessToken();
 
     const orderData = {
@@ -126,6 +128,7 @@ export class PagosService {
       usuario,
       curso,
       referenciaPago: response.data.id,
+      estado: 'Pendiente',
     });
 
     await this.pagoRepository.save(nuevoPago);
@@ -162,56 +165,83 @@ export class PagosService {
       throw new BadRequestException(`Orden no completada. Estado: ${paypalOrder.status}`);
     }
 
+    this.logger.log(`Buscando pago con referencia: ${paypalOrder.id}`);
     const pagoExistente = await this.pagoRepository.findOne({
       where: { referenciaPago: paypalOrder.id },
       relations: ['usuario', 'curso'],
     });
 
     if (!pagoExistente) {
+      this.logger.error('Pago no encontrado para actualizar');
       throw new InternalServerErrorException('Pago no encontrado para actualizar');
     }
 
+    this.logger.log(`Pago encontrado. Estado actual: ${pagoExistente.estado}`);
+
     pagoExistente.fechaConfirmacionPago = new Date();
+    pagoExistente.estado = 'Pagado';
+    this.logger.log(`Actualizando pago con ID ${pagoExistente.id}, estado a 'Pagado'`);
     await this.pagoRepository.save(pagoExistente);
+
+    this.logger.log('Pago actualizado en base');
 
     const inscripcionExistente = await this.inscripcionesService.findByUserAndCourse(
       pagoExistente.usuario.id,
       pagoExistente.curso.id,
     );
 
-    if (!inscripcionExistente) {
+    if (inscripcionExistente) {
+      inscripcionExistente.estado = 'Pagado';
+      await this.inscripcionesService.save(inscripcionExistente);
+      this.logger.log(`Inscripción actualizada a Pagado. ID: ${inscripcionExistente.id}`);
+    } else {
       await this.inscripcionesService.createInscripcion(pagoExistente.usuario, pagoExistente.curso, 'Pagado');
-    } else if (inscripcionExistente.estado === 'Pendiente') {
-      await this.inscripcionesService.updateInscripcionEstado(inscripcionExistente.id, 'Pagado');
+      this.logger.log('Inscripción creada con estado Pagado');
     }
 
     const captureDetails = paypalOrder.purchase_units[0]?.payments?.captures?.[0];
 
+    const usuario = pagoExistente.usuario;
+    const pagosAnteriores = usuario.pagos || [];
+    const listaCursos: string[] = pagosAnteriores
+      .map((pago) => pago.curso?.titulo)
+      .filter((titulo): titulo is string => !!titulo);
+
+    const totalCursosComprados = listaCursos.length;
+    const TOTAL_CURSOS_DISPONIBLES = 10;
+    const porcentajeCursos = (totalCursosComprados / TOTAL_CURSOS_DISPONIBLES) * 100;
+
+    const tipoUsuario: TipoUsuario = usuario.tipoUsuario ?? TipoUsuario.Alumno;
+
+    const mailData: PurchaseNotificationData = {
+      userName: usuario.nombreCompleto,
+      userEmail: usuario.correoElectronico,
+      courseTitle: pagoExistente.curso.titulo,
+      paymentAmount: Number(pagoExistente.monto),
+      orderId: pagoExistente.referenciaPago ?? '',
+      transactionDetails: captureDetails,
+      tipoUsuario,
+      cursosComprados: listaCursos,
+      totalComprados: totalCursosComprados,
+      porcentajeComprados: porcentajeCursos,
+    };
 
     await this.mailService.sendPurchaseReceiptToCustomer(
-      pagoExistente.usuario.correoElectronico,
-      pagoExistente.usuario.nombreCompleto,
-      pagoExistente.curso.titulo,
-      pagoExistente.monto,
-      paypalOrder.id,
-      {
-        id: captureDetails.id,
-        create_time: captureDetails.create_time,
-        amount: captureDetails.amount,
-      },
+      mailData.userEmail,
+      mailData.userName,
+      mailData.courseTitle,
+      mailData.paymentAmount,
+      mailData.orderId,
+      mailData.transactionDetails,
     );
 
+    await this.mailService.sendPurchaseNotificationToAdmin(mailData);
+
     return {
-      userEmail: pagoExistente.usuario.correoElectronico,
-      userName: pagoExistente.usuario.nombreCompleto,
-      courseTitle: pagoExistente.curso.titulo,
-      paymentAmount: pagoExistente.monto,
-      orderId: paypalOrder.id,
-      transactionDetails: {
-        id: captureDetails.id,
-        create_time: captureDetails.create_time,
-        amount: captureDetails.amount,
-      },
+      status: 'COMPLETED',
+      paymentId: paypalOrder.id,
+      transactionDetails: captureDetails,
+      pagoLocal: pagoExistente,
     };
   }
 }
