@@ -4,7 +4,7 @@ import React from "react";
 import { usePerfilUsuario } from "@/app/hooks/perfil/usePerfilUsuario";
 import ErrorNoAutorizado from "@/components/ErrorLogin/ErrorNoAutorizado";
 import VistaAdmin from "@/components/DashboardAdmin/VistaAdmin";
-import PerfilUsuarioEditable from "@/components/DashboardUsuario/PerfilUsuario";
+import DashboardUsuario from "@/components/DashboardUsuario/DashboardUsuario";
 
 export default function PerfilPage() {
   const { usuario, setUsuario, mensajeError } = usePerfilUsuario();
@@ -21,9 +21,5 @@ export default function PerfilPage() {
     return <VistaAdmin />;
   }
 
-  return (
-    <main className="p-4 bg-white">
-      <PerfilUsuarioEditable usuario={usuario} onActualizar={setUsuario} />
-    </main>
-  );
+  return <DashboardUsuario usuario={usuario} />;
 }
