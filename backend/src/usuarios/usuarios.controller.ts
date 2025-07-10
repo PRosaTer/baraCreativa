@@ -24,7 +24,7 @@ import { Usuario } from '../entidades/usuario.entity';
 import { UsuarioAutenticado } from '../auth/decoradores/usuario-autenticado.decorator.ts';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@Controller('usuarios')
+@Controller('api/usuarios')
 export class UsuariosController {
   private readonly logger = new Logger(UsuariosController.name);
 
@@ -56,7 +56,7 @@ export class UsuariosController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   getMe(@UsuarioAutenticado() usuario: Usuario): Partial<Usuario> {
-    this.logger.log('Usuario autenticado recibido en /usuarios/me:', usuario);
+    this.logger.log('Usuario autenticado recibido en /api/usuarios/me:', usuario);
     const { password, ...usuarioSinPassword } = usuario;
     return usuarioSinPassword;
   }
@@ -68,7 +68,7 @@ export class UsuariosController {
 
   @Get(':id')
   async getOne(@Param('id') id: string): Promise<Usuario> {
-    this.logger.log(`ID recibido en GET /usuarios/:id -> ${id}`);
+    this.logger.log(`ID recibido en GET /api/usuarios/:id -> ${id}`);
 
     const idNum = Number(id);
     if (isNaN(idNum)) {

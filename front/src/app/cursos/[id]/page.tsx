@@ -1,423 +1,209 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Curso, Modulo } from '@/app/types/curso';
-import {
-  PayPalScriptProvider,
-  PayPalButtons,
-} from '@paypal/react-paypal-js';
-import {
-  CreateOrderActions,
-  CreateOrderData,
-  OnApproveActions,
-  OnApproveData,
-} from '@paypal/paypal-js';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
+import type { OnApproveData } from '@paypal/paypal-js/types/components/buttons';
 
-interface HasMessage {
-  message: string;
-}
+import { Curso } from '@/app/types/curso';
 
-function isHasMessage(error: unknown): error is HasMessage {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'message' in error &&
-    typeof (error as { message: unknown }).message === 'string'
-  );
-}
-
-export default function CursoPage() {
-  const params = useParams();
+export default function CursoDetalle() {
+  const { id: cursoId } = useParams();
   const router = useRouter();
-  const id = params?.id;
-  const idNum = Number(id);
-
-
-  if (isNaN(idNum)) {
-    return (
-      <p className="p-6 text-center text-red-500 text-lg">
-        ID de curso inválido
-      </p>
-    );
-  }
 
   const [curso, setCurso] = useState<Curso | null>(null);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState('');
-  const [pagado, setPagado] = useState(false);
-  const [paypalError, setPaypalError] = useState<string | null>(null);
-
-  const [isEnrolled, setIsEnrolled] = useState(false);
-
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
-  const initialOptions = {
-    clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb',
-    currency: 'USD',
-    intent: 'capture' as const,
-  };
-
   const [usuarioId, setUsuarioId] = useState<number | null>(null);
-  const [cargandoUsuario, setCargandoUsuario] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
-    const fetchLoggedInUserId = async () => {
+    async function fetchDatos() {
       try {
-        const response = await fetch(`${apiUrl}/usuarios/me`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
-
-        if (response.ok) {
-          const userData = await response.json();
-          if (userData && typeof userData.id === 'number') {
-            setUsuarioId(userData.id);
-            console.log('Usuario ID obtenido del backend:', userData.id);
-          } else {
-            console.warn(
-              'El backend no devolvió un ID de usuario válido en /usuarios/me.'
-            );
-            setUsuarioId(null);
-          }
-        } else {
-          console.warn('No se pudo obtener el usuario logeado del backend.');
-          setUsuarioId(null);
-        }
-      } catch (err) {
-        console.error('Error al obtener el ID del usuario logeado:', err);
-        setUsuarioId(null);
-      } finally {
-        setCargandoUsuario(false);
-      }
-    };
-
-    fetchLoggedInUserId();
-  }, [apiUrl]);
-
-  useEffect(() => {
-    if (cargandoUsuario) return;
-
-    async function fetchData() {
-      setCargando(true);
-      setError('');
-      try {
-        const resCurso = await fetch(`${apiUrl}/api/cursos/${idNum}`);
-        if (!resCurso.ok) throw new Error('Error al cargar curso');
+        const resCurso = await fetch(`http://localhost:3001/api/cursos/${cursoId}`);
+        if (!resCurso.ok) throw new Error('No se pudo cargar el curso');
         const dataCurso: Curso = await resCurso.json();
         setCurso(dataCurso);
 
-        if (usuarioId !== null) {
-          const resEnrollment = await fetch(
-            `${apiUrl}/inscripciones/check-status/${usuarioId}/${idNum}`
-          );
-          if (!resEnrollment.ok) {
-            setIsEnrolled(false);
-          } else {
-            const dataEnrollment = await resEnrollment.json();
-            setIsEnrolled(dataEnrollment.isEnrolled);
-            if (dataEnrollment.isEnrolled) {
-              setPagado(true);
-            }
-          }
-        } else {
-          setIsEnrolled(false);
-        }
+        const resUsuario = await fetch('http://localhost:3001/api/usuarios/me', {
+          credentials: 'include',
+        });
+        if (!resUsuario.ok) throw new Error('No se pudo obtener el usuario');
+        const usuario = await resUsuario.json();
+        setUsuarioId(usuario.id);
+
+        setLoading(false);
       } catch (err) {
-        setError('No se pudo cargar el curso o verificar la inscripción');
-        console.error('Error fetching data:', err);
-      } finally {
-        setCargando(false);
+        setError(err instanceof Error ? err.message : 'Error desconocido');
+        setLoading(false);
       }
     }
-    fetchData();
-  }, [idNum, apiUrl, usuarioId, cargandoUsuario]);
+    fetchDatos();
+  }, [cursoId]);
 
-  const handleCreateOrder = async (
-    data: CreateOrderData,
-    actions: CreateOrderActions
-  ) => {
-    if (!curso || !curso.precio || usuarioId === null) {
-      setPaypalError(
-        'Debes iniciar sesión para comprar este curso o el curso/precio no está disponible.'
-      );
-      return Promise.reject('Curso, precio o ID de usuario no disponible');
-    }
+  const crearOrden = async (): Promise<string> => {
+  if (!usuarioId) throw new Error('Usuario no autenticado');
+ const res = await fetch('http://localhost:3001/pagos/paypal/create-order', {
 
-    const precioParaPaypal =
-      typeof curso.precio === 'string'
-        ? parseFloat(curso.precio)
-        : curso.precio;
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({
+      cursoId: Number(cursoId),
+      usuarioId,
+      // monto: Number(curso?.precio ?? 0), //Esto no hay que tocar
 
-    try {
-      const response = await fetch(`${apiUrl}/pagos/paypal/create-order`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          monto: precioParaPaypal,
-          currency_code: initialOptions.currency,
-          cursoId: curso.id,
-          usuarioId: usuarioId,
-        }),
-      });
+      currency_code: 'USD', 
+    }),
+  });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || 'Error al crear la orden en el backend.'
-        );
-      }
-
-      const orderData = await response.json();
-      console.log('Orden de PayPal creada en backend:', orderData);
-      return orderData.orderId;
-    } catch (err: unknown) {
-      console.error('Error en handleCreateOrder:', err);
-      let errorMessage = 'Por favor, inténtalo de nuevo.';
-      if (err instanceof Error) {
-        errorMessage = err.message;
-      } else if (isHasMessage(err)) {
-        errorMessage = err.message;
-      }
-      setPaypalError(`Error al iniciar el pago: ${errorMessage}`);
-      return Promise.reject(err);
-    }
-  };
-
-  const onApprove = async (
-    data: OnApproveData,
-    actions: OnApproveActions
-  ) => {
-    console.log('Pago aprobado:', data);
-    setPaypalError(null);
-    setPagado(true);
-    if (usuarioId && idNum) {
-      const resEnrollment = await fetch(
-        `${apiUrl}/inscripciones/check-status/${usuarioId}/${idNum}`
-      );
-      if (resEnrollment.ok) {
-        const dataEnrollment = await resEnrollment.json();
-        setIsEnrolled(dataEnrollment.isEnrolled);
-      }
-    }
-  };
-
-  const onError = (err: Record<string, unknown>) => {
-    console.error('Error en PayPal:', err);
-    setPaypalError(
-      'El pago con PayPal no pudo completarse. Por favor, inténtalo de nuevo.'
-    );
-  };
-
-  const onCancel = (data: Record<string, unknown>) => {
-    console.log('Pago cancelado:', data);
-    setPaypalError('El pago fue cancelado.');
-  };
-
-  const getScormLaunchUrl = (scormPath?: string | null) => {
-    if (!scormPath || typeof scormPath !== 'string') return '';
-    return `http://localhost:3000${scormPath}`;
-  };
-
-  if (cargando || cargandoUsuario)
-    return (
-      <p className="p-6 text-center text-lg text-blue-400 animate-pulse">
-        Cargando curso y usuario...
-      </p>
-    );
-  if (error)
-    return (
-      <p className="p-6 text-center text-red-500 text-lg">{error}</p>
-    );
-  if (!curso)
-    return (
-      <p className="p-6 text-center text-lg text-blue-400">Curso no encontrado</p>
-    );
-
-  const imageUrl = curso.imagenCurso
-    ? `${apiUrl}${curso.imagenCurso}`
-    : 'https://placehold.co/600x400/1e293b/64748b?text=Sin+Imagen';
-
-  let precioNumerico: number;
-  if (typeof curso.precio === 'string') {
-    precioNumerico = parseFloat(curso.precio);
-  } else if (typeof curso.precio === 'number') {
-    precioNumerico = curso.precio;
-  } else {
-    precioNumerico = 0;
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('Error al crear la orden:', errorText);
+    throw new Error(`Error al crear la orden: ${errorText}`);
   }
-  const precioFormateado = !isNaN(precioNumerico)
-    ? precioNumerico.toFixed(2)
-    : 'N/A';
+
+  const data = await res.json();
+  return data.orderId;
+};
+
+  const onApprove = async (data: OnApproveData) => {
+  try {
+    if (!usuarioId) throw new Error('Usuario no autenticado');
+
+    const res = await fetch('http://localhost:3001/pagos/paypal/capture-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        orderId: data.orderID,
+      }),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.message || 'Error al capturar el pago');
+    }
+
+    router.push(`/cursos/${cursoId}/scorm`);
+  } catch (error) {
+    setError(error instanceof Error ? error.message : 'Error desconocido');
+  }
+};
+
+  if (loading) return <p>Cargando curso...</p>;
+  if (error) return <p style={{ color: 'red' }}>{error}</p>;
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl bg-gray-900 shadow-2xl rounded-xl my-8 border border-blue-700/50 overflow-hidden relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-black opacity-90 z-0"></div>
-      <div className="relative z-10">
-        {isEnrolled ? (
-          <div className="text-center space-y-6 text-white">
-            <h1 className="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-              Contenido del Curso: {curso.titulo}
-            </h1>
+    <div
+      style={{
+        padding: '30px',
+        background: 'linear-gradient(135deg, #0f2027, #203a43, #2c5364)',
+        borderRadius: '20px',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+        color: '#ffffff',
+        fontFamily: 'Segoe UI, Roboto, sans-serif',
+        maxWidth: '900px',
+        margin: '40px auto',
+      }}
+    >
+      <h1 style={{ marginBottom: '10px', fontSize: '2rem' }}>{curso?.titulo}</h1>
+      <p style={{ opacity: 0.8 }}>{curso?.descripcion}</p>
+      <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>💲 Precio: ${curso?.precio}</p>
 
-            <button
-              onClick={() => router.push('/cursos')}
-              className="mb-6 px-6 py-2 bg-gray-700 text-blue-300 rounded-full hover:bg-gray-600 transition duration-300 ease-in-out flex items-center mx-auto shadow-md border border-gray-600 hover:border-blue-400"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-2"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Volver a Cursos
-            </button>
-
-            {typeof curso.archivoScorm === 'string' &&
-            curso.archivoScorm.indexOf('.html') !== -1 ? (
-              <div className="mt-6 p-4 border border-blue-700 bg-gray-800 rounded-lg flex flex-col items-center shadow-inner">
-                <iframe
-                  key={curso.archivoScorm}
-                  src={getScormLaunchUrl(curso.archivoScorm)}
-                  width="100%"
-                  height="600px"
-                  title={`SCORM Course: ${curso.titulo}`}
-                  frameBorder="0"
-                  allowFullScreen
-                  className="rounded-lg shadow-md border border-blue-600"
-                />
-              </div>
-            ) : (
-              <p className="text-gray-400 text-lg">
-                No hay contenido SCORM válido disponible para este curso.
-              </p>
-            )}
-          </div>
+      <p>
+        Certificado:{' '}
+        {curso?.certificadoDisponible ? (
+          <span style={{ color: '#00ff88' }}>✅ Disponible</span>
         ) : (
-          <div className="text-center space-y-6 text-white">
-            {curso.imagenCurso && (
-              <div className="w-full h-64 relative mb-6 rounded-lg overflow-hidden border border-blue-500/30 shadow-lg">
-                <img
-                  src={imageUrl}
-                  alt={curso.titulo}
-                  style={{ objectFit: 'contain', width: '100%', height: '100%' }}
-                  className="rounded-lg transition-transform duration-500 hover:scale-105"
-                />
-              </div>
-            )}
-
-            <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-6 border-b-2 border-blue-700/50 pb-4">
-              {curso.titulo}
-            </h1>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 text-left">
-              <div>
-                <h2 className="text-2xl font-semibold text-blue-300 mb-4">
-                  Detalles Generales
-                </h2>
-                <p className="text-gray-300 mb-2">
-                  <strong>Descripción:</strong> {curso.descripcion}
-                </p>
-                <p className="text-gray-300 mb-2">
-                  <strong>Tipo:</strong>{' '}
-                  <span className="text-blue-400">{curso.tipo}</span>
-                </p>
-                <p className="text-gray-300 mb-2">
-                  <strong>Categoría:</strong>{' '}
-                  <span className="text-blue-400">{curso.categoria}</span>
-                </p>
-                <p className="text-gray-300 mb-2">
-                  <strong>Duración:</strong>{' '}
-                  <span className="text-blue-400">{curso.duracionHoras} horas</span>
-                </p>
-                <p className="text-gray-300 mb-2">
-                  <strong>Precio:</strong>{' '}
-                  <span className="text-green-400 text-xl font-bold">
-                    ${precioFormateado}
-                  </span>
-                </p>
-                <p className="text-gray-300 mb-2">
-                  <strong>Modalidad:</strong>{' '}
-                  <span className="text-blue-400">{curso.modalidad}</span>
-                </p>
-                <p className="text-gray-300 mb-2">
-                  <strong>Certificado Disponible:</strong>{' '}
-                  {curso.certificadoDisponible ? (
-                    <span className="text-green-500">Sí</span>
-                  ) : (
-                    <span className="text-red-500">No</span>
-                  )}
-                </p>
-                <p className="text-gray-300 mb-2">
-                  <strong>Badge Disponible:</strong>{' '}
-                  {curso.badgeDisponible ? (
-                    <span className="text-green-500">Sí</span>
-                  ) : (
-                    <span className="text-red-500">No</span>
-                  )}
-                </p>
-              </div>
-
-              {curso.modulos && curso.modulos.length > 0 && (
-                <div>
-                  <h2 className="text-2xl font-semibold text-blue-300 mb-4">
-                    Módulos del Curso
-                  </h2>
-                  <ul className="list-none space-y-4">
-                    {curso.modulos.map((modulo: Modulo) => (
-                      <li
-                        key={modulo.id}
-                        className="text-gray-300 border border-blue-600/30 p-4 rounded-lg shadow-inner bg-gray-800 hover:bg-gray-700 transition duration-300 cursor-pointer"
-                      >
-                        <strong className="text-purple-400 block mb-1">
-                          {modulo.titulo}:
-                        </strong>{' '}
-                        <span className="text-gray-400">{modulo.descripcion}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-
-            {paypalError && (
-              <p className="text-red-500 text-lg mt-4">{paypalError}</p>
-            )}
-
-            <div className="mt-6 flex flex-col items-center space-y-4">
-              <PayPalScriptProvider options={initialOptions}>
-                <PayPalButtons
-                  style={{
-                    layout: 'vertical',
-                    color: 'blue',
-                    shape: 'pill',
-                    label: 'pay',
-                  }}
-                  createOrder={handleCreateOrder}
-                  onApprove={onApprove}
-                  onError={onError}
-                  onCancel={onCancel}
-                />
-              </PayPalScriptProvider>
-
-              <button
-                onClick={() => router.push('/cursos')}
-                className="inline-block bg-gray-700 text-blue-300 font-bold py-3 px-6 rounded-full hover:bg-gray-600 transition duration-300 ease-in-out shadow-md border border-gray-600 hover:border-blue-400"
-              >
-                Volver a Cursos
-              </button>
-            </div>
-          </div>
+          <span style={{ color: '#ff4d4d' }}>❌ No disponible</span>
         )}
+      </p>
+
+      <p>
+        Badge:{' '}
+        {curso?.badgeDisponible ? (
+          <span style={{ color: '#00ff88' }}>✅ Disponible</span>
+        ) : (
+          <span style={{ color: '#ff4d4d' }}>❌ No disponible</span>
+        )}
+      </p>
+
+      <p>
+        Archivo Scorm:{' '}
+        {curso?.archivoScorm ? (
+          <span style={{ color: '#00ff88' }}>✅ Disponible</span>
+        ) : (
+          <span style={{ color: '#ff4d4d' }}>❌ No disponible</span>
+        )}
+      </p>
+
+      <p>Tipo: <span style={{ fontWeight: 'bold' }}>{curso?.tipo}</span></p>
+      <p>Categoría: <span style={{ fontWeight: 'bold' }}>{curso?.categoria ?? 'Sin categoría'}</span></p>
+      <p>Modalidad: <span style={{ fontWeight: 'bold' }}>{curso?.modalidad}</span></p>
+      <p>Horas: <span style={{ fontWeight: 'bold' }}>{curso?.duracionHoras}</span></p>
+
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '6px',
+          marginTop: '10px',
+        }}
+      >
+        {curso?.modulos && curso.modulos.length > 0 ? (
+          curso.modulos.map((modulo) => (
+            <div
+              key={modulo.id}
+              style={{
+                flex: '1 1 calc(50% - 6px)',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '12px',
+                padding: '12px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                backdropFilter: 'blur(6px)',
+              }}
+            >
+              <h4 style={{ margin: 0 }}>{modulo.titulo}</h4>
+              <p style={{ margin: '6px 0 0', fontSize: '0.9rem', opacity: 0.8 }}>
+                {modulo.descripcion}
+              </p>
+            </div>
+          ))
+        ) : (
+          <p>Sin módulos</p>
+        )}
+      </div>
+
+      {curso?.imagenCurso && typeof curso.imagenCurso === 'string' && (
+        <img
+          src={curso.imagenCurso}
+          alt="Imagen curso"
+          style={{
+            maxWidth: '100%',
+            marginTop: 20,
+            borderRadius: '12px',
+            boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
+          }}
+        />
+      )}
+
+      <div style={{ marginTop: 30 }}>
+        <PayPalScriptProvider
+          options={{
+            clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
+            currency: 'USD',
+          }}
+        >
+          <PayPalButtons
+            createOrder={() => crearOrden()}
+            onApprove={onApprove}
+            onError={(err) => {
+              console.error('Error en PayPal:', err);
+              setError('Hubo un problema con PayPal');
+            }}
+          />
+        </PayPalScriptProvider>
       </div>
     </div>
   );

@@ -44,7 +44,7 @@ export default function PerfilUsuarioEditable({ usuario, onActualizar }: Props) 
     typeof error === "object" &&
     error !== null &&
     "message" in error &&
-    typeof (error as any).message === "string";
+    typeof (error as { message?: unknown }).message === "string";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -96,59 +96,61 @@ export default function PerfilUsuarioEditable({ usuario, onActualizar }: Props) 
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-xl mx-auto p-8 bg-gradient-to-tr from-gray-900 via-gray-800 to-gray-900 rounded-2xl shadow-2xl shadow-yellow-400/30 ring-1 ring-yellow-400/20 space-y-6 font-sans text-white select-none"
-    >
-      <h1 className="text-3xl font-extrabold text-center tracking-wide mb-4 drop-shadow-[0_0_10px_rgba(255,255,200,0.7)]">
-        Bienvenido, {nombreCompleto}
-      </h1>
+    <>
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-xl mx-auto p-8 bg-gradient-to-tr from-gray-900 via-gray-800 to-gray-900 rounded-2xl shadow-2xl shadow-yellow-400/30 ring-1 ring-yellow-400/20 space-y-6 font-sans text-white select-none"
+      >
+        <h1 className="text-3xl font-extrabold text-center tracking-wide mb-4 drop-shadow-[0_0_10px_rgba(255,255,200,0.7)]">
+          Bienvenido, {nombreCompleto}
+        </h1>
 
-      <SelectorFotoPerfilEditable
-        fotoPerfilInicial={previewFoto}
-        editable={editando}
-        onFotoChange={manejarCambioFoto}
-      />
-
-      <InputFlotante
-        id="nombreCompleto"
-        label="Nombre Completo"
-        value={nombreCompleto}
-        disabled
-      />
-
-      <InputFlotante
-        id="correoElectronico"
-        label="Correo Electrónico"
-        value={usuario.correoElectronico}
-        type="email"
-        disabled
-      />
-
-      <InputFlotante
-        id="telefono"
-        label="Teléfono"
-        value={telefono}
-        disabled={!editando}
-        onChange={(e) => setTelefono(e.target.value)}
-      />
-
-      <InfoCuenta usuario={usuario} />
-
-      <MensajeError mensaje={error} />
-
-      <BotonesEdicion
-        editando={editando}
-        guardando={guardando}
-        onCancelar={cancelarEdicion}
-      />
-
-      {mensajeExito && (
-        <InlineToast
-          mensaje={mensajeExito}
-          onClose={() => setMensajeExito("")}
+        <SelectorFotoPerfilEditable
+          fotoPerfilInicial={previewFoto}
+          editable={editando}
+          onFotoChange={manejarCambioFoto}
         />
-      )}
-    </form>
+
+        <InputFlotante
+          id="nombreCompleto"
+          label="Nombre Completo"
+          value={nombreCompleto}
+          disabled
+        />
+
+        <InputFlotante
+          id="correoElectronico"
+          label="Correo Electrónico"
+          value={usuario.correoElectronico}
+          type="email"
+          disabled
+        />
+
+        <InputFlotante
+          id="telefono"
+          label="Teléfono"
+          value={telefono}
+          disabled={!editando}
+          onChange={(e) => setTelefono(e.target.value)}
+        />
+
+        <InfoCuenta usuario={usuario} />
+
+        <MensajeError mensaje={error} />
+
+        <BotonesEdicion
+          editando={editando}
+          guardando={guardando}
+          onCancelar={cancelarEdicion}
+        />
+
+        {mensajeExito && (
+          <InlineToast
+            mensaje={mensajeExito}
+            onClose={() => setMensajeExito("")}
+          />
+        )}
+      </form>
+    </>
   );
 }
