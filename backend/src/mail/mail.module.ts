@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MailService } from './mail.service';
+import { PurchaseMailService } from './purchase-mail.service';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import * as path from 'path';
@@ -31,7 +32,7 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
       inject: [ConfigService],
     }),
   ],
-  providers: [MailService],
-  exports: [MailService],
+  providers: [MailService, PurchaseMailService],
+  exports: [MailService, PurchaseMailService],
 })
 export class MailModule {}
