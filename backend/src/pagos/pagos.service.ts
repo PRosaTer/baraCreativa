@@ -16,6 +16,7 @@ import { Usuario } from '../entidades/usuario.entity';
 import { CreatePaypalOrderDto } from './dto/create-paypal-order.dto';
 import { CapturePaypalOrderDto } from './dto/capture-paypal-order.dto';
 import { InscripcionesService } from '../inscripciones/inscripciones.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class PagosService {
@@ -34,6 +35,7 @@ export class PagosService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     private readonly inscripcionesService: InscripcionesService,
+    private readonly mailService: MailService,
   ) {
     this.paypalClientId = this.configService.get<string>('PAYPAL_CLIENT_ID')!;
     this.paypalClientSecret = this.configService.get<string>('PAYPAL_CLIENT_SECRET')!;
@@ -184,6 +186,20 @@ export class PagosService {
     }
 
     const captureDetails = paypalOrder.purchase_units[0]?.payments?.captures?.[0];
+
+
+    await this.mailService.sendPurchaseReceiptToCustomer(
+      pagoExistente.usuario.correoElectronico,
+      pagoExistente.usuario.nombreCompleto,
+      pagoExistente.curso.titulo,
+      pagoExistente.monto,
+      paypalOrder.id,
+      {
+        id: captureDetails.id,
+        create_time: captureDetails.create_time,
+        amount: captureDetails.amount,
+      },
+    );
 
     return {
       userEmail: pagoExistente.usuario.correoElectronico,

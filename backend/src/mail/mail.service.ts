@@ -46,7 +46,7 @@ export class MailService {
         context: {
           customerName,
           courseTitle,
-          paymentAmount: paymentAmount.toFixed(2),
+          paymentAmount: Number(paymentAmount).toFixed(2),
           orderId,
           transactionId: transactionDetails.id,
           currency: transactionDetails.amount?.currency_code,
@@ -79,7 +79,7 @@ export class MailService {
           customerEmail,
           customerName,
           courseTitle,
-          paymentAmount: paymentAmount.toFixed(2),
+          paymentAmount: Number(paymentAmount).toFixed(2),
           orderId,
           transactionId: transactionDetails.id,
           currency: transactionDetails.amount?.currency_code,
@@ -160,7 +160,7 @@ export class MailService {
         context: {
           customerName,
           courseTitle,
-          paymentAmount: paymentAmount.toFixed(2),
+          paymentAmount: Number(paymentAmount).toFixed(2),
           orderId,
           transactionId: transactionDetails.id,
           currency: transactionDetails.amount?.currency_code,
