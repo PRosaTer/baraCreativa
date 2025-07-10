@@ -19,6 +19,9 @@ export class Pago {
   @Column({ type: 'timestamp', nullable: true })
   fechaConfirmacionPago?: Date;
 
+  @Column({ type: 'varchar', length: 20, default: 'Pendiente' })
+  estado: string;  // <-- Nuevo campo para estado del pago
+
   @ManyToOne(() => Usuario, (usuario) => usuario.pagos, { onDelete: 'CASCADE' })
   usuario: Usuario;
 

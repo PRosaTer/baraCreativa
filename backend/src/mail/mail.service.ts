@@ -1,121 +1,138 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
-import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
+import * as nodemailer from 'nodemailer';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as Handlebars from 'handlebars';
+import { TransactionDetails } from '../pagos/interfaces/transaction-details.interface';
 
-interface TransactionDetails {
-  id: string;
-  create_time?: string;
-  amount?: {
-    currency_code?: string;
-    value?: string;
-  };
+export interface PurchaseNotificationData {
+  userName: string;
+  userEmail: string;
+  courseTitle: string;
+  paymentAmount: number;
+  orderId: string;
+  transactionDetails: TransactionDetails;
+  tipoUsuario: 'Alumno' | 'Empresa' | 'Instructor' | 'Admin';
+  cursosComprados: string[];
+  totalComprados: number;
+  porcentajeComprados: number;
 }
 
 @Injectable()
 export class MailService {
-  private readonly logger = new Logger(MailService.name);
-  private readonly senderEmail: string;
+  private transporter: nodemailer.Transporter;
+  private readonly adminEmail: string;
 
-  constructor(
-    private readonly mailerService: MailerService,
-    private readonly configService: ConfigService,
-  ) {
-    const emailUser = this.configService.get<string>('EMAIL_USER');
-    if (!emailUser) {
-      const errorMessage = 'La variable de entorno EMAIL_USER no está configurada.';
-      this.logger.error(errorMessage);
-      throw new Error(errorMessage);
-    }
-    this.senderEmail = emailUser;
+  constructor() {
+    this.adminEmail = process.env.EMAIL_USER ?? 'admin@default.com';
+
+    this.transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: Number(process.env.EMAIL_PORT),
+      secure: process.env.EMAIL_SECURE === 'true',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
   }
 
-  async sendPaymentConfirmationToCustomer(
-    customerEmail: string,
-    customerName: string,
+  private async renderTemplate<T extends object>(templateName: string, variables: T): Promise<string> {
+    const filePath = path.resolve(__dirname, 'templates', `${templateName}.hbs`);
+    const templateContent = await fs.promises.readFile(filePath, 'utf-8');
+    const template = Handlebars.compile(templateContent);
+    return template(variables);
+  }
+
+  async sendPurchaseReceiptToCustomer(
+    userEmail: string,
+    userName: string,
     courseTitle: string,
     paymentAmount: number,
     orderId: string,
     transactionDetails: TransactionDetails,
-  ) {
-    try {
-      await this.mailerService.sendMail({
-        from: `BaraCreativa <${this.senderEmail}>`,
-        to: customerEmail,
-        subject: `Confirmación de Compra del Curso: ${courseTitle}`,
-        template: 'customer-payment-confirmation',
-        context: {
-          customerName,
-          courseTitle,
-          paymentAmount: Number(paymentAmount).toFixed(2),
-          orderId,
-          transactionId: transactionDetails.id,
-          currency: transactionDetails.amount?.currency_code,
-          captureTime: new Date(transactionDetails.create_time || Date.now()).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }),
-          currentYear: new Date().getFullYear(),
-        },
-      });
-      this.logger.log(`Correo de confirmación de pago enviado a: ${customerEmail}`);
-    } catch (error) {
-      this.logger.error(`Error enviando correo de pago al cliente ${customerEmail}:`, error.response?.data || error.message);
-    }
+  ): Promise<void> {
+    const html = await this.renderTemplate('purchase-receipt-user', {
+      customerName: userName,
+      courseTitle,
+      paymentAmount,
+      orderId,
+      transactionId: transactionDetails?.id ?? '',
+      captureTime: transactionDetails?.create_time ?? '',
+      currency: 'USD', // O lo que uses
+      currentYear: new Date().getFullYear(),
+    });
+
+    const mailOptions = {
+      from: this.adminEmail,
+      to: userEmail,
+      subject: `Gracias por tu compra, ${userName}!`,
+      html,
+    };
+
+    await this.transporter.sendMail(mailOptions);
   }
 
-  async sendPaymentNotificationToAdmin(
-    adminEmail: string,
-    customerEmail: string,
-    customerName: string,
-    courseTitle: string,
-    paymentAmount: number,
-    orderId: string,
-    transactionDetails: TransactionDetails,
-  ) {
-    try {
-      await this.mailerService.sendMail({
-        from: `BaraCreativa <${this.senderEmail}>`,
-        to: adminEmail,
-        subject: `¡Nueva Venta! Curso: ${courseTitle} - ID: ${orderId}`,
-        template: 'admin-payment-notification',
-        context: {
-          customerEmail,
-          customerName,
-          courseTitle,
-          paymentAmount: Number(paymentAmount).toFixed(2),
-          orderId,
-          transactionId: transactionDetails.id,
-          currency: transactionDetails.amount?.currency_code,
-          captureTime: new Date(transactionDetails.create_time || Date.now()).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }),
-          currentYear: new Date().getFullYear(),
-        },
-      });
-      this.logger.log(`Correo de notificación de venta enviado a admin: ${adminEmail}`);
-    } catch (error) {
-      this.logger.error(`Error enviando correo de venta al admin ${adminEmail}:`, error.response?.data || error.message);
-    }
+  async sendPurchaseNotificationToAdmin(data: PurchaseNotificationData): Promise<void> {
+    const {
+      userName,
+      userEmail,
+      courseTitle,
+      paymentAmount,
+      orderId,
+      transactionDetails,
+      tipoUsuario,
+      cursosComprados,
+      totalComprados,
+      porcentajeComprados,
+    } = data;
+
+    const html = await this.renderTemplate('admin-purchase-notification', {
+      userName,
+      userEmail,
+      courseTitle,
+      paymentAmount,
+      orderId,
+      transactionId: transactionDetails?.id ?? '',
+      purchaseDate: transactionDetails?.create_time ?? '',
+      tipoUsuario,
+      listaCursos: cursosComprados,
+      totalCursosComprados: totalComprados,
+      porcentajeCursosComprados: porcentajeComprados.toFixed(2),
+      currentYear: new Date().getFullYear(),
+    });
+
+    const mailOptions = {
+      from: this.adminEmail,
+      to: this.adminEmail,
+      subject: `Nueva compra realizada por ${userName}`,
+      html,
+    };
+
+    await this.transporter.sendMail(mailOptions);
   }
 
   async sendPasswordRecoveryEmailToUser(
     userEmail: string,
     userName: string,
     recoveryCode: string,
-    resetUrl?: string
-  ) {
-    try {
-      await this.mailerService.sendMail({
-        from: `BaraCreativa <${this.senderEmail}>`,
-        to: userEmail,
-        subject: 'Recuperación de Contraseña - BaraCreativa',
-        template: 'password-recovery-user',
-        context: {
-          userName,
-          recoveryCode,
-          resetUrl,
-          currentYear: new Date().getFullYear(),
-        },
-      });
-      this.logger.log(`Correo de recuperación de contraseña enviado a: ${userEmail}`);
-    } catch (error) {
-      this.logger.error(`Error enviando correo de recuperación al usuario ${userEmail}:`, error.response?.data || error.message);
-    }
+    resetUrl: string,
+  ): Promise<void> {
+    const html = await this.renderTemplate('password-recovery-user', {
+      userName,
+      recoveryCode,
+      resetUrl,
+      currentYear: new Date().getFullYear(),
+    });
+
+    const mailOptions = {
+      from: this.adminEmail,
+      to: userEmail,
+      subject: 'Recuperación de contraseña',
+      html,
+    };
+
+    await this.transporter.sendMail(mailOptions);
   }
 
   async sendPasswordRecoveryNotificationToAdmin(
@@ -123,54 +140,23 @@ export class MailService {
     userEmail: string,
     userName: string,
     recoveryCode: string,
-  ) {
-    try {
-      await this.mailerService.sendMail({
-        from: `BaraCreativa <${this.senderEmail}>`,
-        to: adminEmail,
-        subject: `Notificación: Solicitud de Recuperación de Contraseña para ${userName || userEmail}`,
-        template: 'password-recovery-admin',
-        context: {
-          userEmail,
-          userName,
-          recoveryCode,
-          currentYear: new Date().getFullYear(),
-        },
-      });
-      this.logger.log(`Notificación de recuperación de contraseña enviada a admin: ${adminEmail}`);
-    } catch (error) {
-      this.logger.error(`Error enviando notificación de recuperación al admin ${adminEmail}:`, error.response?.data || error.message);
-    }
-  }
+  ): Promise<void> {
+    const html = `
+      <p>Se ha solicitado una recuperación de contraseña para el usuario:</p>
+      <ul>
+        <li>Nombre: ${userName}</li>
+        <li>Correo: ${userEmail}</li>
+        <li>Código de recuperación: ${recoveryCode}</li>
+      </ul>
+    `;
 
-  async sendPurchaseReceiptToCustomer(
-    customerEmail: string,
-    customerName: string,
-    courseTitle: string,
-    paymentAmount: number,
-    orderId: string,
-    transactionDetails: TransactionDetails,
-  ) {
-    try {
-      await this.mailerService.sendMail({
-        from: `BaraCreativa <${this.senderEmail}>`,
-        to: customerEmail,
-        subject: `Boleta de compra - Curso: ${courseTitle}`,
-        template: 'customer-purchase-receipt',
-        context: {
-          customerName,
-          courseTitle,
-          paymentAmount: Number(paymentAmount).toFixed(2),
-          orderId,
-          transactionId: transactionDetails.id,
-          currency: transactionDetails.amount?.currency_code,
-          captureTime: new Date(transactionDetails.create_time || Date.now()).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }),
-          currentYear: new Date().getFullYear(),
-        },
-      });
-      this.logger.log(`Boleta de compra enviada a: ${customerEmail}`);
-    } catch (error) {
-      this.logger.error(`Error enviando boleta al cliente ${customerEmail}:`, error.response?.data || error.message);
-    }
+    const mailOptions = {
+      from: this.adminEmail,
+      to: adminEmail,
+      subject: 'Notificación de recuperación de contraseña',
+      html,
+    };
+
+    await this.transporter.sendMail(mailOptions);
   }
 }

@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { InscripcionesModule } from '../inscripciones/inscripciones.module';
 import { MailModule } from '../mail/mail.module'; 
 import { PurchaseMailService } from '../mail/purchase-mail.service';
+import { UsuariosModule } from '../usuarios/usuarios.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { PurchaseMailService } from '../mail/purchase-mail.service';
     HttpModule,
     ConfigModule,
     InscripcionesModule,
-    MailModule, 
+    MailModule,
+    UsuariosModule,
   ],
   providers: [PagosService, PurchaseMailService],
   controllers: [PagosController],

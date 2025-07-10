@@ -21,7 +21,7 @@ import { UsuariosService } from './usuarios.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { Usuario } from '../entidades/usuario.entity';
-import { UsuarioAutenticado } from '../auth/decoradores/usuario-autenticado.decorator.ts';
+import { UsuarioAutenticado } from '../auth/decoradores/usuario-autenticado.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('api/usuarios')
