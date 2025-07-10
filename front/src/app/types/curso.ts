@@ -34,7 +34,7 @@ export interface Curso {
   certificadoDisponible: boolean;
   badgeDisponible: boolean;
   imagenCurso?: string | null;
-  archivoScorm?: string | null;
+  archivoScorm?: string | null; 
   modulos: Modulo[];
 }
 
@@ -50,7 +50,7 @@ export interface CursoForm {
   certificadoDisponible: boolean;
   badgeDisponible: boolean;
   imagenCurso?: File | string | null;
-  archivoScorm?: string | null; 
+  archivoScorm?: string | null;
   modulos: EditableModuloForm[];
   newScormFile?: File | null;
 }

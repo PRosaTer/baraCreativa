@@ -1,19 +1,13 @@
-import { IsNumber, IsPositive, IsString, IsNotEmpty } from 'class-validator';
+import { IsInt, IsString, IsNotEmpty } from 'class-validator';
 
 export class CreatePaypalOrderDto {
-  @IsNumber()
-  @IsPositive()
-  monto: number;
-
-  @IsNotEmpty()
-  @IsString()
-  currency_code: string; 
-
-  @IsNumber()
-  @IsPositive()
-  cursoId: number;
-  
-  @IsNumber()
-  @IsPositive()
+  @IsInt()
   usuarioId: number;
+
+  @IsInt()
+  cursoId: number;
+
+  @IsString()
+  @IsNotEmpty()
+  currency_code: string;
 }

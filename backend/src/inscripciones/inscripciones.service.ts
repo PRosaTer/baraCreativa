@@ -18,40 +18,21 @@ export class InscripcionesService {
     private readonly cursoRepository: Repository<Curso>,
   ) {}
 
-  /**
-   * Crea una nueva inscripción para un usuario en un curso.
-   * @param usuario El objeto Usuario.
-   * @param curso El objeto Curso.
-   * @param estado El estado inicial de la inscripción (por defecto 'Pendiente').
-   * @returns La nueva inscripción creada.
-   */
-  async createInscripcion(usuario: Usuario, curso: Curso, estado: string = 'Pendiente'): Promise<Inscripcion> {
+  async createInscripcion(usuario: Usuario, curso: Curso, estado = 'Pendiente'): Promise<Inscripcion> {
     const nuevaInscripcion = this.inscripcionRepository.create({ usuario, curso, estado });
     return this.inscripcionRepository.save(nuevaInscripcion);
   }
 
-  /**
-   * Busca una inscripción específica por usuario y curso.
-   * @param usuarioId El ID del usuario.
-   * @param cursoId El ID del curso.
-   * @returns La inscripción encontrada o null si no existe.
-   */
   async findByUserAndCourse(usuarioId: number, cursoId: number): Promise<Inscripcion | null> {
     return this.inscripcionRepository.findOne({
-      where: { 
+      where: {
         usuario: { id: usuarioId },
-        curso: { id: cursoId }
+        curso: { id: cursoId },
       },
       relations: ['usuario', 'curso'],
     });
   }
 
-  /**
-   * Actualiza el estado de una inscripción existente.
-   * @param inscripcionId El ID de la inscripción a actualizar.
-   * @param nuevoEstado El nuevo estado de la inscripción.
-   * @returns La inscripción actualizada.
-   */
   async updateInscripcionEstado(inscripcionId: number, nuevoEstado: string): Promise<Inscripcion> {
     const inscripcion = await this.inscripcionRepository.findOne({ where: { id: inscripcionId } });
     if (!inscripcion) {
@@ -61,20 +42,19 @@ export class InscripcionesService {
     return this.inscripcionRepository.save(inscripcion);
   }
 
-  /**
-   * Verifica si un usuario está inscrito y su inscripción está 'Completado' para un curso.
-   * @param usuarioId El ID del usuario.
-   * @param cursoId El ID del curso.
-   * @returns true si el usuario está inscrito y el estado es 'Completado', false en caso contrario.
-   */
-  async isUserEnrolledAndCompleted(usuarioId: number, cursoId: number): Promise<boolean> {
-    const inscripcion = await this.inscripcionRepository.findOne({
+  async obtenerCursosPorUsuario(usuarioId: number) {
+    const inscripciones = await this.inscripcionRepository.find({
       where: {
         usuario: { id: usuarioId },
-        curso: { id: cursoId },
-        estado: 'Completado', 
+        estado: 'Pagado', 
       },
+      relations: ['curso'],
     });
-    return !!inscripcion; 
+
+    return inscripciones.map((insc) => ({
+      id: insc.curso.id,
+      titulo: insc.curso.titulo,
+      imagenCurso: insc.curso.imagenCurso || null,
+    }));
   }
 }
