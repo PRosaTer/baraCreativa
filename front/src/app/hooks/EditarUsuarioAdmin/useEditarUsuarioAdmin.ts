@@ -3,7 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Usuario } from '@/app/types/auth';
 
-export default function useEditarUsuarioAdmin(usuario: Usuario, onActualizar: (actualizado: Usuario) => void, onCerrar: () => void) {
+export default function useEditarUsuarioAdmin(
+  usuario: Usuario,
+  onActualizar: (actualizado: Usuario) => void,
+  onCerrar: () => void
+) {
   const [telefono, setTelefono] = useState(usuario.telefono || '');
   const [tipoUsuario, setTipoUsuario] = useState<Usuario['tipoUsuario']>(usuario.tipoUsuario);
   const [nombreCompleto, setNombreCompleto] = useState(usuario.nombreCompleto);
@@ -14,7 +18,7 @@ export default function useEditarUsuarioAdmin(usuario: Usuario, onActualizar: (a
   const handleGuardar = async () => {
     setGuardando(true);
     try {
-      const res = await fetch(`http://localhost:3001/usuarios/${usuario.id}`, {
+      const res = await fetch(`http://localhost:3001/api/usuarios/${usuario.id}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {
