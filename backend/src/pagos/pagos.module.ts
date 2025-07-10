@@ -8,6 +8,7 @@ import { Usuario } from '../entidades/usuario.entity';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { InscripcionesModule } from '../inscripciones/inscripciones.module';
+import { MailModule } from '../mail/mail.module';  // <-- agregado
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { InscripcionesModule } from '../inscripciones/inscripciones.module';
     HttpModule,
     ConfigModule,
     InscripcionesModule,
+    MailModule,  // <-- agregado acá
   ],
   providers: [PagosService],
   controllers: [PagosController],

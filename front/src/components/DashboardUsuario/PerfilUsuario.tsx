@@ -40,52 +40,47 @@ export default function PerfilUsuarioEditable({ usuario, onActualizar }: Props) 
     if (editando) setFotoPerfil(file);
   };
 
-  const isErrorWithMessage = (error: unknown): error is { message: string } =>
-    typeof error === "object" &&
-    error !== null &&
-    "message" in error &&
-    typeof (error as { message?: unknown }).message === "string";
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!editando) {
-      setEstadoInicial({ telefono, fotoPerfilUrl: previewFoto });
-      setEditando(true);
-      return;
+  if (!editando) {
+    setEstadoInicial({ telefono, fotoPerfilUrl: previewFoto });
+    setEditando(true);
+    return;
+  }
+
+  setGuardando(true);
+  setError(null);
+
+  try {
+    const formData = new FormData();
+    formData.append("nombreCompleto", nombreCompleto);
+    formData.append("telefono", telefono);
+    if (fotoPerfil) formData.append("fotoPerfil", fotoPerfil);
+
+    const res = await fetch(`http://localhost:3001/api/usuarios/${usuario.id}`, {
+      method: "PATCH",
+      body: formData,
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.message || "Error al actualizar");
     }
 
-    setGuardando(true);
-    setError(null);
+    const usuarioActualizado = await res.json();
+    onActualizar(usuarioActualizado);
+    setMensajeExito("✅ Perfil actualizado exitosamente 🚀");
+    setEditando(false);
+  } catch (error: unknown) {
+    if (error instanceof Error) setError(error.message);
+    else setError("Error desconocido");
+  } finally {
+    setGuardando(false);
+  }
+};
 
-    try {
-      const formData = new FormData();
-      formData.append("nombreCompleto", nombreCompleto);
-      formData.append("telefono", telefono);
-      if (fotoPerfil) formData.append("fotoPerfil", fotoPerfil);
-
-      const res = await fetch(`http://localhost:3001/usuarios/${usuario.id}`, {
-        method: "PATCH",
-        body: formData,
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || "Error al actualizar");
-      }
-
-      const usuarioActualizado = await res.json();
-      onActualizar(usuarioActualizado);
-      setMensajeExito("✅ Perfil actualizado exitosamente 🚀");
-      setEditando(false);
-    } catch (error: unknown) {
-      if (isErrorWithMessage(error)) setError(error.message);
-      else setError("Error desconocido");
-    } finally {
-      setGuardando(false);
-    }
-  };
 
   const cancelarEdicion = () => {
     setTelefono(estadoInicial.telefono);
@@ -96,61 +91,56 @@ export default function PerfilUsuarioEditable({ usuario, onActualizar }: Props) 
   };
 
   return (
-    <>
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-xl mx-auto p-8 bg-gradient-to-tr from-gray-900 via-gray-800 to-gray-900 rounded-2xl shadow-2xl shadow-yellow-400/30 ring-1 ring-yellow-400/20 space-y-6 font-sans text-white select-none"
-      >
-        <h1 className="text-3xl font-extrabold text-center tracking-wide mb-4 drop-shadow-[0_0_10px_rgba(255,255,200,0.7)]">
-          Bienvenido, {nombreCompleto}
-        </h1>
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-xl mx-auto p-8 bg-gradient-to-tr from-gray-900 via-gray-800 to-gray-900 rounded-2xl shadow-2xl shadow-yellow-400/30 ring-1 ring-yellow-400/20 space-y-6 font-sans text-white select-none"
+    >
+      <h1 className="text-3xl font-extrabold text-center tracking-wide mb-4 drop-shadow-[0_0_10px_rgba(255,255,200,0.7)]">
+        Bienvenido, {nombreCompleto}
+      </h1>
 
-        <SelectorFotoPerfilEditable
-          fotoPerfilInicial={previewFoto}
-          editable={editando}
-          onFotoChange={manejarCambioFoto}
-        />
+      <SelectorFotoPerfilEditable
+        fotoPerfilInicial={previewFoto}
+        editable={editando}
+        onFotoChange={manejarCambioFoto}
+      />
 
-        <InputFlotante
-          id="nombreCompleto"
-          label="Nombre Completo"
-          value={nombreCompleto}
-          disabled
-        />
+      <InputFlotante
+        id="nombreCompleto"
+        label="Nombre Completo"
+        value={nombreCompleto}
+        disabled
+      />
 
-        <InputFlotante
-          id="correoElectronico"
-          label="Correo Electrónico"
-          value={usuario.correoElectronico}
-          type="email"
-          disabled
-        />
+      <InputFlotante
+        id="correoElectronico"
+        label="Correo Electrónico"
+        value={usuario.correoElectronico}
+        type="email"
+        disabled
+      />
 
-        <InputFlotante
-          id="telefono"
-          label="Teléfono"
-          value={telefono}
-          disabled={!editando}
-          onChange={(e) => setTelefono(e.target.value)}
-        />
+      <InputFlotante
+        id="telefono"
+        label="Teléfono"
+        value={telefono}
+        disabled={!editando}
+        onChange={(e) => setTelefono(e.target.value)}
+      />
 
-        <InfoCuenta usuario={usuario} />
+      <InfoCuenta usuario={usuario} />
 
-        <MensajeError mensaje={error} />
+      <MensajeError mensaje={error} />
 
-        <BotonesEdicion
-          editando={editando}
-          guardando={guardando}
-          onCancelar={cancelarEdicion}
-        />
+      <BotonesEdicion
+        editando={editando}
+        guardando={guardando}
+        onCancelar={cancelarEdicion}
+      />
 
-        {mensajeExito && (
-          <InlineToast
-            mensaje={mensajeExito}
-            onClose={() => setMensajeExito("")}
-          />
-        )}
-      </form>
-    </>
+      {mensajeExito && (
+        <InlineToast mensaje={mensajeExito} onClose={() => setMensajeExito("")} />
+      )}
+    </form>
   );
 }

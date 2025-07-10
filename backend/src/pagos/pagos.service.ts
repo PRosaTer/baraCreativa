@@ -172,7 +172,6 @@ export class PagosService {
     pagoExistente.fechaConfirmacionPago = new Date();
     await this.pagoRepository.save(pagoExistente);
 
- 
     const inscripcionExistente = await this.inscripcionesService.findByUserAndCourse(
       pagoExistente.usuario.id,
       pagoExistente.curso.id,
@@ -187,10 +186,16 @@ export class PagosService {
     const captureDetails = paypalOrder.purchase_units[0]?.payments?.captures?.[0];
 
     return {
-      status: 'COMPLETED',
-      paymentId: paypalOrder.id,
-      transactionDetails: captureDetails,
-      pagoLocal: pagoExistente,
+      userEmail: pagoExistente.usuario.correoElectronico,
+      userName: pagoExistente.usuario.nombreCompleto,
+      courseTitle: pagoExistente.curso.titulo,
+      paymentAmount: pagoExistente.monto,
+      orderId: paypalOrder.id,
+      transactionDetails: {
+        id: captureDetails.id,
+        create_time: captureDetails.create_time,
+        amount: captureDetails.amount,
+      },
     };
   }
 }

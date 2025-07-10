@@ -47,13 +47,15 @@ export class UsuariosService {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
     }
 
-    if (usuarioData.tipoUsuario) {
-      usuarioData.esAdmin = usuarioData.tipoUsuario === 'Admin';
-    }
 
     if (usuarioData.password) {
       const salt = await bcrypt.genSalt();
       usuarioData.password = await bcrypt.hash(usuarioData.password, salt);
+    }
+
+ 
+    if (usuarioData.tipoUsuario) {
+      usuarioData.esAdmin = usuarioData.tipoUsuario === 'Admin';
     }
 
     await this.usuariosRepository.update(id, usuarioData);

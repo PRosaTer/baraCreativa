@@ -18,5 +18,5 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
 
   @IsOptional()
   @IsEnum(TipoUsuario)
-  tipoUsuario?: TipoUsuario; 
+  tipoUsuario?: TipoUsuario;
 }
