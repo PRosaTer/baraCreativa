@@ -9,7 +9,6 @@ import BotonesEdicion from "./BotonesEdicion";
 import MensajeError from "./MensajeError";
 import { usePerfilEditable } from "../../app/hooks/perfil/usePerfilEditable";
 import InlineToast from "./InlineToast";
-import CursosUsuario from "./CursosUsuario";
 
 interface Props {
   usuario: Usuario;
@@ -46,7 +45,6 @@ export default function PerfilUsuarioEditable({ usuario, onActualizar }: Props) 
     error !== null &&
     "message" in error &&
     typeof (error as { message?: unknown }).message === "string";
-
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -153,14 +151,6 @@ export default function PerfilUsuarioEditable({ usuario, onActualizar }: Props) 
           />
         )}
       </form>
-
-
-      <section className="max-w-4xl mx-auto mt-12 px-4">
-        <h2 className="text-2xl font-bold text-yellow-400 mb-6 text-center">
-          Mis Cursos Pagados
-        </h2>
-        <CursosUsuario />
-      </section>
     </>
   );
 }
