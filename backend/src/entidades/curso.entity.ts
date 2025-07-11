@@ -11,7 +11,7 @@ import { Certificado } from './certificado.entity';
 import { EquipoEmpresaMiembro } from './equipo-empresa.entity';
 import { Inscripcion } from './inscripcion.entity';
 import { Pago } from './pago.entity';
-import { ReporteProgresoEntity } from './reporte-progreso.entity';
+import { ReporteProgresoEntity } from './ReporteProgreso.entity';
 import { Resena } from './resena.entity';
 
 
@@ -20,7 +20,7 @@ export enum ClaseItem {
   SERVICIO = 'servicio',
 }
 
-@Entity('cursos') 
+@Entity('cursos')
 export class Curso {
   @PrimaryGeneratedColumn()
   id: number;
@@ -67,7 +67,7 @@ export class Curso {
   @Column({ nullable: true })
   pdfCurso?: string;
 
-  
+
   @Column({ type: 'date', nullable: true })
   fechaInicio?: Date;
 

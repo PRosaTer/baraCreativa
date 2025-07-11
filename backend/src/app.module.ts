@@ -3,12 +3,12 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 
-import { UsuariosModule } from './usuarios/usuarios.module';
-import { PasswordModule } from './password/password.module';
-import { AuthModule } from './auth/auth.module';
-import { CursosModule } from './cursos/cursos.module';
-import { PagosModule } from './pagos/pagos.module';
-import { InscripcionesModule } from './inscripciones/inscripciones.module';
+import { UsuariosModule } from './modules/usuarios/usuarios.module';
+import { PasswordModule } from './modules/password/password.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { CursosModule } from './modules/cursos/cursos.module';
+import { PagosModule } from './modules/pagos/pagos.module';
+import { InscripcionesModule } from './modules/inscripciones/inscripciones.module';
 
 import configuration, { AppConfig } from './config/configuration';
 
