@@ -1,0 +1,17 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { CursosController } from '../../controllers/cursos/cursos.controller';
+import { CursosService } from '../../services/cursos/cursos.service';
+import { Curso } from '../../entidades/curso.entity';
+import { ModuloEntity } from '../../entidades/modulo.entity';
+import { ProgresoModule } from '../../modules/progreso/progreso.module';
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([Curso, ModuloEntity]),
+    ProgresoModule, 
+  ],
+  controllers: [CursosController],
+  providers: [CursosService],
+})
+export class CursosModule {}

@@ -21,32 +21,32 @@ export default function TablaCursosAdmin({ cursos, onEditar, onEliminar }: Props
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo Item</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modalidad</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SCORM</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Modalidad</th>
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SCORM</th>
+            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {cursos.map((curso) => (
             <tr key={curso.id}>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{curso.titulo}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">{curso.titulo}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                   curso.claseItem === ClaseItem.CURSO ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
                 }`}>
                   {curso.claseItem === ClaseItem.CURSO ? 'Curso' : 'Servicio'}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{curso.categoria}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{curso.categoria}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                 {curso.claseItem === ClaseItem.CURSO ? curso.modalidad : 'N/A'}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${Number(curso.precio).toFixed(2)}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">${Number(curso.precio).toFixed(2)}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                 {curso.archivoScorm ? (
                   <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                     SCORM Disponible
@@ -57,7 +57,7 @@ export default function TablaCursosAdmin({ cursos, onEditar, onEliminar }: Props
                   </span>
                 )}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
                 <button
                   onClick={() => onEditar(curso)}
                   className="text-indigo-600 hover:text-indigo-900 mr-3"
