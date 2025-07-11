@@ -91,105 +91,106 @@ export default function CursoDetalle() {
     }
   };
 
-  if (loading) return <p>Cargando curso...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (loading) return <p className="text-center text-lg mt-8 text-gray-700">Cargando curso...</p>;
+  if (error) return <p className="text-red-600 text-center mt-8">{error}</p>;
 
   return (
     <div
-      style={{
-        padding: '30px',
-        background: 'linear-gradient(135deg, #0f2027, #203a43, #2c5364)',
-        borderRadius: '20px',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
-        color: '#ffffff',
-        fontFamily: 'Segoe UI, Roboto, sans-serif',
-        maxWidth: '900px',
-        margin: '40px auto',
-      }}
+      className="p-6 md:p-8 lg:p-10 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700
+                 rounded-2xl shadow-xl text-white font-sans max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-4xl
+                 mx-auto my-8 md:my-12"
     >
-      <h1 style={{ marginBottom: '10px', fontSize: '2rem' }}>{curso?.titulo}</h1>
-      <p style={{ opacity: 0.8 }}>{curso?.descripcion}</p>
-      <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>💲 Precio: ${curso?.precio}</p>
+      <h1 className="mb-4 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-blue-300 text-center">
+        {curso?.titulo}
+      </h1>
 
-      <p>
-        Certificado:{' '}
-        {curso?.certificadoDisponible ? (
-          <span style={{ color: '#00ff88' }}>✅ Disponible</span>
-        ) : (
-          <span style={{ color: '#ff4d4d' }}>❌ No disponible</span>
-        )}
-      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6 items-start">
+        <div className="flex flex-col">
+          <div className="mb-6">
+            <p className="font-bold text-base sm:text-lg text-green-400 mb-2">
+              💲 Precio: ${curso?.precio}
+            </p>
+            <p className="text-sm sm:text-base mb-1">
+              Certificado:{' '}
+              {curso?.certificadoDisponible ? (
+                <span className="text-emerald-400">✅ Disponible</span>
+              ) : (
+                <span className="text-red-400">❌ No disponible</span>
+              )}
+            </p>
+            <p className="text-sm sm:text-base mb-1">
+              Badge:{' '}
+              {curso?.badgeDisponible ? (
+                <span className="text-emerald-400">✅ Disponible</span>
+              ) : (
+                <span className="text-red-400">❌ No disponible</span>
+              )}
+            </p>
+            <p className="text-sm sm:text-base mb-4">
+              Archivo Scorm:{' '}
+              {curso?.archivoScorm ? (
+                <span className="text-emerald-400">✅ Disponible</span>
+              ) : (
+                <span className="text-red-400">❌ No disponible</span>
+              )}
+            </p>
+            <p className="text-sm sm:text-base mb-1">Tipo: <span className="font-bold">{curso?.tipo}</span></p>
+            <p className="text-sm sm:text-base mb-1">Categoría: <span className="font-bold">{curso?.categoria ?? 'Sin categoría'}</span></p>
+            <p className="text-sm sm:text-base mb-1">Modalidad: <span className="font-bold">{curso?.modalidad}</span></p>
+            <p className="text-sm sm:text-base mb-4">Horas: <span className="font-bold">{curso?.duracionHoras}</span></p>
+          </div>
 
-      <p>
-        Badge:{' '}
-        {curso?.badgeDisponible ? (
-          <span style={{ color: '#00ff88' }}>✅ Disponible</span>
-        ) : (
-          <span style={{ color: '#ff4d4d' }}>❌ No disponible</span>
-        )}
-      </p>
-
-      <p>
-        Archivo Scorm:{' '}
-        {curso?.archivoScorm ? (
-          <span style={{ color: '#00ff88' }}>✅ Disponible</span>
-        ) : (
-          <span style={{ color: '#ff4d4d' }}>❌ No disponible</span>
-        )}
-      </p>
-
-      <p>Tipo: <span style={{ fontWeight: 'bold' }}>{curso?.tipo}</span></p>
-      <p>Categoría: <span style={{ fontWeight: 'bold' }}>{curso?.categoria ?? 'Sin categoría'}</span></p>
-      <p>Modalidad: <span style={{ fontWeight: 'bold' }}>{curso?.modalidad}</span></p>
-      <p>Horas: <span style={{ fontWeight: 'bold' }}>{curso?.duracionHoras}</span></p>
-
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '6px',
-          marginTop: '10px',
-        }}
-      >
-        {curso?.modulos && curso.modulos.length > 0 ? (
-          curso.modulos.map((modulo) => (
+     
+          <div className='mt-10'> 
+            <h3 className="text-xl sm:text-2xl font-bold text-blue-200 mb-3">Descripción:</h3>
             <div
-              key={modulo.id}
-              style={{
-                flex: '1 1 calc(50% - 6px)',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '12px',
-                padding: '12px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                backdropFilter: 'blur(6px)',
-              }}
+              className="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg
+                         transition-all duration-300 hover:shadow-2xl hover:border-blue-500"
             >
-              <h4 style={{ margin: 0 }}>{modulo.titulo}</h4>
-              <p style={{ margin: '6px 0 0', fontSize: '0.9rem', opacity: 0.8 }}>
-                {modulo.descripcion}
-              </p>
+              <p className="m-0 text-lg sm:text-xl font-semibold text-blue-100 mb-5">{curso?.descripcion}</p>
             </div>
-          ))
-        ) : (
-          <p>Sin módulos</p>
-        )}
+          </div>
+        </div>
+
+
+        <div className="flex flex-col">
+   
+          {curso?.imagenCurso && typeof curso.imagenCurso === 'string' && (
+            <div className="w-full flex justify-center md:justify-start mb-6">
+              <img
+                src={curso.imagenCurso}
+                alt={`Imagen de ${curso.titulo}`}
+                className="max-w-full h-auto object-contain rounded-xl shadow-lg md:max-h-96 w-auto"
+              />
+            </div>
+          )}
+
+   
+          <div> 
+            <h3 className="text-xl sm:text-2xl font-bold text-blue-200 mb-3">Módulos:</h3>
+            <div
+              className="grid grid-cols-1 gap-4 w-full"
+            >
+              {curso?.modulos && curso.modulos.length > 0 ? (
+                curso.modulos.map((modulo) => (
+                  <div
+                    key={modulo.id}
+                    className="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg
+                               transition-all duration-300 hover:shadow-2xl hover:border-blue-500"
+                  >
+                    <h4 className="m-0 text-lg sm:text-xl font-semibold text-blue-100 mb-1">{modulo.titulo}</h4>
+                    <p className="m-0 text-sm opacity-80">{modulo.descripcion}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400">Sin módulos disponibles para este curso.</p>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {curso?.imagenCurso && typeof curso.imagenCurso === 'string' && (
-        <img
-          src={curso.imagenCurso}
-          alt="Imagen curso"
-          style={{
-            maxWidth: '100%',
-            marginTop: 20,
-            borderRadius: '12px',
-            boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
-          }}
-        />
-      )}
-
-      <div style={{ marginTop: 30 }}>
+      <div className="mt-8">
         <PayPalScriptProvider
           options={{
             clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
@@ -203,6 +204,7 @@ export default function CursoDetalle() {
               console.error('Error en PayPal:', err);
               setError('Hubo un problema con PayPal');
             }}
+            style={{ layout: 'vertical', color: 'blue' }}
           />
         </PayPalScriptProvider>
       </div>
