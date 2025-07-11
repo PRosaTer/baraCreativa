@@ -8,7 +8,7 @@ import { PasswordModule } from './password/password.module';
 import { AuthModule } from './auth/auth.module';
 import { CursosModule } from './cursos/cursos.module';
 import { PagosModule } from './pagos/pagos.module';
-import { InscripcionesModule } from './inscripciones/inscripciones.module'; // Importa el nuevo módulo de Inscripciones
+import { InscripcionesModule } from './inscripciones/inscripciones.module';
 
 import configuration, { AppConfig } from './config/configuration';
 
