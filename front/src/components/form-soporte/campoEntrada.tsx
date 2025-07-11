@@ -23,7 +23,9 @@ const CampoEntrada: React.FC<PropsCampoEntrada> = ({
 }) => {
   return (
     <div className="flex flex-col space-y-2">
-      <label className="text-sm font-medium text-yellow-600">{etiqueta}</label>
+      <label className="block font-bold text-yellow-400 drop-shadow-md">
+        {etiqueta}
+      </label>
       <input
         type={tipo}
         name={nombre}
@@ -32,7 +34,7 @@ const CampoEntrada: React.FC<PropsCampoEntrada> = ({
         required={requerido}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full px-4 py-3 border border-red-300 rounded-lg bg-yellow-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-200 disabled:bg-gray-200 disabled:cursor-not-allowed"
+        className="w-full p-3 border-2 border-red-500/70 rounded-lg bg-gray-800 text-white placeholder-yellow-300/70 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition duration-300 disabled:bg-gray-600/50 disabled:cursor-not-allowed hover:bg-gray-700 hover:scale-[1.02]"
       />
     </div>
   );

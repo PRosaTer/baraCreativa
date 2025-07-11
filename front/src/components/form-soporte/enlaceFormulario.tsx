@@ -15,7 +15,7 @@ const EnlaceFormulario: React.FC<PropsEnlaceFormulario> = ({
   return (
     <Link
       href={href}
-      className={`text-red-600 font-medium hover:text-yellow-600 hover:underline transition duration-200 ${className}`}
+      className={`text-yellow-400 font-bold hover:text-red-500 hover:underline transition duration-300 drop-shadow-md ${className}`}
     >
       {texto}
     </Link>
