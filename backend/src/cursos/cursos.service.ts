@@ -1,4 +1,3 @@
-
 import {
   Injectable,
   NotFoundException,
@@ -7,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Curso } from '../entidades/curso.entity';
+import { ModuloEntity } from '../entidades/modulo.entity';
 import { Repository, DeepPartial } from 'typeorm';
 import { CrearCursoDto } from './crear-curso.dto';
 import { join } from 'path';
@@ -19,6 +19,8 @@ export class CursosService {
   constructor(
     @InjectRepository(Curso)
     private readonly cursosRepository: Repository<Curso>,
+    @InjectRepository(ModuloEntity)
+    private readonly modulosRepository: Repository<ModuloEntity>,
   ) {}
 
   obtenerCursos(): Promise<Curso[]> {
@@ -37,8 +39,8 @@ export class CursosService {
   }
 
   crearCurso(datos: CrearCursoDto): Promise<Curso> {
-    const curso = this.cursosRepository.create(datos as DeepPartial<Curso>);
-    return this.cursosRepository.save(curso);
+    const nuevoCurso = this.cursosRepository.create(datos as DeepPartial<Curso>);
+    return this.cursosRepository.save(nuevoCurso);
   }
 
   async actualizarCurso(
@@ -46,11 +48,15 @@ export class CursosService {
     datos: Partial<CrearCursoDto>,
   ): Promise<Curso> {
     const curso = await this.obtenerCursoPorId(id);
-    for (const key in datos) {
-      if (Object.prototype.hasOwnProperty.call(datos, key)) {
-        curso[key] = datos[key];
-      }
+
+    if (datos.modulos !== undefined) {
+
     }
+
+
+    Object.assign(curso, datos); 
+
+
     return this.cursosRepository.save(curso);
   }
 
@@ -63,7 +69,7 @@ export class CursosService {
 
   async actualizarArchivoScorm(
     id: number,
-    scormFile: Express.Multer.File,
+    scormFile: Express.Multer.File, 
   ): Promise<Curso> {
     const curso = await this.obtenerCursoPorId(id);
 
@@ -134,26 +140,21 @@ export class CursosService {
         );
       }
 
-      
       const entryFilePath = join(destinationPath, scormEntryPoint);
       if (fs.existsSync(entryFilePath)) {
         const entryFileContent = fs.readFileSync(entryFilePath, 'utf8');
         console.log(`[SCORM DEBUG] Contenido del archivo de entrada (${scormEntryPoint}, primeras 500 chars):\n${entryFileContent.substring(0, 500)}...`);
         if (entryFileContent.trim().length === 0) {
           console.warn(`[SCORM DEBUG] ADVERTENCIA: El archivo de entrada (${scormEntryPoint}) está vacío o casi vacío después de la extracción.`);
-       
         }
       } else {
         console.error(`[SCORM DEBUG] ERROR: El archivo de entrada (${scormEntryPoint}) NO EXISTE en la carpeta de destino después de la extracción.`);
         throw new InternalServerErrorException(`El archivo de entrada SCORM (${scormEntryPoint}) no se encontró después de la extracción.`);
       }
-    
 
-
-  
       if (curso.archivoScorm) {
         const prevParts = curso.archivoScorm.split('/');
-        const prevFolder = prevParts.length > 3 ? prevParts[3] : null; 
+        const prevFolder = prevParts.length > 3 ? prevParts[3] : null;
         if (prevFolder) {
           const prevFullPath = join(
             process.cwd(),
@@ -174,25 +175,53 @@ export class CursosService {
       curso.archivoScorm = scormDbPath;
       await this.cursosRepository.save(curso);
 
-    
       console.log(`[SCORM DEBUG] Eliminando archivo ZIP temporal: ${scormZipPath}`);
       fs.unlinkSync(scormZipPath);
 
       console.log(`[SCORM DEBUG] Proceso de SCORM completado exitosamente.`);
       return curso;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`[SCORM DEBUG] Error en el procesamiento de SCORM:`, error);
       if (fs.existsSync(scormZipPath)) {
         console.log(`[SCORM DEBUG] Limpiando archivo ZIP temporal tras error: ${scormZipPath}`);
         fs.unlinkSync(scormZipPath);
       }
-     
+
       if (fs.existsSync(destinationPath)) {
         console.log(`[SCORM DEBUG] Limpiando carpeta de destino tras error: ${destinationPath}`);
         fs.rmSync(destinationPath, { recursive: true, force: true });
       }
-      
-      throw error;
+
+
+      if (error instanceof BadRequestException || error instanceof InternalServerErrorException || error instanceof NotFoundException) {
+          throw error;
+      } else if (error instanceof Error) {
+          throw new InternalServerErrorException(`Error inesperado al procesar SCORM: ${error.message}`);
+      } else {
+          throw new InternalServerErrorException('Error inesperado y desconocido al procesar SCORM.');
+      }
     }
+  }
+
+  async actualizarModuloFilePaths(
+    moduloId: number,
+    updatedPaths: { videoUrl?: string | null; pdfUrl?: string | null; imageUrl?: string | null },
+  ): Promise<ModuloEntity> {
+    const modulo = await this.modulosRepository.findOneBy({ id: moduloId });
+    if (!modulo) {
+      throw new NotFoundException(`Módulo con ID ${moduloId} no encontrado`);
+    }
+
+    if (updatedPaths.videoUrl !== undefined) {
+      modulo.videoUrl = updatedPaths.videoUrl;
+    }
+    if (updatedPaths.pdfUrl !== undefined) {
+      modulo.pdfUrl = updatedPaths.pdfUrl;
+    }
+    if (updatedPaths.imageUrl !== undefined) {
+      modulo.imageUrl = updatedPaths.imageUrl;
+    }
+
+    return this.modulosRepository.save(modulo);
   }
 }

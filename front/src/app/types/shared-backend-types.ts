@@ -1,3 +1,4 @@
+
 export enum TipoCurso {
   DOCENTES = 'Docentes',
   ESTUDIANTES = 'Estudiantes',
@@ -10,11 +11,10 @@ export enum ModalidadCurso {
   MIXTO = 'mixto', 
 }
 
-
 export interface ModuloDto {
   id?: number;
   titulo: string;
-  descripcion: string;
+  descripcion: string | null;
   videoUrl?: string | null;
   pdfUrl?: string | null;
   imageUrl?: string | null;

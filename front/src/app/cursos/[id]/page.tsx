@@ -8,7 +8,7 @@ import type { OnApproveData } from '@paypal/paypal-js/types/components/buttons';
 import { Curso } from '@/app/types/curso';
 
 export default function CursoDetalle() {
-  const { id: cursoId } = useParams();
+  const { id: cursoId } = useParams() as { id: string };
   const router = useRouter();
 
   const [curso, setCurso] = useState<Curso | null>(null);
@@ -22,6 +22,10 @@ export default function CursoDetalle() {
         const resCurso = await fetch(`http://localhost:3001/api/cursos/${cursoId}`);
         if (!resCurso.ok) throw new Error('No se pudo cargar el curso');
         const dataCurso: Curso = await resCurso.json();
+
+        dataCurso.precio = parseFloat(dataCurso.precio as unknown as string);
+        dataCurso.fechaInicio = dataCurso.fechaInicio ? new Date(dataCurso.fechaInicio) : null;
+
         setCurso(dataCurso);
 
         const resUsuario = await fetch('http://localhost:3001/api/usuarios/me', {
@@ -43,15 +47,12 @@ export default function CursoDetalle() {
   const crearOrden = async (): Promise<string> => {
     if (!usuarioId) throw new Error('Usuario no autenticado');
     const res = await fetch('http://localhost:3001/pagos/paypal/create-order', {
-
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({
         cursoId: Number(cursoId),
         usuarioId,
-        // monto: Number(curso?.precio ?? 0), //Esto no hay que tocar
-
         currency_code: 'USD',
       }),
     });
@@ -195,7 +196,7 @@ export default function CursoDetalle() {
             currency: 'USD',
           }}
         >
-         <PayPalButtons
+          <PayPalButtons
             createOrder={() => crearOrden()}
             onApprove={onApprove}
             onError={(err) => {
@@ -203,7 +204,6 @@ export default function CursoDetalle() {
               setError('Hubo un problema con PayPal');
             }}
           />
-
         </PayPalScriptProvider>
       </div>
     </div>

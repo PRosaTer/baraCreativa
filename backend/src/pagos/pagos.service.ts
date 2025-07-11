@@ -201,14 +201,13 @@ export class PagosService {
 
     const captureDetails = paypalOrder.purchase_units[0]?.payments?.captures?.[0];
 
-   
     const usuario = await this.usuarioRepository.findOne({
         where: { id: pagoExistente.usuario.id },
         relations: ['pagos', 'pagos.curso'],
     });
 
     if (!usuario) {
-        throw new InternalServerErrorException('Usuario no encontrado después de pago.');
+      throw new InternalServerErrorException('Usuario no encontrado después de pago.');
     }
 
     const pagosAnteriores = usuario.pagos || [];
@@ -222,6 +221,23 @@ export class PagosService {
 
     const tipoUsuario: TipoUsuario = usuario.tipoUsuario ?? TipoUsuario.Alumno;
 
+
+    let fechaInicioISO: string | null = null;
+    if (pagoExistente.curso.fechaInicio) {
+        const dateObj = (pagoExistente.curso.fechaInicio instanceof Date)
+            ? pagoExistente.curso.fechaInicio
+            : new Date(pagoExistente.curso.fechaInicio);
+
+   
+        if (!isNaN(dateObj.getTime())) {
+            fechaInicioISO = dateObj.toISOString();
+        } else {
+            this.logger.warn(`Fecha de inicio del curso inválida para ID ${pagoExistente.curso.id}: ${pagoExistente.curso.fechaInicio}`);
+            fechaInicioISO = 'Fecha inválida';
+        }
+    }
+
+
     const mailData: PurchaseNotificationData = {
       userName: usuario.nombreCompleto,
       userEmail: usuario.correoElectronico,
@@ -233,9 +249,8 @@ export class PagosService {
       cursosComprados: listaCursos,
       totalComprados: totalCursosComprados,
       porcentajeComprados: porcentajeCursos,
-      startDate: pagoExistente.curso.fechaInicio?.toISOString() ?? 'Próximamente',
+      startDate: fechaInicioISO ?? 'Próximamente',
     };
-
 
     await this.mailService.sendPurchaseReceiptToCustomer(
       mailData.userEmail,

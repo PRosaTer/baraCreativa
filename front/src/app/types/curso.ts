@@ -1,15 +1,20 @@
+export enum ClaseItem {
+  CURSO = 'curso',
+  SERVICIO = 'servicio',
+}
+
 export interface Modulo {
-  id?: number;
+  id: number;
   titulo: string;
-  descripcion: string;
-  videoUrl?: string | null;
-  pdfUrl?: string | null;
-  imageUrl?: string | null;
+  descripcion: string | null;
+  videoUrl: string | null;
+  pdfUrl: string | null;
+  imageUrl: string | null;
 }
 
 export interface ModuloFormBase {
   titulo: string;
-  descripcion: string;
+  descripcion: string | null;
   videoUrl?: string | null;
   pdfUrl?: string | null;
   imageUrl?: string | null;
@@ -26,16 +31,39 @@ export interface Curso {
   id: number;
   titulo: string;
   descripcion: string;
-  precio: number;
   duracionHoras: number;
   tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
   categoria: string;
+  subcategoria: string;
+  precio: number;
   modalidad: 'en vivo' | 'grabado' | 'mixto';
+  imagenCurso: string | null;
+  archivoScorm: string | null;
+  fechaInicio: Date | null;
+  claseItem: ClaseItem;
+  modulos: Modulo[];
   certificadoDisponible: boolean;
   badgeDisponible: boolean;
-  imagenCurso?: string | null;
-  archivoScorm?: string | null; 
+}
+
+
+export interface RawCursoApiResponse {
+  id: number;
+  titulo: string;
+  descripcion: string;
+  fechaInicio: string | null;
+  duracionHoras: number;
+  tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
+  categoria: string;
+  subcategoria: string;
+  precio: string | number;
+  modalidad: 'en vivo' | 'grabado' | 'mixto';
+  imagenCurso: string | null;
+  archivoScorm: string | null;
+  claseItem: ClaseItem;
   modulos: Modulo[];
+  certificadoDisponible: boolean;
+  badgeDisponible: boolean;
 }
 
 export interface CursoForm {
@@ -46,6 +74,7 @@ export interface CursoForm {
   duracionHoras: number | '';
   tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
   categoria: string;
+  subcategoria: string;
   modalidad: 'en vivo' | 'grabado' | 'mixto';
   certificadoDisponible: boolean;
   badgeDisponible: boolean;
@@ -53,4 +82,6 @@ export interface CursoForm {
   archivoScorm?: string | null;
   modulos: EditableModuloForm[];
   newScormFile?: File | null;
+  claseItem: ClaseItem;
+  fechaInicio?: Date | null;
 }

@@ -6,8 +6,10 @@ import {
   IsOptional,
   IsArray,
   IsEnum,
+  IsDateString, 
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ClaseItem } from '../entidades/curso.entity';
 
 export enum TipoCurso {
   DOCENTES = 'Docentes',
@@ -55,6 +57,7 @@ export class CrearCursoDto {
   @IsNumber({}, { message: 'El precio debe ser un número válido.' })
   precio: number;
 
+
   @IsNumber({}, { message: 'La duración en horas debe ser un número válido.' })
   duracionHoras: number;
 
@@ -64,6 +67,7 @@ export class CrearCursoDto {
   @IsString({ message: 'La categoría debe ser una cadena de texto.' })
   categoria: string;
 
+  
   @IsEnum(ModalidadCurso, { message: 'La modalidad de curso no es válida.' })
   modalidad: ModalidadCurso;
 
@@ -86,4 +90,13 @@ export class CrearCursoDto {
   @Type(() => ModuloDto)
   @IsArray({ message: 'Los módulos deben ser un arreglo.' })
   modulos?: ModuloDto[];
+
+
+  @IsEnum(ClaseItem, { message: 'El tipo de ítem no es válido.' })
+  @IsOptional() 
+  claseItem?: ClaseItem;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'La fecha de inicio debe ser una cadena de fecha válida (ISO 8601).' })
+  fechaInicio?: string | null; 
 }

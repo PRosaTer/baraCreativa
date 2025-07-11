@@ -18,6 +18,9 @@ export class ModuloEntity {
   @Column({ type: 'varchar', nullable: true })
   pdfUrl?: string | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  imageUrl?: string | null;
+
   @ManyToOne(() => Curso, (curso) => curso.modulos, { onDelete: 'CASCADE' })
   curso: Curso;
 }

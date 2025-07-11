@@ -12,14 +12,16 @@ import {
   BadRequestException,
   InternalServerErrorException,
   ParseIntPipe,
+  UploadedFiles,
 } from '@nestjs/common';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { CursosService } from './cursos.service';
 import { CrearCursoDto } from './crear-curso.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { SubirScormDto } from '../types/subir-scorm.dto';
+import * as fs from 'fs';
 
 @Controller('api/cursos')
 export class CursosController {
@@ -60,7 +62,13 @@ export class CursosController {
   @UseInterceptors(
     FileInterceptor('imagen', {
       storage: diskStorage({
-        destination: join(process.cwd(), 'uploads', 'imagenes-cursos'),
+        destination: (req, file, cb) => {
+          const uploadPath = join(process.cwd(), 'uploads', 'imagenes-cursos');
+          if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+          }
+          cb(null, uploadPath);
+        },
         filename: (req, file, cb) => {
           const uniqueName = uuidv4() + extname(file.originalname);
           cb(null, uniqueName);
@@ -70,7 +78,7 @@ export class CursosController {
         if (file.mimetype.startsWith('image/')) cb(null, true);
         else cb(new BadRequestException('Solo imágenes permitidas'), false);
       },
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+      limits: { fileSize: 5 * 1024 * 1024 },
     }),
   )
   async subirImagenCurso(
@@ -95,7 +103,13 @@ export class CursosController {
   @UseInterceptors(
     FileInterceptor('scormFile', {
       storage: diskStorage({
-        destination: join(process.cwd(), 'uploads', 'scorm_unzipped_courses'),
+        destination: (req, file, cb) => {
+          const uploadPath = join(process.cwd(), 'uploads', 'scorm_unzipped_courses');
+          if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+          }
+          cb(null, uploadPath);
+        },
         filename: (req, file, cb) => {
           const uniqueName = uuidv4() + extname(file.originalname);
           cb(null, uniqueName);
@@ -109,7 +123,7 @@ export class CursosController {
           cb(null, true);
         else cb(new BadRequestException('Solo archivos .zip permitidos'), false);
       },
-      limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+      limits: { fileSize: 50 * 1024 * 1024 },
     }),
   )
   async subirScormNuevo(
@@ -143,6 +157,73 @@ export class CursosController {
         throw error;
       }
       throw new InternalServerErrorException('Error al procesar el archivo SCORM');
+    }
+  }
+
+  @Post('modulos/:id/files')
+  @UseInterceptors(
+    FilesInterceptor('files', 3, {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const moduloUploadPath = join(process.cwd(), 'uploads', 'modulos');
+          if (!fs.existsSync(moduloUploadPath)) {
+            fs.mkdirSync(moduloUploadPath, { recursive: true });
+          }
+          cb(null, moduloUploadPath);
+        },
+        filename: (req, file, cb) => {
+          const uniqueName = uuidv4() + extname(file.originalname);
+          cb(null, uniqueName);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('video/') || file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/')) {
+          cb(null, true);
+        } else {
+          cb(new BadRequestException('Solo se permiten archivos de video, PDF o imagen'), false);
+        }
+      },
+      limits: { fileSize: 100 * 1024 * 1024 },
+    }),
+  )
+  async uploadModuloFiles(
+    @Param('id', ParseIntPipe) moduloId: number,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
+    if (!files || files.length === 0) {
+      throw new BadRequestException('No se subieron archivos para el módulo.');
+    }
+
+    const updatedPaths: {
+      videoUrl: string | null;
+      pdfUrl: string | null;  
+      imageUrl: string | null; 
+    } = {
+      videoUrl: null,
+      pdfUrl: null,
+      imageUrl: null,
+    };
+
+    files.forEach(file => {
+      const filePath = `/uploads/modulos/${file.filename}`;
+      if (file.mimetype.startsWith('video/')) {
+        updatedPaths.videoUrl = filePath;
+      } else if (file.mimetype === 'application/pdf') {
+        updatedPaths.pdfUrl = filePath;
+      } else if (file.mimetype.startsWith('image/')) {
+        updatedPaths.imageUrl = filePath;
+      }
+    });
+
+    try {
+      const updatedModulo = await this.cursosService.actualizarModuloFilePaths(moduloId, updatedPaths);
+      return {
+        message: 'Archivos de módulo subidos y rutas actualizadas correctamente',
+        modulo: updatedModulo,
+      };
+    } catch (error) {
+      console.error('Error al subir archivos de módulo:', error);
+      throw new InternalServerErrorException('Error al procesar la subida de archivos del módulo');
     }
   }
 }
