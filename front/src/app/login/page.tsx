@@ -39,12 +39,16 @@ const InicioSesion: React.FC = () => {
           requerido
         />
         <div className="text-sm text-right">
-          <EnlaceFormulario texto="¿Olvidaste la contraseña?" href="/password" />
+          <EnlaceFormulario
+            texto="¿Olvidaste la contraseña?"
+            href="/password"
+          />
         </div>
         <BotonEnviar texto="Ingresar" />
       </form>
       <div className="text-sm text-center mt-6 text-gray-600">
-        ¿No tienes una cuenta? <EnlaceFormulario texto="Regístrate" href="/registro" />
+        ¿No tienes una cuenta?{" "}
+        <EnlaceFormulario texto="Regístrate" href="/registro" />
       </div>
     </ContenedorFormulario>
   );

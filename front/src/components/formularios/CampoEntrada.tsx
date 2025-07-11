@@ -11,6 +11,7 @@ interface PropsCampoEntrada {
   className?: string;
   inputClassName?: string;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 const CampoEntrada: React.FC<PropsCampoEntrada> = ({
@@ -24,10 +25,14 @@ const CampoEntrada: React.FC<PropsCampoEntrada> = ({
   className = "",
   inputClassName = "",
   placeholder,
+  disabled = false,
 }) => {
   return (
     <div className={`flex flex-col space-y-2 ${className}`}>
-      <label htmlFor={nombre} className="text-sm font-medium text-gray-800">
+      <label
+        htmlFor={nombre}
+        className="block font-bold text-yellow-400 drop-shadow-md"
+      >
         {etiqueta}
         {requerido && <span className="text-red-500 ml-1">*</span>}
       </label>
@@ -39,11 +44,8 @@ const CampoEntrada: React.FC<PropsCampoEntrada> = ({
         onChange={onChange}
         required={requerido}
         placeholder={placeholder}
-        className={`w-full px-4 py-3 border rounded-lg bg-gray-50 text-gray-900 
-                    placeholder-gray-400 focus:outline-none focus:ring-2 
-                    transition duration-200
-                    ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'}
-                    ${inputClassName}`}
+        disabled={disabled}
+        className={`w-full p-3 border-2 border-red-500/70 rounded-lg bg-gray-800 text-yellow-400 placeholder-yellow-300/70 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition duration-300 disabled:bg-gray-600/50 disabled:cursor-not-allowed hover:bg-gray-700 hover:scale-[1.02] ${inputClassName}`}
         aria-invalid={error ? "true" : "false"}
         aria-describedby={error ? `${nombre}-error` : undefined}
       />

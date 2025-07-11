@@ -1,3 +1,5 @@
+// app/types/curso.ts
+
 export enum ClaseItem {
   CURSO = 'curso',
   SERVICIO = 'servicio',
@@ -31,21 +33,20 @@ export interface Curso {
   id: number;
   titulo: string;
   descripcion: string;
+  precio: number;
   duracionHoras: number;
   tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
   categoria: string;
-  subcategoria: string;
-  precio: number;
+  subcategoria?: string | null;
   modalidad: 'en vivo' | 'grabado' | 'mixto';
-  imagenCurso: string | null;
-  archivoScorm: string | null;
-  fechaInicio: Date | null;
-  claseItem: ClaseItem;
-  modulos: Modulo[];
   certificadoDisponible: boolean;
   badgeDisponible: boolean;
+  imagenCurso: string | null;
+  archivoScorm: string | null;
+  modulos: Modulo[];
+  claseItem: ClaseItem;
+  fechaInicio: Date | null;
 }
-
 
 export interface RawCursoApiResponse {
   id: number;
@@ -55,7 +56,7 @@ export interface RawCursoApiResponse {
   duracionHoras: number;
   tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
   categoria: string;
-  subcategoria: string;
+  subcategoria?: string;
   precio: string | number;
   modalidad: 'en vivo' | 'grabado' | 'mixto';
   imagenCurso: string | null;
@@ -74,7 +75,7 @@ export interface CursoForm {
   duracionHoras: number | '';
   tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
   categoria: string;
-  subcategoria: string;
+  subcategoria?: string | null;
   modalidad: 'en vivo' | 'grabado' | 'mixto';
   certificadoDisponible: boolean;
   badgeDisponible: boolean;

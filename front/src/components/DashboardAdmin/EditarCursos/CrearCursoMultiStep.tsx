@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, ChangeEvent, FormEvent } from 'react';
+// IMPORTANTE: Asegúrate de que 'subcategoria' sea opcional o se elimine de la interfaz CursoForm
+// en tu archivo '@/app/types/curso.ts' para resolver el error de TypeScript.
 import { Curso, CursoForm, EditableModuloForm, ClaseItem } from '@/app/types/curso';
 import { ModuloDto, TipoCurso, ModalidadCurso } from '@/app/types/shared-backend-types'; // Ensure ModuloDto is imported
 import DatePicker from 'react-datepicker';
@@ -16,16 +18,16 @@ const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) 
   const [form, setForm] = useState<CursoForm>(() => {
     const initialModulos: EditableModuloForm[] = curso?.modulos
       ? curso.modulos.map((m) => ({
-          id: m.id,
-          titulo: m.titulo,
-          descripcion: m.descripcion,
-          videoUrl: m.videoUrl,
-          pdfUrl: m.pdfUrl,
-          imageUrl: m.imageUrl,
-          videoFile: null,
-          pdfFile: null,
-          imageFile: null,
-        }))
+            id: m.id,
+            titulo: m.titulo,
+            descripcion: m.descripcion,
+            videoUrl: m.videoUrl,
+            pdfUrl: m.pdfUrl,
+            imageUrl: m.imageUrl,
+            videoFile: null,
+            pdfFile: null,
+            imageFile: null,
+          }))
       : [];
 
     return {
@@ -35,7 +37,7 @@ const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) 
       duracionHoras: curso?.duracionHoras || 0,
       tipo: curso?.tipo || TipoCurso.DOCENTES,
       categoria: curso?.categoria || '',
-      subcategoria: curso?.subcategoria || '',
+      // subcategoria: curso?.subcategoria || '', // Eliminado del estado inicial
       modalidad: curso?.modalidad || ModalidadCurso.GRABADO,
       certificadoDisponible: curso?.certificadoDisponible || false,
       badgeDisponible: curso?.badgeDisponible || false,
@@ -83,13 +85,13 @@ const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) 
     if (name === 'claseItem') {
         const selectedClaseItem = value as ClaseItem;
         setForm((prev: CursoForm) => ({
-            ...prev,
-            claseItem: selectedClaseItem,
-            duracionHoras: selectedClaseItem === ClaseItem.SERVICIO ? 0 : prev.duracionHoras,
-            modalidad: selectedClaseItem === ClaseItem.SERVICIO ? ModalidadCurso.GRABADO : prev.modalidad,
-            fechaInicio: selectedClaseItem === ClaseItem.SERVICIO ? null : prev.fechaInicio,
-            modulos: selectedClaseItem === ClaseItem.SERVICIO ? [] : prev.modulos,
-            badgeDisponible: selectedClaseItem === ClaseItem.SERVICIO ? false : prev.badgeDisponible,
+          ...prev,
+          claseItem: selectedClaseItem,
+          duracionHoras: selectedClaseItem === ClaseItem.SERVICIO ? 0 : prev.duracionHoras,
+          modalidad: selectedClaseItem === ClaseItem.SERVICIO ? ModalidadCurso.GRABADO : prev.modalidad,
+          fechaInicio: selectedClaseItem === ClaseItem.SERVICIO ? null : prev.fechaInicio,
+          modulos: selectedClaseItem === ClaseItem.SERVICIO ? [] : prev.modulos,
+          badgeDisponible: selectedClaseItem === ClaseItem.SERVICIO ? false : prev.badgeDisponible,
         }));
         setModuloFiles(selectedClaseItem === ClaseItem.SERVICIO ? [] : moduloFiles);
         return;
@@ -190,7 +192,7 @@ const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) 
         precio: Number(form.precio),
         tipo: form.tipo,
         categoria: form.categoria,
-        subcategoria: form.subcategoria,
+        // subcategoria: form?.subcategoria, // Eliminado del payload
         certificadoDisponible: form.certificadoDisponible,
         badgeDisponible: form.badgeDisponible,
         claseItem: form.claseItem,
@@ -198,7 +200,7 @@ const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) 
       };
 
     
-      type CourseDataForApi = Omit<Curso, 'id' | 'imagenCurso' | 'archivoScorm' | 'modulos' | 'fechaInicio'> & {
+      type CourseDataForApi = Omit<Curso, 'id' | 'imagenCurso' | 'archivoScorm' | 'modulos' | 'fechaInicio' | 'subcategoria'> & { // 'subcategoria' eliminado del Omit
         modulos?: ModuloDto[];
         fechaInicio?: string | null;
       };
@@ -461,8 +463,7 @@ const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) 
       <label style={labelStyle}>Categoría</label>
       <input type="text" name="categoria" value={form.categoria} onChange={handleChange} required style={inputStyle} />
 
-      <label style={labelStyle}>Subcategoría</label>
-      <input type="text" name="subcategoria" value={form.subcategoria} onChange={handleChange} required style={inputStyle} />
+      {/* Eliminado el campo de subcategoría */}
 
       <label style={checkboxLabelStyle}>
         <input type="checkbox" name="certificadoDisponible" checked={form.certificadoDisponible} onChange={handleChange} style={{ marginRight: 8 }} />
