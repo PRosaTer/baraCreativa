@@ -12,24 +12,26 @@ const ContenedorFormulario: React.FC<PropsContenedorFormulario> = ({
   className = "",
 }) => {
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, []);
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-blue-100 overflow-hidden"
+      className="min-h-screen flex items-center justify-center bg-gray-900 overflow-hidden"
       style={{
-        backgroundImage: `url(/bombillo-negro.png)`,
+        backgroundImage: "url(/bombillo-blanco.png)",
         backgroundSize: "contain",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
       }}
     >
-      <div className={`bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl transform transition-all duration-300 ${className}`}>
-        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
+      <div
+        className={`bg-gray-950 w-full max-w-md p-8 rounded-2xl shadow-2xl transform transition-all duration-300 ${className}`}
+      >
+        <h2 className="text-3xl font-extrabold text-center text-red-600 mb-6 drop-shadow-[0_2px_4px_rgba(239,68,68,0.5)] animate-pulse">
           {titulo}
         </h2>
         {children}
