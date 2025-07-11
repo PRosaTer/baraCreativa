@@ -14,13 +14,13 @@ import { Pago } from './pago.entity';
 import { ReporteProgresoEntity } from './reporte-progreso.entity';
 import { Resena } from './resena.entity';
 
-// Definimos un enumerado (enum) para diferenciar el tipo de ítem
+
 export enum ClaseItem {
   CURSO = 'curso',
   SERVICIO = 'servicio',
 }
 
-@Entity('cursos') // La tabla en la base de datos sigue siendo 'cursos'
+@Entity('cursos') 
 export class Curso {
   @PrimaryGeneratedColumn()
   id: number;
@@ -31,8 +31,6 @@ export class Curso {
   @Column({ default: 'Descripción del curso por defecto' })
   descripcion: string;
 
-  // Nueva columna para diferenciar entre "curso" y "servicio"
-  // Por defecto, se asume que es un curso si no se especifica.
   @Column({ type: 'enum', enum: ClaseItem, default: ClaseItem.CURSO })
   claseItem: ClaseItem;
 
@@ -69,9 +67,9 @@ export class Curso {
   @Column({ nullable: true })
   pdfCurso?: string;
 
-  // Propiedad para la fecha de inicio del curso, opcional ya que los servicios no la tendrían
+  
   @Column({ type: 'date', nullable: true })
-  fechaInicio?: Date; // Lo hacemos opcional con '?' y 'nullable: true'
+  fechaInicio?: Date;
 
   @OneToMany(() => ModuloEntity, (modulo) => modulo.curso, { cascade: true })
   modulos: ModuloEntity[];
