@@ -7,7 +7,9 @@ import { VideoActivo } from "./VideoActivo";
 import { BotonNavegacion } from "./BotonNavegacion";
 
 const VideoSlider = () => {
-  const { indiceActual, videoSiguiente, videoAnterior } = usarNavegacionDeVideo(videosDeTestimonios.length);
+  const { indiceActual, videoSiguiente, videoAnterior } = usarNavegacionDeVideo(
+    videosDeTestimonios.length
+  );
   const [estaReproduciendo, setEstaReproduciendo] = useState(false);
 
   useEffect(() => {
@@ -21,29 +23,39 @@ const VideoSlider = () => {
       </div>
 
       <div className="relative w-full h-full overflow-hidden rounded-lg">
-        {videosDeTestimonios.map(({ src }, index) => (
-          index === indiceActual && (
-            <div key={src} className="absolute z-20 scale-100 opacity-100 left-1/2 transform -translate-x-1/2 w-full h-full">
-              <VideoActivo
-                src={src}
-                reproduciendo={estaReproduciendo}
-                onPlay={() => setEstaReproduciendo(true)}
-                onPause={() => setEstaReproduciendo(false)}
-              />
-            </div>
-          )
-        ))}
+        {videosDeTestimonios.map(
+          ({ src }, index) =>
+            index === indiceActual && (
+              <div
+                key={src}
+                className="absolute z-20 scale-100 opacity-100 left-1/2 transform -translate-x-1/2 w-full h-full"
+              >
+                <VideoActivo
+                  src={src}
+                  reproduciendo={estaReproduciendo}
+                  onPlay={() => setEstaReproduciendo(true)}
+                  onPause={() => setEstaReproduciendo(false)}
+                />
+              </div>
+            )
+        )}
       </div>
 
-      <BotonNavegacion direccion="izquierda" onClick={() => {
-        videoAnterior();
-        setEstaReproduciendo(false);
-      }} />
+      <BotonNavegacion
+        direccion="izquierda"
+        onClick={() => {
+          videoAnterior();
+          setEstaReproduciendo(false);
+        }}
+      />
 
-      <BotonNavegacion direccion="derecha" onClick={() => {
-        videoSiguiente();
-        setEstaReproduciendo(false);
-      }} />
+      <BotonNavegacion
+        direccion="derecha"
+        onClick={() => {
+          videoSiguiente();
+          setEstaReproduciendo(false);
+        }}
+      />
     </div>
   );
 };
