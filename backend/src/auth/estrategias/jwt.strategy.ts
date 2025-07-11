@@ -6,7 +6,7 @@ import {
   StrategyOptionsWithoutRequest,
 } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { UsuariosService } from '../../usuarios/usuarios.service';
+import { UsuariosService } from '../../services/usuarios/usuarios.service';
 import { Request } from 'express';
 import { Usuario } from '../../entidades/usuario.entity';
 
