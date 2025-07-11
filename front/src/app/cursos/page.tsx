@@ -15,7 +15,7 @@ export default function CursosPage() {
         setCargando(true);
         const res = await fetch('http://localhost:3001/api/cursos');
         if (!res.ok) throw new Error('Error al cargar items');
-        const dataFromApi: Array<{ 
+        const dataFromApi: Array<{
           id: number;
           titulo: string;
           descripcion: string;
@@ -23,11 +23,11 @@ export default function CursosPage() {
           tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
           categoria: string;
           subcategoria: string;
-          precio: string | number; 
+          precio: string | number;
           modalidad: 'en vivo' | 'grabado' | 'mixto';
           imagenCurso: string | null;
           archivoScorm: string | null;
-          fechaInicio: string | null; 
+          fechaInicio: string | null;
           claseItem: ClaseItem;
           modulos: Modulo[];
           certificadoDisponible: boolean;
@@ -71,36 +71,44 @@ export default function CursosPage() {
             <li key={curso.id}>
               <Link
                 href={`/cursos/${curso.id}`}
-                className="block border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg bg-white transition-all transform hover:-translate-y-1 relative"
+                className="flex flex-col border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg bg-white transition-all transform hover:-translate-y-1 relative h-full"
               >
                 {curso.imagenCurso ? (
                   <img
                     src={`http://localhost:3001${curso.imagenCurso}`}
                     alt={curso.titulo}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-48 object-cover flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-gray-500 text-sm font-medium">
+                  <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-gray-500 text-sm font-medium flex-shrink-0">
                     <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253"></path></svg>
                     <span className="ml-2">Sin imagen</span>
                   </div>
                 )}
-                <div className="p-4 flex flex-col justify-between" style={{ minHeight: '120px' }}>
-                  <h2 className="text-lg font-semibold text-blue-700 mb-2">{curso.titulo}</h2>
-                  <p className="text-sm text-gray-600 line-clamp-3 mb-2">{curso.descripcion}</p>
-                  {curso.precio > 0 && (
-                    <p className="mt-auto text-md font-bold text-green-600">
-                      ${curso.precio.toFixed(2)}
+                <div className="p-4 flex flex-col justify-between flex-grow">
+                  <div className="flex-grow">
+                    <h2 className="text-lg font-semibold text-blue-700 mb-2 line-clamp-2">
+                      {curso.titulo}
+                    </h2>
+                    <p className="text-sm text-gray-600 line-clamp-3 mb-2">
+                      {curso.descripcion}
                     </p>
-                  )}
-                  {curso.fechaInicio && (
+                  </div>
+                  <div className="flex-shrink-0 mt-auto">
+                    {curso.precio > 0 && (
+                      <p className="text-md font-bold text-green-600">
+                        ${curso.precio.toFixed(2)}
+                      </p>
+                    )}
+                    {curso.fechaInicio && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Inicio: {curso.fechaInicio.toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </p>
+                    )}
                     <p className="text-xs text-gray-500 mt-1">
-                      Inicio: {curso.fechaInicio.toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      Modalidad: {curso.modalidad === 'en vivo' ? 'En Vivo' : curso.modalidad === 'grabado' ? 'Grabado' : 'Mixto'}
                     </p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    Modalidad: {curso.modalidad === 'en vivo' ? 'En Vivo' : curso.modalidad === 'grabado' ? 'Grabado' : 'Mixto'}
-                  </p>
+                  </div>
                 </div>
               </Link>
             </li>
@@ -119,28 +127,36 @@ export default function CursosPage() {
             <li key={servicio.id}>
               <Link
                 href={`/servicios/${servicio.id}`}
-                className="block border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg bg-white transition-all transform hover:-translate-y-1 relative"
+                className="flex flex-col border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg bg-white transition-all transform hover:-translate-y-1 relative h-full"
               >
                 {servicio.imagenCurso ? (
                   <img
                     src={`http://localhost:3001${servicio.imagenCurso}`}
                     alt={servicio.titulo}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-48 object-cover flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-full h-48 bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center text-gray-500 text-sm font-medium">
+                  <div className="w-full h-48 bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center text-gray-500 text-sm font-medium flex-shrink-0">
                     <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 4v12m-4-2v4m-4-6v6m1.5-1.5a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm9 0a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"></path></svg>
                     <span className="ml-2">Sin imagen de servicio</span>
                   </div>
                 )}
-                <div className="p-4 flex flex-col justify-between" style={{ minHeight: '120px' }}>
-                  <h2 className="text-lg font-semibold text-purple-700 mb-2">{servicio.titulo}</h2>
-                  <p className="text-sm text-gray-600 line-clamp-3 mb-2">{servicio.descripcion}</p>
-                  {servicio.precio > 0 && (
-                    <p className="mt-auto text-md font-bold text-green-600">
-                      ${servicio.precio.toFixed(2)}
+                <div className="p-4 flex flex-col justify-between flex-grow">
+                  <div className="flex-grow">
+                    <h2 className="text-lg font-semibold text-purple-700 mb-2 line-clamp-2">
+                      {servicio.titulo}
+                    </h2>
+                    <p className="text-sm text-gray-600 line-clamp-3 mb-2">
+                      {servicio.descripcion}
                     </p>
-                  )}
+                  </div>
+                  <div className="flex-shrink-0 mt-auto">
+                    {servicio.precio > 0 && (
+                      <p className="text-md font-bold text-green-600">
+                        ${servicio.precio.toFixed(2)}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </Link>
             </li>
