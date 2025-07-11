@@ -17,7 +17,7 @@ import { CreatePaypalOrderDto } from './dto/create-paypal-order.dto';
 import { CapturePaypalOrderDto } from './dto/capture-paypal-order.dto';
 import { InscripcionesService } from '../inscripciones/inscripciones.service';
 import { PurchaseNotificationData } from '../pagos/interfaces/purchase-notification-data.interface';
-import { MailService } from '../mail/mail.service';
+import { PurchaseMailService } from '../mail/purchase-mail.service';
 
 @Injectable()
 export class PagosService {
@@ -36,7 +36,7 @@ export class PagosService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     private readonly inscripcionesService: InscripcionesService,
-    private readonly mailService: MailService,
+    private readonly mailService: PurchaseMailService, 
   ) {
     this.paypalClientId = this.configService.get<string>('PAYPAL_CLIENT_ID')!;
     this.paypalClientSecret = this.configService.get<string>('PAYPAL_CLIENT_SECRET')!;
@@ -201,7 +201,16 @@ export class PagosService {
 
     const captureDetails = paypalOrder.purchase_units[0]?.payments?.captures?.[0];
 
-    const usuario = pagoExistente.usuario;
+   
+    const usuario = await this.usuarioRepository.findOne({
+        where: { id: pagoExistente.usuario.id },
+        relations: ['pagos', 'pagos.curso'],
+    });
+
+    if (!usuario) {
+        throw new InternalServerErrorException('Usuario no encontrado después de pago.');
+    }
+
     const pagosAnteriores = usuario.pagos || [];
     const listaCursos: string[] = pagosAnteriores
       .map((pago) => pago.curso?.titulo)
@@ -224,15 +233,13 @@ export class PagosService {
       cursosComprados: listaCursos,
       totalComprados: totalCursosComprados,
       porcentajeComprados: porcentajeCursos,
+      startDate: pagoExistente.curso.fechaInicio?.toISOString() ?? 'Próximamente',
     };
+
 
     await this.mailService.sendPurchaseReceiptToCustomer(
       mailData.userEmail,
-      mailData.userName,
-      mailData.courseTitle,
-      mailData.paymentAmount,
-      mailData.orderId,
-      mailData.transactionDetails,
+      mailData,
     );
 
     await this.mailService.sendPurchaseNotificationToAdmin(mailData);

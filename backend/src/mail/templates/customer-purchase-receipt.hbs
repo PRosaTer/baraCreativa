@@ -1,44 +1,67 @@
-<!-- src/mail/templates/purchase-receipt-user.hbs -->
-<h2 style="color: #2c3e50; font-family: Arial, sans-serif;">¡Gracias por tu compra, {{customerName}}!</h2>
+<h2 style="color: #2a3d66; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 25px; text-align: center;">
+  ¡Gracias por tu compra, {{customerName}}!
+</h2>
 
-<p style="font-family: Arial, sans-serif; font-size: 14px; color: #34495e;">
+<p style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; color: #4a5568; line-height: 1.6; text-align: center;">
   Te enviamos la boleta de tu curso adquirido:
 </p>
 
-<table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-family: Arial, sans-serif; font-size: 14px; color: #2c3e50;">
-  <tr>
-    <td style="padding: 8px; border: 1px solid #ddd; background-color: #ecf0f1; font-weight: bold;">Curso:</td>
-    <td style="padding: 8px; border: 1px solid #ddd;">{{courseTitle}}</td>
+<table style="width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-top: 25px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 15px; color: #2d3748; background-color: #f7fafc; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);">
+  <tr style="background-color: #ffffff;">
+    <td style="padding: 15px 25px; border: none; background-color: #ebf4ff; font-weight: 600; color: #2c5282; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">
+      Curso:
+    </td>
+    <td style="padding: 15px 25px; border: none; background-color: #ffffff; color: #4a5568; border-top-right-radius: 10px; border-bottom-right-radius: 10px;">{{courseTitle}}</td>
   </tr>
-  <tr>
-    <td style="padding: 8px; border: 1px solid #ddd; background-color: #ecf0f1; font-weight: bold;">Monto:</td>
-    <td style="padding: 8px; border: 1px solid #ddd;">{{paymentAmount}} {{currency}}</td>
+  <tr style="background-color: #ffffff;">
+    <td style="padding: 15px 25px; border: none; background-color: #ebf4ff; font-weight: 600; color: #2c5282; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">
+      Monto:
+    </td>
+    <td style="padding: 15px 25px; border: none; background-color: #ffffff; color: #4a5568; border-top-right-radius: 10px; border-bottom-right-radius: 10px;">
+      <strong style="color: #007bff;">{{paymentAmount}} {{currency}}</strong>
+    </td>
   </tr>
-  <tr>
-    <td style="padding: 8px; border: 1px solid #ddd; background-color: #ecf0f1; font-weight: bold;">ID de orden:</td>
-    <td style="padding: 8px; border: 1px solid #ddd;">{{orderId}}</td>
+  <tr style="background-color: #ffffff;">
+    <td style="padding: 15px 25px; border: none; background-color: #ebf4ff; font-weight: 600; color: #2c5282; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">
+      Inicio del curso:
+    </td>
+    <td style="padding: 15px 25px; border: none; background-color: #ffffff; color: #4a5568; border-top-right-radius: 10px; border-bottom-right-radius: 10px;">{{startDate}}</td>
   </tr>
-  <tr>
-    <td style="padding: 8px; border: 1px solid #ddd; background-color: #ecf0f1; font-weight: bold;">ID de transacción:</td>
-    <td style="padding: 8px; border: 1px solid #ddd;">{{transactionId}}</td>
+  <tr style="background-color: #ffffff;">
+    <td style="padding: 15px 25px; border: none; background-color: #ebf4ff; font-weight: 600; color: #2c5282; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">
+      ID de orden:
+    </td>
+    <td style="padding: 15px 25px; border: none; background-color: #ffffff; color: #4a5568; border-top-right-radius: 10px; border-bottom-right-radius: 10px;">
+      <span style="background-color: #edf2f7; padding: 4px 10px; border-radius: 5px; font-family: 'Consolas', 'Courier New', monospace; font-size: 14px; color: #4299e1;">{{orderId}}</span>
+    </td>
   </tr>
-  <tr>
-    <td style="padding: 8px; border: 1px solid #ddd; background-color: #ecf0f1; font-weight: bold;">Fecha y hora:</td>
-    <td style="padding: 8px; border: 1px solid #ddd;">{{captureTime}}</td>
+  <tr style="background-color: #ffffff;">
+    <td style="padding: 15px 25px; border: none; background-color: #ebf4ff; font-weight: 600; color: #2c5282; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">
+      ID de transacción:
+    </td>
+    <td style="padding: 15px 25px; border: none; background-color: #ffffff; color: #4a5568; border-top-right-radius: 10px; border-bottom-right-radius: 10px;">
+      <span style="background-color: #edf2f7; padding: 4px 10px; border-radius: 5px; font-family: 'Consolas', 'Courier New', monospace; font-size: 14px; color: #4299e1;">{{transactionId}}</span>
+    </td>
+  </tr>
+  <tr style="background-color: #ffffff;">
+    <td style="padding: 15px 25px; border: none; background-color: #ebf4ff; font-weight: 600; color: #2c5282; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">
+      Fecha y hora:
+    </td>
+    <td style="padding: 15px 25px; border: none; background-color: #ffffff; color: #4a5568; border-top-right-radius: 10px; border-bottom-right-radius: 10px;">{{captureTime}}</td>
   </tr>
 </table>
 
-<p style="margin-top: 15px; font-family: Arial, sans-serif; font-size: 14px; color: #34495e;">
+<p style="margin-top: 35px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; color: #4a5568; line-height: 1.6; text-align: center;">
   Si tenés alguna consulta, no dudes en escribirnos.
 </p>
 
-<p style="font-family: Arial, sans-serif; font-size: 14px; color: #34495e;">
+<p style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; color: #4a5568; line-height: 1.6; text-align: center;">
   Saludos,<br/>
   El equipo de BaraCreativa
 </p>
 
-<hr style="border: none; border-top: 1px solid #bdc3c7; margin-top: 20px; margin-bottom: 10px;" />
+<hr style="border: none; border-top: 2px solid #cbd5e0; margin: 40px auto; width: 60%; max-width: 400px;" />
 
-<p style="font-size: 12px; font-family: Arial, sans-serif; color: #888; text-align: center;">
+<p style="font-size: 13px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #718096; text-align: center;">
   © {{currentYear}} BaraCreativa. Todos los derechos reservados.
 </p>

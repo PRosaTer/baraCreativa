@@ -12,4 +12,5 @@ export interface PurchaseNotificationData {
   cursosComprados: string[];
   totalComprados: number;
   porcentajeComprados: number;
+  startDate?: string;
 }
