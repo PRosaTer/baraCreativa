@@ -29,8 +29,8 @@ export class ModuloEntity {
   @Column({ type: 'varchar', nullable: true })
   imageUrl?: string | null;
 
-  @Column({ type: 'int', nullable: true }) // <-- CAMBIO IMPORTANTE AQUÍ: Hazla nullable temporalmente
-  orden: number | null; // <-- CAMBIO IMPORTANTE AQUÍ: Permite que sea null en TypeScript
+  @Column({ type: 'int', nullable: true })
+  orden: number | null; 
 
   @Column({ type: 'enum', enum: TipoModulo, default: TipoModulo.TEXTO })
   tipo: TipoModulo;
