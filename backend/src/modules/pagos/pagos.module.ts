@@ -8,8 +8,8 @@ import { Usuario } from '../../entidades/usuario.entity';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { InscripcionesModule } from '../../modules/inscripciones/inscripciones.module';
-import { MailModule } from '../../modules/mail/mail.module'; 
-import { PurchaseMailService } from '../../services/envio mail/purchase-mail.service';
+import { MailModule } from '../../mail/mail.module'; 
+import { PurchaseMailService } from '../../mail/purchase-mail.service';
 import { UsuariosModule } from '../../modules/usuarios/usuarios.module';
 
 @Module({

@@ -6,15 +6,16 @@ import { ReporteProgresoController } from '../../controllers/reporte-progreso/re
 import { Usuario } from '../../entidades/usuario.entity';
 import { Curso } from '../../entidades/curso.entity';
 import { ModuloEntity } from '../../entidades/modulo.entity';
-import { AuthModule } from '../../modules/auth/auth.module';
+import { Inscripcion } from '../../entidades/inscripcion.entity';
+import { CertificadosModule } from '../../modules/certificados/certificados.module'; 
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ReporteProgresoEntity, Usuario, Curso, ModuloEntity]),
-    AuthModule,
+    TypeOrmModule.forFeature([ReporteProgresoEntity, Usuario, Curso, ModuloEntity, Inscripcion]),
+    CertificadosModule, 
   ],
-  providers: [ReporteProgresoService],
   controllers: [ReporteProgresoController],
+  providers: [ReporteProgresoService],
   exports: [ReporteProgresoService],
 })
 export class ReporteProgresoModule {}

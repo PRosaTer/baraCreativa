@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, CreateDateColumn } from 'typeorm';
-import { Usuario } from './usuario.entity';
-import { Curso } from './curso.entity';
+import { Usuario } from '../entidades/usuario.entity';
+import { Curso } from '../entidades/curso.entity'; 
 
 @Entity('certificados')
 export class Certificado {
@@ -16,8 +16,11 @@ export class Certificado {
   @Column()
   nombreCurso: string;
 
-  @Column()
+  @Column({ type: 'timestamp' }) 
   fechaEmision: Date;
+
+  @Column()
+  rutaArchivo: string;
 
   @CreateDateColumn()
   creadoEn: Date;

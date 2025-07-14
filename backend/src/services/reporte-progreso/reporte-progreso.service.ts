@@ -5,7 +5,9 @@ import { ReporteProgresoEntity } from '../../entidades/ReporteProgreso.entity';
 import { Usuario } from '../../entidades/usuario.entity';
 import { Curso } from '../../entidades/curso.entity';
 import { ModuloEntity } from '../../entidades/modulo.entity';
+import { Inscripcion } from '../../entidades/inscripcion.entity'; 
 import { MarcarModuloCompletadoDto } from '../../interfaces/reporte-progreso.interface';
+import { CertificadosService } from '../../services/certificados/certificados.service'; 
 
 @Injectable()
 export class ReporteProgresoService {
@@ -20,6 +22,9 @@ export class ReporteProgresoService {
     private readonly cursoRepository: Repository<Curso>,
     @InjectRepository(ModuloEntity)
     private readonly moduloRepository: Repository<ModuloEntity>,
+    @InjectRepository(Inscripcion)
+    private readonly inscripcionRepository: Repository<Inscripcion>,
+    private readonly certificadosService: CertificadosService,
   ) {}
 
   async marcarModuloCompletado(
@@ -72,7 +77,7 @@ export class ReporteProgresoService {
     const reporteGuardado = await this.reporteProgresoRepository.save(reporteProgreso);
     this.logger.log(`Módulo ${moduloId} del curso ${cursoId} marcado como completado para usuario ${usuarioId}.`);
 
-   
+
     await this.verificarYMarcarCursoCompleto(usuarioId, cursoId);
 
     return reporteGuardado;
@@ -114,10 +119,33 @@ export class ReporteProgresoService {
       modulosCompletadosIds.has(modulo.id)
     );
 
+   
     if (todosLosModulosCompletados) {
-     
-      this.logger.log(`Todos los módulos del curso ${cursoId} completados por usuario ${usuarioId}. El curso debería ser marcado como completado.`);
-     
+      this.logger.log(`Todos los módulos del curso ${cursoId} completados por usuario ${usuarioId}. Marcando curso como completado.`);
+
+      const inscripcion = await this.inscripcionRepository.findOne({
+        where: { usuario: { id: usuarioId }, curso: { id: cursoId } },
+      });
+
+      if (inscripcion && !inscripcion.cursoCompletado) {
+        inscripcion.cursoCompletado = true;
+        inscripcion.estado = 'Completado';
+        inscripcion.fechaFinalizacion = new Date();
+        await this.inscripcionRepository.save(inscripcion);
+        this.logger.log(`Inscripción ${inscripcion.id} marcada como completada para usuario ${usuarioId} y curso ${cursoId}.`);
+
+        try {
+          await this.certificadosService.generarCertificado(usuarioId, cursoId);
+          this.logger.log(`Certificado generado automáticamente para usuario ${usuarioId} y curso ${cursoId}.`);
+        } catch (error) {
+          this.logger.error(`Error al generar certificado automáticamente para usuario ${usuarioId} y curso ${cursoId}:`, error.message);
+          
+        }
+      } else if (inscripcion && inscripcion.cursoCompletado) {
+        this.logger.log(`Curso ${cursoId} ya estaba marcado como completado para usuario ${usuarioId}.`);
+      } else {
+        this.logger.warn(`No se encontró inscripción para usuario ${usuarioId} y curso ${cursoId} al intentar marcar como completado.`);
+      }
     }
   }
 }

@@ -1,180 +1,152 @@
 'use client';
 
-import React, { useState, ChangeEvent, FormEvent } from 'react';
-// IMPORTANTE: Asegúrate de que 'subcategoria' sea opcional o se elimine de la interfaz CursoForm
-// en tu archivo '@/app/types/curso.ts' para resolver el error de TypeScript.
-import { Curso, CursoForm, EditableModuloForm, ClaseItem } from '@/app/types/curso';
-import { ModuloDto, TipoCurso, ModalidadCurso } from '@/app/types/shared-backend-types'; // Ensure ModuloDto is imported
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
+import { CursoForm, Curso, Modulo, ClaseItem, EditableModuloForm } from '@/app/types/curso';
+import { useRouter } from 'next/navigation';
 
 interface Props {
-  curso?: Curso;
-  onGuardar: (cursoGuardado: Curso) => Promise<void>;
+  // Este componente es para CREAR un curso, por lo tanto, NO espera una prop 'curso'.
+  onGuardar: (curso: Curso) => Promise<void>;
   onCancelar: () => void;
 }
 
-const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) => {
-  const [form, setForm] = useState<CursoForm>(() => {
-    const initialModulos: EditableModuloForm[] = curso?.modulos
-      ? curso.modulos.map((m) => ({
-            id: m.id,
-            titulo: m.titulo,
-            descripcion: m.descripcion,
-            videoUrl: m.videoUrl,
-            pdfUrl: m.pdfUrl,
-            imageUrl: m.imageUrl,
-            videoFile: null,
-            pdfFile: null,
-            imageFile: null,
-          }))
-      : [];
+const CrearCursoMultiStep: React.FC<Props> = ({ onGuardar, onCancelar }) => {
+  const router = useRouter();
 
-    return {
-      titulo: curso?.titulo || '',
-      descripcion: curso?.descripcion || '',
-      precio: curso?.precio || 0,
-      duracionHoras: curso?.duracionHoras || 0,
-      tipo: curso?.tipo || TipoCurso.DOCENTES,
-      categoria: curso?.categoria || '',
-      // subcategoria: curso?.subcategoria || '', // Eliminado del estado inicial
-      modalidad: curso?.modalidad || ModalidadCurso.GRABADO,
-      certificadoDisponible: curso?.certificadoDisponible || false,
-      badgeDisponible: curso?.badgeDisponible || false,
-      imagenCurso: curso?.imagenCurso || null,
-      archivoScorm: curso?.archivoScorm || null,
-      modulos: initialModulos,
-      newScormFile: null,
-      claseItem: curso?.claseItem || ClaseItem.CURSO,
-      fechaInicio: curso?.fechaInicio ? new Date(curso.fechaInicio) : null,
-    };
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState<CursoForm>({
+    titulo: '',
+    descripcion: '',
+    precio: 0,
+    duracionHoras: 0,
+    tipo: 'Docentes',
+    categoria: '',
+    modalidad: 'grabado',
+    certificadoDisponible: false,
+    badgeDisponible: false,
+    imagenCurso: null,
+    archivoScorm: null, // Ahora puede ser File o string
+    modulos: [],
+    newScormFile: null,
+    claseItem: ClaseItem.CURSO,
+    fechaInicio: null, // Asegurar que fechaInicio esté inicializado
   });
-
-  const [moduloFiles, setModuloFiles] = useState<
-    Array<{
-      videoFile?: File | null;
-      pdfFile?: File | null;
-      imageFile?: File | null;
-    }>
-  >(
-    curso?.modulos
-      ? curso.modulos.map(() => ({}))
-      : []
-  );
 
   const [error, setError] = useState('');
   const [exito, setExito] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const [currentModuloFiles, setCurrentModuloFiles] = useState<{
+    videoFile: File | null;
+    pdfFile: File | null;
+    imageFile: File | null;
+  }>({
+    videoFile: null,
+    pdfFile: null,
+    imageFile: null,
+  });
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target;
+
     if (type === 'checkbox') {
       const target = e.target as HTMLInputElement;
-      setForm((prev: CursoForm) => ({ ...prev, [name]: target.checked }));
+      setForm(prev => ({
+        ...prev,
+        [name]: target.checked,
+      }));
       return;
     }
 
-    if (name === 'tipo') {
-      setForm((prev: CursoForm) => ({ ...prev, tipo: value as 'Docentes' | 'Estudiantes' | 'Empresas' }));
-      return;
-    }
-    if (name === 'modalidad') {
-      setForm((prev: CursoForm) => ({ ...prev, modalidad: value as 'en vivo' | 'grabado' | 'mixto' }));
-      return;
-    }
-    if (name === 'claseItem') {
-        const selectedClaseItem = value as ClaseItem;
-        setForm((prev: CursoForm) => ({
-          ...prev,
-          claseItem: selectedClaseItem,
-          duracionHoras: selectedClaseItem === ClaseItem.SERVICIO ? 0 : prev.duracionHoras,
-          modalidad: selectedClaseItem === ClaseItem.SERVICIO ? ModalidadCurso.GRABADO : prev.modalidad,
-          fechaInicio: selectedClaseItem === ClaseItem.SERVICIO ? null : prev.fechaInicio,
-          modulos: selectedClaseItem === ClaseItem.SERVICIO ? [] : prev.modulos,
-          badgeDisponible: selectedClaseItem === ClaseItem.SERVICIO ? false : prev.badgeDisponible,
-        }));
-        setModuloFiles(selectedClaseItem === ClaseItem.SERVICIO ? [] : moduloFiles);
-        return;
-    }
-
-    setForm((prev: CursoForm) => ({
+    setForm(prev => ({
       ...prev,
-      [name]: name === 'precio' || name === 'duracionHoras' ? (value === '' ? '' : Number(value)) : value,
+      [name]:
+        name === 'precio' || name === 'duracionHoras'
+          ? value === '' ? '' : Number(value)
+          : value,
     }));
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, files } = e.target;
     if (!files || files.length === 0) return;
+
     const file = files[0];
 
-    if (name === 'newScormFile') {
-      if (file.type !== 'application/zip' && file.type !== 'application/x-zip-compressed') {
-        setError('Solo archivos .zip permitidos para SCORM');
-        return;
-      }
-      setForm((prev: CursoForm) => ({ ...prev, newScormFile: file }));
-      setError('');
-    } else if (name === 'imagenCurso') {
+    if (name === 'imagenCurso') {
       if (!file.type.startsWith('image/')) {
         setError('Solo imágenes permitidas para la imagen del curso');
+        setForm(prev => ({ ...prev, imagenCurso: null }));
         return;
       }
-      setForm((prev: CursoForm) => ({ ...prev, imagenCurso: file }));
+      setForm(prev => ({ ...prev, imagenCurso: file }));
+      setError('');
+    } else if (name === 'archivoScorm') {
+      if (file.type !== 'application/zip' && file.type !== 'application/x-zip-compressed') {
+        setError('Solo archivos .zip permitidos para SCORM');
+        setForm(prev => ({ ...prev, archivoScorm: null }));
+        return;
+      }
+      setForm(prev => ({ ...prev, archivoScorm: file })); // Asigna el objeto File
       setError('');
     }
   };
 
-  const handleDateChange = (date: Date | null) => {
-    setForm((prev: CursoForm) => ({
-      ...prev,
-      fechaInicio: date,
-    }));
+  const handleModuloFileChange = (e: ChangeEvent<HTMLInputElement>, fileType: 'video' | 'pdf' | 'image') => {
+    const { files } = e.target;
+    if (!files || files.length === 0) {
+      setCurrentModuloFiles(prev => ({ ...prev, [`${fileType}File`]: null }));
+      return;
+    }
+    const file = files[0];
+
+    if (fileType === 'video' && !file.type.startsWith('video/')) {
+      setError('Solo archivos de video permitidos.');
+      setCurrentModuloFiles(prev => ({ ...prev, videoFile: null }));
+      return;
+    }
+    if (fileType === 'pdf' && file.type !== 'application/pdf') {
+      setError('Solo archivos PDF permitidos.');
+      setCurrentModuloFiles(prev => ({ ...prev, pdfFile: null }));
+      return;
+    }
+    if (fileType === 'image' && !file.type.startsWith('image/')) {
+      setError('Solo archivos de imagen permitidos.');
+      setCurrentModuloFiles(prev => ({ ...prev, imageFile: null }));
+      return;
+    }
+
+    setCurrentModuloFiles(prev => ({ ...prev, [`${fileType}File`]: file }));
+    setError('');
   };
 
   const handleAddModulo = () => {
-    setForm((prev: CursoForm) => ({
+    setForm(prev => ({
       ...prev,
-      modulos: [...prev.modulos, { titulo: '', descripcion: null, videoFile: null, pdfFile: null, imageFile: null }],
+      // Los módulos creados aquí no tienen ID real hasta que el backend los guarda
+      modulos: [...prev.modulos, { id: Date.now(), titulo: `Módulo ${prev.modulos.length + 1}`, descripcion: null, videoUrl: null, pdfUrl: null, imageUrl: null }],
     }));
-    setModuloFiles((prev: Array<{ videoFile?: File | null; pdfFile?: File | null; imageFile?: File | null; }>) => [...prev, {}]);
   };
 
-  const handleRemoveModulo = (indexToRemove: number) => {
-    setForm((prev: CursoForm) => ({
+  const handleRemoveModulo = (index: number) => {
+    setForm(prev => ({
       ...prev,
-      modulos: prev.modulos.filter((_, index) => index !== indexToRemove),
+      modulos: prev.modulos.filter((_, i) => i !== index),
     }));
-    setModuloFiles((prev: Array<{ videoFile?: File | null; pdfFile?: File | null; imageFile?: File | null; }>) => prev.filter((_, index) => index !== indexToRemove));
   };
 
-
-  const handleModuloChange = (index: number, field: 'titulo' | 'descripcion', value: string) => {
-    setForm((prev: CursoForm) => {
-      const newModulos = [...prev.modulos];
-      if (field === 'descripcion') {
-        newModulos[index][field] = value === '' ? null : value;
-      } else {
-        newModulos[index][field] = value;
-      }
+  const handleModuloTitleChange = (index: number, value: string) => {
+    setForm(prev => {
+      const newModulos: EditableModuloForm[] = [...prev.modulos];
+      newModulos[index] = { ...newModulos[index], titulo: value };
       return { ...prev, modulos: newModulos };
     });
   };
 
-  const handleModuloFileChange = (
-    index: number,
-    fileType: 'videoFile' | 'pdfFile' | 'imageFile',
-    file: File | null
-  ) => {
-    setModuloFiles((prev: Array<{ videoFile?: File | null; pdfFile?: File | null; imageFile?: File | null; }>) => {
-      const newModuloFiles = [...prev];
-      if (!newModuloFiles[index]) {
-        newModuloFiles[index] = {};
-      }
-      newModuloFiles[index] = { ...newModuloFiles[index], [fileType]: file };
-      return newModuloFiles;
-    });
-  };
+  const nextStep = () => setStep(prev => prev + 1);
+  const prevStep = () => setStep(prev => prev - 1);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -183,401 +155,399 @@ const CrearCursoMultiStep: React.FC<Props> = ({ curso, onGuardar, onCancelar }) 
     setLoading(true);
 
     try {
-      let nuevoCurso: Curso;
-      const baseUrl = 'http://localhost:3001/api/cursos';
-
-      const baseData = {
+      // 1. Crear el curso (información básica y módulos con títulos)
+      const cursoDataToCreate = {
         titulo: form.titulo,
         descripcion: form.descripcion,
         precio: Number(form.precio),
+        duracionHoras: Number(form.duracionHoras),
         tipo: form.tipo,
         categoria: form.categoria,
-        // subcategoria: form?.subcategoria, // Eliminado del payload
+        modalidad: form.modalidad,
         certificadoDisponible: form.certificadoDisponible,
         badgeDisponible: form.badgeDisponible,
         claseItem: form.claseItem,
-        fechaInicio: form.fechaInicio ? form.fechaInicio.toISOString().split('T')[0] : null,
+        fechaInicio: form.fechaInicio, // Incluir fechaInicio
+        modulos: form.modulos.map(m => ({ titulo: m.titulo, descripcion: m.descripcion || null })), // Asegurarse de enviar descripcion si existe
       };
 
-    
-      type CourseDataForApi = Omit<Curso, 'id' | 'imagenCurso' | 'archivoScorm' | 'modulos' | 'fechaInicio' | 'subcategoria'> & { // 'subcategoria' eliminado del Omit
-        modulos?: ModuloDto[];
-        fechaInicio?: string | null;
-      };
+      const resCurso = await fetch('http://localhost:3001/api/cursos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, // Añadir Accept
+        body: JSON.stringify(cursoDataToCreate),
+        credentials: 'include',
+      });
 
-      let courseDataForApi: CourseDataForApi;
-
-      if (form.claseItem === ClaseItem.CURSO) {
-        courseDataForApi = {
-          ...baseData,
-          duracionHoras: Number(form.duracionHoras),
-          modalidad: form.modalidad,
-          modulos: form.modulos.map((m: EditableModuloForm): ModuloDto => ({ 
-            ...(m.id !== undefined && { id: m.id }),
-            titulo: m.titulo,
-            descripcion: m.descripcion,
-            videoUrl: m.videoUrl,
-            pdfUrl: m.pdfUrl,
-            imageUrl: m.imageUrl,
-          })),
-        };
-      } else { 
-        courseDataForApi = {
-          ...baseData,
-          duracionHoras: 0,
-          modalidad: ModalidadCurso.GRABADO,
-          modulos: [],
-        };
+      if (!resCurso.ok) {
+        const errData = await resCurso.json();
+        throw new Error(errData.message || 'Error al crear el curso');
       }
+      const newCurso: Curso = await resCurso.json();
+      const cursoId = newCurso.id;
 
-      if (curso) {
-        const resUpdate = await fetch(`${baseUrl}/${curso.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(courseDataForApi),
-        });
-        if (!resUpdate.ok) {
-          const errData = await resUpdate.json();
-          throw new Error(errData.message || 'Error al actualizar ítem');
-        }
-        nuevoCurso = await resUpdate.json();
-      } else {
-        const resCreate = await fetch(baseUrl, {
+      // 2. Subir imagen del curso si existe
+      if (form.imagenCurso instanceof File) {
+        const formDataImagen = new FormData();
+        formDataImagen.append('imagen', form.imagenCurso);
+        const resImg = await fetch(`http://localhost:3001/api/cursos/${cursoId}/imagen`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(courseDataForApi),
+          body: formDataImagen,
+          credentials: 'include',
         });
-        if (!resCreate.ok) {
-          const errData = await resCreate.json();
-          throw new Error(errData.message || 'Error al crear ítem');
+        if (!resImg.ok) {
+          const errData = await resImg.json();
+          throw new Error(errData.message || 'Error al subir imagen del curso');
         }
-        nuevoCurso = await resCreate.json();
       }
 
-      if (form.newScormFile) {
+      // 3. Subir archivo SCORM si existe (desde archivoScorm para la creación inicial)
+      if (form.archivoScorm instanceof File) {
         const formDataScorm = new FormData();
-        formDataScorm.append('scormFile', form.newScormFile);
-        formDataScorm.append('cursoId', nuevoCurso.id.toString());
-
-        const resScorm = await fetch(`${baseUrl}/scorm_unzipped_courses`, {
+        formDataScorm.append('scormFile', form.archivoScorm);
+        formDataScorm.append('cursoId', cursoId.toString());
+        const resScorm = await fetch(`http://localhost:3001/api/cursos/scorm_unzipped_courses`, {
           method: 'POST',
           body: formDataScorm,
+          credentials: 'include',
         });
-
         if (!resScorm.ok) {
           const errData = await resScorm.json();
           throw new Error(errData.message || 'Error al subir archivo SCORM');
         }
       }
 
-      if (form.imagenCurso instanceof File) {
-        const formDataImagen = new FormData();
-        formDataImagen.append('imagen', form.imagenCurso);
-        const resImg = await fetch(`${baseUrl}/${nuevoCurso.id}/imagen`, {
-          method: 'POST',
-          body: formDataImagen,
-        });
-        if (!resImg.ok) {
-          const errData = await resImg.json();
-          throw new Error(errData.message || 'Error al subir imagen del ítem');
+      // 4. Subir archivos para cada módulo (si se seleccionaron)
+      // Necesitamos obtener los módulos con sus IDs reales del backend después de la creación del curso
+      const updatedCursoWithModulos = await fetch(`http://localhost:3001/api/cursos/${cursoId}`, { credentials: 'include' }).then(res => res.json());
+
+      // Iterar sobre los módulos que el backend acaba de devolver (que ya tienen IDs)
+      for (let i = 0; i < updatedCursoWithModulos.modulos.length; i++) {
+        const modulo = updatedCursoWithModulos.modulos[i];
+        const moduloId = modulo.id;
+
+        const formDataModuleFiles = new FormData();
+        let filesAttached = false;
+
+        // Usamos currentModuloFiles para los archivos que el usuario seleccionó en el paso 3
+        // Asumimos que el orden de los módulos en `form.modulos` coincide con `updatedCursoWithModulos.modulos`
+        const originalModuloForm = form.modulos[i];
+
+        if (originalModuloForm.videoFile) {
+          formDataModuleFiles.append('files', originalModuloForm.videoFile);
+          filesAttached = true;
+        }
+        if (originalModuloForm.pdfFile) {
+          formDataModuleFiles.append('files', originalModuloForm.pdfFile);
+          filesAttached = true;
+        }
+        if (originalModuloForm.imageFile) {
+          formDataModuleFiles.append('files', originalModuloForm.imageFile);
+          filesAttached = true;
+        }
+
+        if (filesAttached) {
+          const resModuleFiles = await fetch(`http://localhost:3001/api/cursos/modulos/${moduloId}/files`, {
+            method: 'POST',
+            body: formDataModuleFiles,
+            credentials: 'include',
+          });
+
+          if (!resModuleFiles.ok) {
+            const errData = await resModuleFiles.json();
+            console.error(`Error al subir archivos para el módulo ${moduloId}:`, errData.message || 'Error desconocido');
+            // Aquí puedes decidir si quieres lanzar un error o solo loguearlo
+          }
         }
       }
 
-      if (form.claseItem === ClaseItem.CURSO) {
-          await Promise.all(
-              moduloFiles.map(async (filesForModule, moduleIndex) => {
-                  const currentModulo = nuevoCurso.modulos[moduleIndex];
-                  if (!currentModulo || !currentModulo.id) {
-                      console.warn(`Módulo en el índice ${moduleIndex} no encontrado o sin ID después de la creación/actualización.`);
-                      return;
-                  }
-
-                  const moduleFormData = new FormData();
-                  let fileUploaded = false;
-
-                  if (filesForModule.videoFile) {
-                      moduleFormData.append('videoFile', filesForModule.videoFile);
-                      fileUploaded = true;
-                  }
-                  if (filesForModule.pdfFile) {
-                      moduleFormData.append('pdfFile', filesForModule.pdfFile);
-                      fileUploaded = true;
-                  }
-                  if (filesForModule.imageFile) {
-                      moduleFormData.append('imageFile', filesForModule.imageFile);
-                      fileUploaded = true;
-                  }
-
-                  if (fileUploaded) {
-                      const resModuleFiles = await fetch(`${baseUrl}/modulos/${currentModulo.id}/files`, {
-                          method: 'POST',
-                          body: moduleFormData,
-                      });
-                      if (!resModuleFiles.ok) {
-                          const errData = await resModuleFiles.json();
-                          console.error(`Error al subir archivos para el módulo ${currentModulo.id}:`, errData.message || 'Error desconocido');
-                      }
-                  }
-              })
-          );
-      }
-
-
-      setExito(`Item (${form.claseItem === ClaseItem.CURSO ? 'Curso' : 'Servicio'}) guardado correctamente`);
-      await onGuardar(nuevoCurso);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error inesperado');
+      setExito('Curso creado y archivos subidos correctamente');
+      await onGuardar(newCurso);
+      router.push('/admin/cursos');
+    } catch (error) {
+      if (error instanceof Error) setError(error.message);
+      else setError('Error inesperado');
     } finally {
       setLoading(false);
     }
   };
 
-  const formStyle: React.CSSProperties = {
-    maxWidth: 700,
-    margin: '2rem auto',
-    padding: 24,
-    borderRadius: 15,
-    background: 'linear-gradient(135deg, #4ade80, #22c55e)',
-    boxShadow: '0 10px 25px rgba(34, 197, 94, 0.3)',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    color: '#065f46',
-  };
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <>
+            <label style={labelStyle}>Título</label>
+            <input type="text" name="titulo" value={form.titulo} onChange={handleChange} required style={inputStyle} />
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '0.6rem',
-    borderRadius: 8,
-    border: 'none',
-    marginBottom: 16,
-    fontSize: 16,
-    boxShadow: 'inset 0 0 5px rgba(0,0,0,0.1)',
-  };
+            <label style={labelStyle}>Descripción</label>
+            <textarea name="descripcion" value={form.descripcion} onChange={handleChange} rows={4} required style={{ ...inputStyle, resize: 'vertical' }} />
 
-  const labelStyle: React.CSSProperties = {
-    fontWeight: 600,
-    marginBottom: 6,
-    display: 'block',
-  };
+            <label style={labelStyle}>Precio</label>
+            <input type="number" name="precio" value={form.precio} onChange={handleChange} min={0} step={0.01} style={inputStyle} />
 
-  const checkboxLabelStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: 12,
-  };
+            <label style={labelStyle}>Duración (horas)</label>
+            <input type="number" name="duracionHoras" value={form.duracionHoras} onChange={handleChange} min={0} step={1} style={inputStyle} />
 
-  const buttonStyle: React.CSSProperties = {
-    padding: '0.8rem',
-    borderRadius: 10,
-    border: 'none',
-    backgroundColor: '#b91c1c',
-    color: 'white',
-    fontWeight: 700,
-    fontSize: '1.1rem',
-    cursor: 'pointer',
-    boxShadow: '0 5px 15px rgba(185, 28, 28, 0.5)',
-    transition: 'background-color 0.3s ease',
-  };
+            <button type="button" onClick={nextStep} style={buttonStyle}>Siguiente</button>
+          </>
+        );
+      case 2:
+        return (
+          <>
+            <label style={labelStyle}>Tipo</label>
+            <select name="tipo" value={form.tipo} onChange={handleChange} required style={inputStyle}>
+              <option value="">Seleccione tipo</option>
+              <option value="Docentes">Docentes</option>
+              <option value="Estudiantes">Estudiantes</option>
+              <option value="Empresas">Empresas</option>
+            </select>
 
-  const removeModuloButtonStyle: React.CSSProperties = {
-    padding: '0.5rem 1rem',
-    borderRadius: 8,
-    border: 'none',
-    backgroundColor: '#dc3545',
-    color: 'white',
-    fontWeight: 600,
-    fontSize: '0.9rem',
-    cursor: 'pointer',
-    marginTop: '10px',
-    alignSelf: 'flex-end',
-    boxShadow: '0 3px 10px rgba(220, 53, 69, 0.3)',
-    transition: 'background-color 0.3s ease',
-  };
+            <label style={labelStyle}>Categoría</label>
+            <input type="text" name="categoria" value={form.categoria} onChange={handleChange} required style={inputStyle} />
 
+            <label style={labelStyle}>Modalidad</label>
+            <select name="modalidad" value={form.modalidad} onChange={handleChange} required style={inputStyle}>
+              <option value="">Seleccione modalidad</option>
+              <option value="en vivo">En vivo</option>
+              <option value="grabado">Grabado</option>
+              <option value="mixto">Mixto</option>
+            </select>
+
+            <label style={checkboxLabelStyle}>
+              <input type="checkbox" name="certificadoDisponible" checked={form.certificadoDisponible} onChange={handleChange} style={{ marginRight: 8 }} />
+              Certificado disponible
+            </label>
+
+            <label style={checkboxLabelStyle}>
+              <input type="checkbox" name="badgeDisponible" checked={form.badgeDisponible} onChange={handleChange} style={{ marginRight: 8 }} />
+              Badge disponible
+            </label>
+
+            <label style={labelStyle}>Imagen del curso</label>
+            <input type="file" name="imagenCurso" accept="image/*" onChange={handleFileChange} style={{ marginBottom: 20 }} />
+
+            <label style={labelStyle}>Archivo SCORM (.zip)</label>
+            <input type="file" name="archivoScorm" accept=".zip" onChange={handleFileChange} style={{ marginBottom: 20 }} />
+
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
+              <button type="button" onClick={prevStep} style={{ ...buttonStyle, backgroundColor: '#6b7280', width: '48%' }}>Anterior</button>
+              <button type="button" onClick={nextStep} style={{ ...buttonStyle, width: '48%' }}>Siguiente</button>
+            </div>
+          </>
+        );
+      case 3:
+        return (
+          <>
+            <h3 style={{ marginBottom: 15, textAlign: 'center', color: '#5a1a01' }}>Módulos del Curso</h3>
+            {form.modulos.map((modulo, index) => (
+              <div key={modulo.id} style={moduloItemStyle}>
+                <input
+                  type="text"
+                  placeholder={`Título del Módulo ${index + 1}`}
+                  value={modulo.titulo}
+                  onChange={(e) => handleModuloTitleChange(index, e.target.value)}
+                  required
+                  style={inputStyle}
+                />
+                {/* Aquí no usamos currentModuloFiles directamente, sino que los adjuntamos al form.modulos */}
+                {/* Para la creación, los archivos se asocian al módulo en el estado del formulario */}
+                <label style={labelStyle}>Video del Módulo (opcional)</label>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => {
+                    const files = e.target.files;
+                    if (files && files.length > 0) {
+                      const newModulos = [...form.modulos];
+                      newModulos[index] = { ...newModulos[index], videoFile: files[0] };
+                      setForm(prev => ({ ...prev, modulos: newModulos }));
+                    } else {
+                      const newModulos = [...form.modulos];
+                      newModulos[index] = { ...newModulos[index], videoFile: null };
+                      setForm(prev => ({ ...prev, modulos: newModulos }));
+                    }
+                  }}
+                  style={{ marginBottom: 10 }}
+                />
+
+                <label style={labelStyle}>PDF del Módulo (opcional)</label>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) => {
+                    const files = e.target.files;
+                    if (files && files.length > 0) {
+                      const newModulos = [...form.modulos];
+                      newModulos[index] = { ...newModulos[index], pdfFile: files[0] };
+                      setForm(prev => ({ ...prev, modulos: newModulos }));
+                    } else {
+                      const newModulos = [...form.modulos];
+                      newModulos[index] = { ...newModulos[index], pdfFile: null };
+                      setForm(prev => ({ ...prev, modulos: newModulos }));
+                    }
+                  }}
+                  style={{ marginBottom: 10 }}
+                />
+
+                <label style={labelStyle}>Imagen del Módulo (opcional)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const files = e.target.files;
+                    if (files && files.length > 0) {
+                      const newModulos = [...form.modulos];
+                      newModulos[index] = { ...newModulos[index], imageFile: files[0] };
+                      setForm(prev => ({ ...prev, modulos: newModulos }));
+                    } else {
+                      const newModulos = [...form.modulos];
+                      newModulos[index] = { ...newModulos[index], imageFile: null };
+                      setForm(prev => ({ ...prev, modulos: newModulos }));
+                    }
+                  }}
+                  style={{ marginBottom: 20 }}
+                />
+
+                <button type="button" onClick={() => handleRemoveModulo(index)} style={removeModuloButtonStyle}>
+                  Eliminar Módulo
+                </button>
+              </div>
+            ))}
+            <button type="button" onClick={handleAddModulo} style={addModuloButtonStyle}>
+              Añadir Módulo
+            </button>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
+              <button type="button" onClick={prevStep} style={{ ...buttonStyle, backgroundColor: '#6b7280', width: '48%' }}>Anterior</button>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{ ...buttonStyle, width: '48%' }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#f59e0b';
+                  (e.currentTarget as HTMLButtonElement).style.color = '#5a1a01';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#b91c1c';
+                  (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                }}
+              >
+                {loading ? 'Creando Curso...' : 'Crear Curso'}
+              </button>
+            </div>
+          </>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} style={formStyle}>
-      <h2 style={{ textAlign: 'center', marginBottom: 20 }}>
-        {curso ? 'Editar Item' : 'Crear Nuevo Item'}
-      </h2>
+      <h2 style={{ textAlign: 'center', marginBottom: 20 }}>Crear Nuevo Curso</h2>
 
       {error && <p style={{ color: '#8b0000', fontWeight: '700', marginBottom: 20 }}>{error}</p>}
       {exito && <p style={{ color: '#065f46', fontWeight: '700', marginBottom: 20 }}>{exito}</p>}
 
-      <div>
-        <label htmlFor="claseItem" style={labelStyle}>Tipo de Item</label>
-        <select
-          name="claseItem"
-          id="claseItem"
-          value={form.claseItem}
-          onChange={handleChange}
-          style={inputStyle}
-          required
-        >
-          <option value={ClaseItem.CURSO}>Curso</option>
-          <option value={ClaseItem.SERVICIO}>Servicio</option>
-        </select>
-      </div>
+      {renderStep()}
 
-      <label style={labelStyle}>Título</label>
-      <input type="text" name="titulo" value={form.titulo} onChange={handleChange} required style={inputStyle} />
-
-      <label style={labelStyle}>Descripción</label>
-      <textarea name="descripcion" value={form.descripcion || ''} onChange={handleChange} rows={4} required style={{ ...inputStyle, resize: 'vertical' }} />
-
-      <label style={labelStyle}>Precio</label>
-      <input type="number" name="precio" value={form.precio} onChange={handleChange} min={0} step={0.01} style={inputStyle} />
-
-      {form.claseItem === ClaseItem.CURSO && (
-        <>
-          <label style={labelStyle}>Duración (horas)</label>
-          <input type="number" name="duracionHoras" value={form.duracionHoras} onChange={handleChange} min={0} step={1} style={inputStyle} required />
-
-          <label style={labelStyle}>Modalidad</label>
-          <select name="modalidad" value={form.modalidad} onChange={handleChange} required style={inputStyle}>
-            <option value={ModalidadCurso.GRABADO}>Grabado</option>
-            <option value={ModalidadCurso.EN_VIVO}>En vivo</option>
-            <option value={ModalidadCurso.MIXTO}>Mixto</option>
-          </select>
-
-          <label style={labelStyle}>Fecha de Inicio (opcional)</label>
-          <DatePicker
-            selected={form.fechaInicio}
-            onChange={handleDateChange}
-            dateFormat="dd/MM/yyyy"
-            className="w-full"
-            wrapperClassName="w-full"
-            customInput={<input style={inputStyle} />}
-            isClearable
-            placeholderText="Seleccionar fecha"
-          />
-        </>
-      )}
-
-      <label style={labelStyle}>Tipo de Audiencia</label>
-      <select name="tipo" value={form.tipo} onChange={handleChange} required style={inputStyle}>
-        <option value={TipoCurso.DOCENTES}>Docentes</option>
-        <option value={TipoCurso.ESTUDIANTES}>Estudiantes</option>
-        <option value={TipoCurso.EMPRESAS}>Empresas</option>
-      </select>
-
-      <label style={labelStyle}>Categoría</label>
-      <input type="text" name="categoria" value={form.categoria} onChange={handleChange} required style={inputStyle} />
-
-      {/* Eliminado el campo de subcategoría */}
-
-      <label style={checkboxLabelStyle}>
-        <input type="checkbox" name="certificadoDisponible" checked={form.certificadoDisponible} onChange={handleChange} style={{ marginRight: 8 }} />
-        Certificado disponible
-      </label>
-
-      <label style={checkboxLabelStyle}>
-        <input type="checkbox" name="badgeDisponible" checked={form.badgeDisponible} onChange={handleChange} style={{ marginRight: 8 }} />
-        Badge disponible
-      </label>
-
-      <label style={labelStyle}>Imagen del item</label>
-      <input type="file" name="imagenCurso" accept="image/*" onChange={handleFileChange} style={{ marginBottom: 20 }} />
-      {typeof form.imagenCurso === 'string' && form.imagenCurso && (
-        <img src={form.imagenCurso} alt="Imagen item" style={{ maxWidth: '100%', maxHeight: 180, marginBottom: 20, borderRadius: 10 }} />
-      )}
-
-      {form.claseItem === ClaseItem.CURSO && (
-        <>
-          <label style={labelStyle}>Archivo SCORM (.zip)</label>
-          <input type="file" name="newScormFile" accept=".zip" onChange={handleFileChange} style={{ marginBottom: 20 }} />
-        </>
-      )}
-
-      {form.claseItem === ClaseItem.CURSO && (
-        <div style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '10px', marginBottom: '20px', background: '#f9f9f9', color: '#333' }}>
-          <h3 style={{ fontSize: '1.4rem', marginBottom: '15px' }}>Módulos</h3>
-          {form.modulos.map((modulo: EditableModuloForm, index: number) => (
-            <div key={index} style={{ border: '1px dashed #bbb', padding: '10px', marginBottom: '10px', borderRadius: '8px', background: '#e0ffe0', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <h4 style={{ fontSize: '1.2rem', margin: 0 }}>Módulo {index + 1}</h4>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveModulo(index)}
-                  style={removeModuloButtonStyle}
-                >
-                  Eliminar Módulo
-                </button>
-              </div>
-              <label style={labelStyle}>Título del Módulo</label>
-              <input
-                type="text"
-                value={modulo.titulo}
-                onChange={(e) => handleModuloChange(index, 'titulo', e.target.value)}
-                style={inputStyle}
-                required
-              />
-              <label style={labelStyle}>Descripción del Módulo</label>
-              <textarea
-                value={modulo.descripcion || ''} 
-                onChange={(e) => handleModuloChange(index, 'descripcion', e.target.value)}
-                rows={2}
-                style={{ ...inputStyle, resize: 'vertical' }}
-                required
-              />
-              <label style={labelStyle}>Video (opcional)</label>
-              <input
-                type="file"
-                accept="video/*"
-                onChange={(e) => handleModuloFileChange(index, 'videoFile', e.target.files ? e.target.files[0] : null)}
-                style={{ marginBottom: 10 }}
-              />
-              {modulo.videoUrl && (
-                <p style={{ fontSize: '0.8rem', color: '#555', marginBottom: '10px' }}>
-                  Video actual: <a href={modulo.videoUrl} target="_blank" rel="noopener noreferrer">Ver video</a>
-                </p>
-              )}
-              <label style={labelStyle}>PDF (opcional)</label>
-              <input
-                type="file"
-                accept=".pdf"
-                onChange={(e) => handleModuloFileChange(index, 'pdfFile', e.target.files ? e.target.files[0] : null)}
-                style={{ marginBottom: 10 }}
-              />
-              {modulo.pdfUrl && (
-                <p style={{ fontSize: '0.8rem', color: '#555', marginBottom: '10px' }}>
-                  PDF actual: <a href={modulo.pdfUrl} target="_blank" rel="noopener noreferrer">Ver PDF</a>
-                </p>
-              )}
-              <label style={labelStyle}>Imagen (opcional)</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleModuloFileChange(index, 'imageFile', e.target.files ? e.target.files[0] : null)}
-                style={{ marginBottom: 10 }}
-              />
-              {modulo.imageUrl && (
-                <p style={{ fontSize: '0.8rem', color: '#555', marginBottom: '10px' }}>
-                  Imagen actual: <a href={modulo.imageUrl} target="_blank" rel="noopener noreferrer">Ver imagen</a>
-                </p>
-              )}
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={handleAddModulo}
-            style={{ ...buttonStyle, backgroundColor: '#28a745', boxShadow: '0 5px 15px rgba(40, 167, 69, 0.5)' }}
-          >
-            Añadir Módulo
-          </button>
-        </div>
-      )}
-
-      <div style={{ display: 'flex', gap: 10 }}>
-        <button type="submit" disabled={loading} style={{ ...buttonStyle, flex: 1, backgroundColor: '#007bff', boxShadow: '0 5px 15px rgba(0, 123, 255, 0.5)' }}>
-          {loading ? (curso ? 'Guardando...' : 'Creando...') :
-            form.claseItem === ClaseItem.CURSO ? 'Crear Curso' : 'Crear Servicio'}
-        </button>
-        <button type="button" onClick={onCancelar} style={{ ...buttonStyle, flex: 1, backgroundColor: '#6c757d', boxShadow: '0 5px 15px rgba(108, 117, 125, 0.5)' }} disabled={loading}>
-          Cancelar
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={onCancelar}
+        style={{ ...buttonStyle, backgroundColor: '#6b7280', marginTop: 10 }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#4b5563';
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#6b7280';
+        }}
+      >
+        Cancelar
+      </button>
     </form>
   );
+};
+
+const formStyle: React.CSSProperties = {
+  maxWidth: 700,
+  margin: '2rem auto',
+  padding: 24,
+  borderRadius: 15,
+  background: 'linear-gradient(135deg, #ff6a00, #fddb92)',
+  boxShadow: '0 10px 25px rgba(255, 105, 0, 0.3)',
+  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  color: '#5a1a01',
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '0.6rem',
+  borderRadius: 8,
+  border: 'none',
+  marginBottom: 16,
+  fontSize: 16,
+  boxShadow: 'inset 0 0 5px rgba(0,0,0,0.1)',
+};
+
+const labelStyle: React.CSSProperties = {
+  fontWeight: 600,
+  marginBottom: 6,
+  display: 'block',
+};
+
+const checkboxLabelStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  marginBottom: 12,
+};
+
+const buttonStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '0.8rem',
+  borderRadius: 10,
+  border: 'none',
+  backgroundColor: '#b91c1c',
+  color: 'white',
+  fontWeight: 700,
+  fontSize: '1.1rem',
+  cursor: 'pointer',
+  boxShadow: '0 5px 15px rgba(185, 28, 28, 0.5)',
+  transition: 'background-color 0.3s ease',
+};
+
+const moduloItemStyle: React.CSSProperties = {
+  background: 'rgba(255, 255, 255, 0.7)',
+  padding: 15,
+  borderRadius: 10,
+  marginBottom: 15,
+  boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+};
+
+const removeModuloButtonStyle: React.CSSProperties = {
+  backgroundColor: '#dc2626',
+  color: 'white',
+  padding: '0.5rem 1rem',
+  borderRadius: 8,
+  border: 'none',
+  cursor: 'pointer',
+  marginTop: 10,
+  fontSize: '0.9rem',
+  fontWeight: 600,
+  transition: 'background-color 0.3s ease',
+};
+
+const addModuloButtonStyle: React.CSSProperties = {
+  backgroundColor: '#10b981',
+  color: 'white',
+  padding: '0.8rem 1.5rem',
+  borderRadius: 10,
+  border: 'none',
+  cursor: 'pointer',
+  marginTop: 20,
+  fontSize: '1rem',
+  fontWeight: 700,
+  transition: 'background-color 0.3s ease',
 };
 
 export default CrearCursoMultiStep;
