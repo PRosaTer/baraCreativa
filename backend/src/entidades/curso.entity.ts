@@ -71,7 +71,8 @@ export class Curso {
   @Column({ type: 'date', nullable: true })
   fechaInicio?: Date;
 
-  @OneToMany(() => ModuloEntity, (modulo) => modulo.curso, { cascade: true })
+ 
+  @OneToMany(() => ModuloEntity, (modulo) => modulo.curso, { cascade: true, eager: true })
   modulos: ModuloEntity[];
 
   @OneToMany(() => BadgeEntity, (badge) => badge.curso)

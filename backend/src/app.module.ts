@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CursosModule } from './modules/cursos/cursos.module';
 import { PagosModule } from './modules/pagos/pagos.module';
 import { InscripcionesModule } from './modules/inscripciones/inscripciones.module';
+import { ReporteProgresoModule } from './modules/reporte-progreso/reporte-progreso.module'; // Importa el nuevo módulo
 
 import configuration, { AppConfig } from './config/configuration';
 
@@ -37,6 +38,7 @@ import configuration, { AppConfig } from './config/configuration';
     CursosModule,
     PagosModule,
     InscripcionesModule,
+    ReporteProgresoModule,
   ],
 })
 export class AppModule {}
