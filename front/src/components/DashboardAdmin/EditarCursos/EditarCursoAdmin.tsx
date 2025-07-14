@@ -1,5 +1,5 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { CursoForm, Curso } from '@/app/types/curso';
+import { CursoForm, Curso, ClaseItem } from '@/app/types/curso'; // Importa ClaseItem si no está ya en types/curso
 
 interface Props {
   curso: Curso;
@@ -18,10 +18,11 @@ const EditarCursoAdmin: React.FC<Props> = ({ curso, onGuardar, onCancelar }) => 
     modalidad: curso.modalidad || '',
     certificadoDisponible: curso.certificadoDisponible || false,
     badgeDisponible: curso.badgeDisponible || false,
-    imagenCurso: curso.imagenCurso || null,
-    archivoScorm: curso.archivoScorm || null,
+    imagenCurso: curso.imagenCurso || null, // Ahora acepta string o null
+    archivoScorm: curso.archivoScorm || null, // Ahora acepta string o null
     modulos: curso.modulos || [],
     newScormFile: null,
+    claseItem: curso.claseItem || ClaseItem.CURSO, // ¡Añadido! Asegura que siempre tenga un valor
   });
 
   const [error, setError] = useState('');
@@ -59,6 +60,7 @@ const EditarCursoAdmin: React.FC<Props> = ({ curso, onGuardar, onCancelar }) => 
       const file = files[0];
       if (file.type !== 'application/zip' && file.type !== 'application/x-zip-compressed') {
         setError('Solo archivos .zip permitidos para SCORM');
+        setForm(prev => ({ ...prev, newScormFile: null })); // Limpia el archivo si es inválido
         return;
       }
       setForm(prev => ({ ...prev, newScormFile: file }));
@@ -67,6 +69,7 @@ const EditarCursoAdmin: React.FC<Props> = ({ curso, onGuardar, onCancelar }) => 
       const file = files[0];
       if (!file.type.startsWith('image/')) {
         setError('Solo imágenes permitidas para la imagen del curso');
+        setForm(prev => ({ ...prev, imagenCurso: null })); // Limpia el archivo si es inválido
         return;
       }
       setForm(prev => ({ ...prev, imagenCurso: file }));
@@ -91,24 +94,30 @@ const EditarCursoAdmin: React.FC<Props> = ({ curso, onGuardar, onCancelar }) => 
         modalidad: form.modalidad,
         certificadoDisponible: form.certificadoDisponible,
         badgeDisponible: form.badgeDisponible,
+        claseItem: form.claseItem, // ¡Añadido!
       };
 
-      const resInfo = await fetch(`/api/cursos/${curso.id}`, {
+      // PATCH para actualizar información básica del curso
+      const resInfo = await fetch(`http://localhost:3001/api/cursos/${curso.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(patchData),
+        credentials: 'include',
       });
       if (!resInfo.ok) {
         const errData = await resInfo.json();
         throw new Error(errData.message || 'Error al actualizar información del curso');
       }
 
-      if (form.imagenCurso && form.imagenCurso instanceof File) {
+      // POST para subir imagen del curso
+      // Asegúrate de que form.imagenCurso sea un File antes de intentar subirlo
+      if (form.imagenCurso instanceof File) {
         const formDataImagen = new FormData();
         formDataImagen.append('imagen', form.imagenCurso);
-        const resImg = await fetch(`/api/cursos/${curso.id}/imagen`, {
+        const resImg = await fetch(`http://localhost:3001/api/cursos/${curso.id}/imagen`, {
           method: 'POST',
           body: formDataImagen,
+          credentials: 'include',
         });
         if (!resImg.ok) {
           const errData = await resImg.json();
@@ -116,12 +125,15 @@ const EditarCursoAdmin: React.FC<Props> = ({ curso, onGuardar, onCancelar }) => 
         }
       }
 
+      // POST para subir archivo SCORM (usando newScormFile)
       if (form.newScormFile) {
         const formDataScorm = new FormData();
         formDataScorm.append('scormFile', form.newScormFile);
-        const resScorm = await fetch(`/api/cursos/${curso.id}/scorm-file`, {
-          method: 'PATCH',
+        formDataScorm.append('cursoId', curso.id.toString()); // Asegúrate de enviar el cursoId
+        const resScorm = await fetch(`http://localhost:3001/api/cursos/scorm_unzipped_courses`, {
+          method: 'POST',
           body: formDataScorm,
+          credentials: 'include',
         });
         if (!resScorm.ok) {
           const errData = await resScorm.json();
@@ -130,7 +142,8 @@ const EditarCursoAdmin: React.FC<Props> = ({ curso, onGuardar, onCancelar }) => 
       }
 
       setExito('Curso actualizado correctamente');
-      const cursoActualizado = await fetch(`/api/cursos/${curso.id}`).then(res => res.json());
+      // Asegura que la llamada para obtener el curso actualizado también tenga credenciales
+      const cursoActualizado = await fetch(`http://localhost:3001/api/cursos/${curso.id}`, { credentials: 'include' }).then(res => res.json());
       await onGuardar(cursoActualizado);
     } catch (error) {
       if (error instanceof Error) setError(error.message);

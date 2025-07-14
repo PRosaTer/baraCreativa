@@ -1,0 +1,392 @@
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as path from 'path';
+import * as fs from 'fs/promises';
+import * as Handlebars from 'handlebars';
+import puppeteer from 'puppeteer';
+import { Certificado } from '../../entidades/certificado.entity';
+import { Usuario } from '../../entidades/usuario.entity';
+import { Curso } from '../../entidades/curso.entity';
+import { ReporteProgresoEntity } from '../../entidades/ReporteProgreso.entity';
+import { Inscripcion } from '../../entidades/inscripcion.entity';
+
+@Injectable()
+export class CertificadosService {
+  private readonly logger = new Logger(CertificadosService.name);
+
+  constructor(
+    @InjectRepository(Certificado)
+    private certificadosRepository: Repository<Certificado>,
+    @InjectRepository(Usuario)
+    private usuariosRepository: Repository<Usuario>,
+    @InjectRepository(Curso)
+    private cursosRepository: Repository<Curso>,
+    @InjectRepository(ReporteProgresoEntity)
+    private reporteProgresoRepository: Repository<ReporteProgresoEntity>,
+    @InjectRepository(Inscripcion)
+    private inscripcionRepository: Repository<Inscripcion>,
+  ) {}
+
+  /**
+   * Genera un certificado para un usuario y curso específicos.
+   * @param usuarioId El ID del usuario.
+   * @param cursoId El ID del curso.
+   * @returns La ruta al certificado generado en formato PDF.
+   */
+  async generarCertificado(usuarioId: number, cursoId: number): Promise<string> {
+    const usuario = await this.usuariosRepository.findOne({ where: { id: usuarioId } });
+    const curso = await this.cursosRepository.findOne({ where: { id: cursoId } });
+
+    if (!usuario) {
+      throw new NotFoundException(`Usuario con ID ${usuarioId} no encontrado.`);
+    }
+    if (!curso) {
+      throw new NotFoundException(`Curso con ID ${cursoId} no encontrado.`);
+    }
+
+    const inscripcion = await this.inscripcionRepository.findOne({
+      where: { usuario: { id: usuarioId }, curso: { id: cursoId } },
+    });
+
+    if (!inscripcion || !inscripcion.cursoCompletado) {
+      throw new BadRequestException(`El usuario ${usuario.nombreCompleto} no ha completado el curso "${curso.titulo}".`);
+    }
+
+    const certificadoExistente = await this.certificadosRepository.findOne({
+      where: { usuario: { id: usuarioId }, curso: { id: cursoId } },
+    });
+
+    if (certificadoExistente) {
+      this.logger.warn(`Certificado ya existe para usuario ${usuarioId} y curso ${cursoId}. Devolviendo el existente.`);
+      return certificadoExistente.rutaArchivo;
+    }
+
+    const fechaEmision = new Date();
+    const nombreCurso = curso.titulo;
+    const nombreUsuario = usuario.nombreCompleto;
+
+    // --- Cargar y preparar el logo de BaraCreativa ---
+    // ¡IMPORTANTE! Asegúrate de que esta ruta sea correcta para tu logo en el backend.
+    // El logo debe estar en 'uploads/logo-bc.png' dentro de la raíz de tu proyecto backend.
+    const baraCreativaLogoPath = path.join(process.cwd(), 'uploads', 'logo-bc.png');
+    let baraCreativaLogoBase64: string = '';
+    try {
+      const logoBuffer = await fs.readFile(baraCreativaLogoPath);
+      baraCreativaLogoBase64 = `data:image/png;base64,${logoBuffer.toString('base64')}`;
+    } catch (error) {
+      this.logger.error(`No se pudo cargar el logo de BaraCreativa desde ${baraCreativaLogoPath}. Asegúrate de que la ruta sea correcta y el archivo exista.`);
+      baraCreativaLogoBase64 = ''; // Deja el logo vacío si no se encuentra
+    }
+    // ----------------------------------------------------
+
+    const htmlContent = await this.generateCertificateHtml(
+      nombreUsuario,
+      nombreCurso,
+      fechaEmision,
+      baraCreativaLogoBase64 // Pasar el logo al template
+    );
+
+    const pdfBuffer = await this.generatePdfFromHtml(htmlContent);
+
+    const certificadosDir = path.join(process.cwd(), 'uploads', 'certificados');
+    await fs.mkdir(certificadosDir, { recursive: true });
+    const fileName = `certificado_${usuarioId}_${cursoId}_${Date.now()}.pdf`;
+    const filePath = path.join(certificadosDir, fileName);
+
+    try {
+      await fs.writeFile(filePath, pdfBuffer);
+      this.logger.log(`Certificado guardado en: ${filePath}`);
+    } catch (error) {
+      this.logger.error(`Error al guardar el certificado en ${filePath}:`, (error as Error).message);
+      throw new InternalServerErrorException('Error al guardar el certificado.');
+    }
+
+    const nuevoCertificado = this.certificadosRepository.create({
+      usuario,
+      curso,
+      nombreCurso: curso.titulo,
+      fechaEmision,
+      rutaArchivo: filePath,
+    });
+
+    await this.certificadosRepository.save(nuevoCertificado);
+    this.logger.log(`Certificado registrado en la base de datos para usuario ${usuarioId} y curso ${cursoId}.`);
+
+    return filePath;
+  }
+
+  /**
+   * Genera el contenido HTML del certificado.
+   * @param userName Nombre del usuario.
+   * @param courseTitle Título del curso.
+   * @param issueDate Fecha de emisión.
+   * @param baraCreativaLogoBase64 String Base64 del logo de BaraCreativa.
+   * @returns String con el contenido HTML.
+   */
+  private async generateCertificateHtml(
+    userName: string,
+    courseTitle: string,
+    issueDate: Date,
+    baraCreativaLogoBase64: string // Recibir el logo
+  ): Promise<string> {
+    const formattedDate = issueDate.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    // --- Datos para la firma ---
+    const signerName = 'Victor Padilla';
+    const signerTitle = 'CEO de Bara Creativa';
+    // ---------------------------------
+
+    const templatePath = path.join(process.cwd(), 'src', 'certificados', 'templates', 'certificate.hbs');
+    let templateContent: string;
+    try {
+      templateContent = await fs.readFile(templatePath, 'utf-8');
+    } catch (error) {
+      this.logger.error(`No se encontró la plantilla de certificado en ${templatePath}. Usando plantilla por defecto.`);
+      // --- PLANTILLA HTML POR DEFECTO MEJORADA Y AJUSTADA ---
+      templateContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Certificado de Finalización</title>
+          <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+          <style>
+            body {
+              font-family: 'Roboto', sans-serif;
+              margin: 0;
+              padding: 0;
+              background-color: #f0f2f5;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              min-height: 100vh;
+            }
+            .certificate-container {
+              width: 297mm; /* A4 width */
+              height: 210mm; /* A4 height */
+              border: 10px solid #0056b3; /* Azul profesional */
+              padding: 25mm; /* Más padding */
+              box-sizing: border-box;
+              background: linear-gradient(to bottom right, #ffffff, #f8fafd); /* Fondo suave */
+              text-align: center;
+              position: relative;
+              overflow: hidden;
+              box-shadow: 0 8px 16px rgba(0,0,0,0.2); /* Sombra pronunciada */
+              border-radius: 15px; /* Bordes redondeados */
+            }
+            .header-main {
+                display: flex;
+                align-items: center; /* Alinea verticalmente el logo y el título */
+                justify-content: center; /* Centra el bloque completo */
+                margin-bottom: 20px;
+                flex-wrap: nowrap; /* Evita que los elementos se envuelvan */
+            }
+            .bara-creativa-logo-inline {
+                height: 60px; /* Ajusta el tamaño del logo */
+                width: auto;
+                margin-right: 20px; /* Espacio entre el logo y el título */
+                object-fit: contain; /* Asegura que la imagen se ajuste sin distorsión */
+            }
+            .main-title {
+              font-family: 'Playfair Display', serif; /* Fuente más elegante para el título */
+              font-size: 3.8em; /* Tamaño más grande */
+              font-weight: 700;
+              color: #0056b3;
+              margin: 0;
+              line-height: 1.1;
+              text-transform: uppercase;
+            }
+            .subtitle {
+              font-size: 1.6em;
+              color: #333;
+              margin-top: 10px;
+              font-weight: 300;
+            }
+            .recipient-name {
+              font-family: 'Playfair Display', serif;
+              font-size: 3.2em;
+              font-weight: 700;
+              color: #2c3e50;
+              margin: 30px 0 20px 0;
+              text-transform: uppercase;
+            }
+            .content-area {
+              margin-top: 20px;
+            }
+            .course-title {
+              font-size: 2.4em;
+              font-weight: 700;
+              color: #00796b; /* Un verde complementario */
+              margin-bottom: 15px;
+            }
+            .completion-info {
+              font-size: 1.4em;
+              color: #555;
+              margin-bottom: 30px;
+            }
+            .description {
+              font-size: 1.2em;
+              color: #444;
+              line-height: 1.8; /* Mayor interlineado para legibilidad */
+              max-width: 85%;
+              margin: 0 auto 50px auto;
+            }
+            .signature-area {
+              display: flex;
+              justify-content: space-around;
+              width: 90%;
+              margin: 0 auto 30px auto;
+            }
+            .signature-block {
+              text-align: center;
+              width: 45%;
+              padding-top: 20px;
+            }
+            .signature-line {
+              border-top: 2px solid #999;
+              margin-bottom: 8px;
+            }
+            .signer-name {
+              font-weight: 700;
+              color: #333;
+              font-size: 1.1em;
+            }
+            .signer-title {
+              font-size: 0.9em;
+              color: #777;
+            }
+            .footer-id {
+              position: absolute;
+              bottom: 10mm; /* Posicionado más abajo */
+              left: 50%;
+              transform: translateX(-50%);
+              font-size: 0.8em;
+              color: #999;
+              width: calc(100% - 50mm); /* Ajustar ancho para que no se superponga con el borde */
+              text-align: center;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="certificate-container">
+            <div class="header-main">
+              ${baraCreativaLogoBase64 ? `<img src="${baraCreativaLogoBase64}" alt="Bara Creativa Logo" class="bara-creativa-logo-inline">` : ''}
+              <h1 class="main-title">CERTIFICADO DE FINALIZACIÓN</h1>
+            </div>
+
+            <p class="subtitle">¡Felicidades!</p>
+            <p class="recipient-name">${userName}</p>
+
+            <div class="content-area">
+              <h2 class="course-title">${courseTitle}</h2>
+              <p class="completion-info">Curso completado el ${formattedDate}</p>
+
+              <p class="description">
+                Por haber completado exitosamente el curso, demostrando dedicación y un profundo
+                conocimiento en la materia. Tu compromiso con el aprendizaje continuo es un ejemplo
+                y te permitirá alcanzar nuevas metas profesionales.
+              </p>
+
+              <div class="signature-area">
+                <div class="signature-block">
+                  <div class="signature-line"></div>
+                  <p class="signer-name">${signerName}</p>
+                  <p class="signer-title">${signerTitle}</p>
+                </div>
+                <div class="signature-block">
+                  <div class="signature-line"></div>
+                  <p class="signer-name">Bara Creativa Team</p>
+                  <p class="signer-title">Equipo de Desarrollo y Contenido</p>
+                </div>
+              </div>
+            </div>
+            <p class="footer-id">ID del certificado: ${'BCERT_' + Math.random().toString(36).substring(2, 12).toUpperCase()}</p>
+          </div>
+        </body>
+        </html>
+      `;
+      // ----------------------------------------------------
+    }
+
+    const template = Handlebars.compile(templateContent);
+    const html = template({
+      userName,
+      courseTitle,
+      issueDate: formattedDate,
+      certificateId: 'BCERT_' + Math.random().toString(36).substring(2, 12).toUpperCase(), // ID de ejemplo
+      signerName, // Pasar a Handlebars
+      signerTitle, // Pasar a Handlebars
+      baraCreativaLogoBase64 // Pasar el logo al template
+    });
+
+    return html;
+  }
+
+  /**
+   * Convierte contenido HTML en un buffer PDF usando Puppeteer.
+   * @param htmlContent El contenido HTML a convertir.
+   * @returns Un Buffer que contiene los datos del PDF.
+   */
+  private async generatePdfFromHtml(htmlContent: string): Promise<Buffer> {
+    let browser;
+    try {
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      });
+      const page = await browser.newPage();
+      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: {
+          top: '10mm',
+          right: '10mm',
+          bottom: '10mm',
+          left: '10mm',
+        },
+      });
+      return pdfBuffer;
+    } catch (error) {
+      this.logger.error('Error al generar el PDF con Puppeteer:', (error as Error).message);
+      throw new InternalServerErrorException('Error al generar el certificado PDF.');
+    } finally {
+      if (browser) {
+        await browser.close();
+      }
+    }
+  }
+
+  /**
+   * Obtiene un certificado por su ID.
+   * @param certificadoId El ID del certificado.
+   * @returns El objeto Certificado.
+   */
+  async getCertificadoById(certificadoId: number): Promise<Certificado> {
+    const certificado = await this.certificadosRepository.findOne({
+      where: { id: certificadoId },
+      relations: ['usuario', 'curso'],
+    });
+    if (!certificado) {
+      throw new NotFoundException(`Certificado con ID ${certificadoId} no encontrado.`);
+    }
+    return certificado;
+  }
+
+  /**
+   * Obtiene certificados por usuario.
+   * @param usuarioId El ID del usuario.
+   * @returns Un array de objetos Certificado.
+   */
+  async getCertificadosByUsuario(usuarioId: number): Promise<Certificado[]> {
+    const certificados = await this.certificadosRepository.find({
+      where: { usuario: { id: usuarioId } },
+      relations: ['curso'],
+    });
+    return certificados;
+  }
+}

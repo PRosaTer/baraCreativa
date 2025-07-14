@@ -38,15 +38,21 @@ export default function VistaCursos() {
 
   const fetchCursoById = async (id: number): Promise<Curso | null> => {
     try {
-      const res = await fetch(`http://localhost:3001/api/cursos/${id}`);
+      const res = await fetch(`http://localhost:3001/api/cursos/${id}`, {
+        credentials: 'include',
+      });
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Error obteniendo curso');
       }
       const data: Curso = await res.json();
       return data;
-    } catch {
-      setMensajeError('Error obteniendo curso actualizado.');
+    } catch (error) {
+      if (error instanceof Error) {
+        setMensajeError(`Error obteniendo curso actualizado: ${error.message}`);
+      } else {
+        setMensajeError('Error obteniendo curso actualizado: Error desconocido.');
+      }
       return null;
     }
   };

@@ -122,6 +122,7 @@ export class CursosController {
     };
   }
 
+  // Endpoint para subir SCORM. Tu frontend lo llama con POST.
   @Post('scorm_unzipped_courses')
   @UseInterceptors(
     FileInterceptor('scormFile', {
@@ -178,7 +179,7 @@ export class CursosController {
 
   @Post('modulos/:id/files')
   @UseInterceptors(
-    FilesInterceptor('files', 3, {
+    FilesInterceptor('files', 3, { // 'files' es el nombre del campo esperado en el FormData del frontend
       storage: diskStorage({
         destination: (req, file, cb) => {
           const moduloUploadPath = join(process.cwd(), 'uploads', 'modulos');

@@ -80,7 +80,7 @@ export interface CursoForm {
   certificadoDisponible: boolean;
   badgeDisponible: boolean;
   imagenCurso?: File | string | null;
-  archivoScorm?: string | null;
+  archivoScorm?: File | string | null; // <-- MODIFICADO: Ahora puede ser File o string
   modulos: EditableModuloForm[];
   newScormFile?: File | null;
   claseItem: ClaseItem;

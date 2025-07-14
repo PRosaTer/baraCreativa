@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Certificado de Finalización</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .certificate-container {
+      width: 297mm;
+      height: 210mm;
+      border: 10px solid #004d40;
+      padding: 20mm;
+      box-sizing: border-box;
+      background: linear-gradient(to bottom right, #e0f2f7, #ffffff);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+    .header { margin-bottom: 20px; }
+    .header h1 { color: #004d40; font-size: 3em; margin: 0; }
+    .header p { color: #555; font-size: 1.2em; }
+    .content h2 { color: #00796b; font-size: 2.5em; margin-top: 30px; }
+    .content p { font-size: 1.5em; color: #333; margin-top: 10px; }
+    .signature { margin-top: 50px; display: flex; justify-content: space-around; }
+    .signature div { border-top: 1px solid #333; padding-top: 10px; width: 40%; }
+    .footer { position: absolute; bottom: 20mm; width: calc(100% - 40mm); font-size: 0.9em; color: #777; }
+    .badge {
+      position: absolute;
+      top: 20mm;
+      left: 20mm;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: #ffd700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8em;
+      font-weight: bold;
+      color: #333;
+      border: 3px solid #ccac00;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .linkedin-logo {
+      position: absolute;
+      top: 20mm;
+      right: 20mm;
+      width: 150px;
+      height: auto;
+    }
+    .main-title {
+      font-size: 2.8em;
+      font-weight: bold;
+      color: #0077B5; 
+      margin-bottom: 5px;
+    }
+    .subtitle {
+      font-size: 1.5em;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .course-title {
+      font-size: 2.2em;
+      font-weight: bold;
+      color: #000;
+      margin-top: 30px;
+      margin-bottom: 10px;
+    }
+    .completion-info {
+      font-size: 1.2em;
+      color: #555;
+      margin-bottom: 30px;
+    }
+    .description {
+      font-size: 1.1em;
+      color: #444;
+      line-height: 1.6;
+      max-width: 80%;
+      margin: 0 auto 40px auto;
+    }
+    .signature-area {
+      display: flex;
+      justify-content: space-between;
+      width: 80%;
+      margin: 0 auto 30px auto;
+    }
+    .signature-block {
+      text-align: center;
+      width: 45%;
+    }
+    .signature-line {
+      border-top: 1px solid #aaa;
+      padding-top: 5px;
+      margin-bottom: 5px;
+    }
+    .signer-name {
+      font-weight: bold;
+      color: #333;
+    }
+    .signer-title {
+      font-size: 0.9em;
+      color: #777;
+    }
+    .footer-id {
+      position: absolute;
+      bottom: 10mm;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8em;
+      color: #999;
+    }
+    .side-badge {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 100px;
+      background-color: #f0f2f5; 
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+      box-sizing: border-box;
+      border-right: 1px solid #ddd;
+    }
+    .side-badge .circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: #ffd700;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.9em;
+      font-weight: bold;
+      color: #333;
+      border: 3px solid #ccac00;
+      box-shadow: 0 0 8px rgba(0,0,0,0.2);
+      margin-bottom: 10px;
+    }
+    .side-badge .text {
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #555;
+      text-transform: uppercase;
+      transform: rotate(-90deg); 
+      white-space: nowrap;
+      position: absolute;
+      left: -10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate-container">
+    <div class="side-badge">
+      <div class="circle">🏅</div>
+      <span class="text">COMPLETADO</span>
+    </div>
+
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Linkedin_logo_PNG_Transparent.png/800px-Linkedin_logo_PNG_Transparent.png" alt="LinkedIn Learning Logo" class="linkedin-logo">
+
+    <div style="margin-left: 120px; text-align: left;">
+      <p style="color: #0077B5; font-size: 1.2em; font-weight: bold; margin-bottom: 5px;">LinkedIn Learning</p>
+      <h1 class="main-title">CERTIFICADO de finalización</h1>
+      <p class="subtitle">¡Felicidades, {{userName}}!</p>
+
+      <h2 class="course-title">{{courseTitle}}</h2>
+      <p class="completion-info">Curso completado el {{issueDate}}</p>
+
+      <p class="description">
+        Seguir aprendiendo te ha permitido ampliar horizontes, perfeccionar tus
+        aptitudes y mejorar tus posibilidades profesionales.
+      </p>
+
+      <div class="signature-area">
+        <div class="signature-block">
+          <div class="signature-line"></div>
+          <p class="signer-name">Dany Bednartz</p>
+          <p class="signer-title">Responsable de estrategia de contenido de Learning</p>
+        </div>
+        <div class="signature-block">
+          <div class="signature-line"></div>
+          <p class="signer-name">LinkedIn Learning</p>
+          <p class="signer-title">1000 W Maude Ave<br>Sunnyvale, CA 94085</p>
+        </div>
+      </div>
+    </div>
+    <p class="footer-id">ID del certificado: {{certificateId}}</p>
+  </div>
+</body>
+</html>

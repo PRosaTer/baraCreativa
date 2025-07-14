@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Usuario } from './usuario.entity';
 import { Curso } from './curso.entity';
 
@@ -7,15 +7,24 @@ export class Inscripcion {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Usuario, (usuario) => usuario.inscripciones, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Usuario, usuario => usuario.inscripciones, { onDelete: 'CASCADE' })
   usuario: Usuario;
 
-  @ManyToOne(() => Curso, (curso) => curso.inscripciones, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Curso, curso => curso.inscripciones, { onDelete: 'CASCADE' })
   curso: Curso;
 
-  @Column({ default: 'Pendiente' })
-  estado: string;
+  @Column({ default: 'Pendiente' }) 
+  estado: string; 
+
+  @Column({ default: false })
+  cursoCompletado: boolean;
 
   @CreateDateColumn()
-  creadoEn: Date;
+  fechaInscripcion: Date;
+
+  @UpdateDateColumn()
+  fechaActualizacion: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  fechaFinalizacion: Date | null;
 }
