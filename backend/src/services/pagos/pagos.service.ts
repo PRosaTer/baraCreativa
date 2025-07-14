@@ -17,7 +17,7 @@ import { CreatePaypalOrderDto } from '../../dto/pagos/create-paypal-order.dto';
 import { CapturePaypalOrderDto } from '../../dto/pagos/capture-paypal-order.dto';
 import { InscripcionesService } from '../inscripciones/inscripciones.service';
 import { PurchaseNotificationData } from '../../interfaces/purchase-notification-data.interface';
-import { PurchaseMailService } from '../envio mail/purchase-mail.service';
+import { PurchaseMailService } from '../../mail/purchase-mail.service';
 
 @Injectable()
 export class PagosService {

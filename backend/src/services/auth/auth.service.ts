@@ -6,7 +6,7 @@ import { UsuariosService } from '../../services/usuarios/usuarios.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-import { MailService } from '../../services/mail/mail.service';
+import { MailService } from '../../mail/mail.service';
 import { ConfigService } from '@nestjs/config';
 import { AppConfig } from '../../config/configuration';
 

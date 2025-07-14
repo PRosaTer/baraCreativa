@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
-import { PurchaseNotificationData } from '../../interfaces/purchase-notification-data.interface';
+import { PurchaseNotificationData } from '../interfaces/purchase-notification-data.interface';
 
 @Injectable()
 export class PurchaseMailService {

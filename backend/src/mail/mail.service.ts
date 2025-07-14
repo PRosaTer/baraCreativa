@@ -3,7 +3,7 @@ import * as nodemailer from 'nodemailer';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
-import { TransactionDetails } from '../../interfaces/transaction-details.interface';
+import { TransactionDetails } from '../interfaces/transaction-details.interface';
 
 export interface PurchaseNotificationData {
   userName: string;
@@ -38,7 +38,8 @@ export class MailService {
   }
 
   private async renderTemplate<T extends object>(templateName: string, variables: T): Promise<string> {
-    const filePath = path.resolve(__dirname, 'templates', `${templateName}.hbs`);
+const filePath = path.resolve(__dirname, 'templates', `${templateName}.hbs`);
+
     const templateContent = await fs.promises.readFile(filePath, 'utf-8');
     const template = Handlebars.compile(templateContent);
     return template(variables);
@@ -59,7 +60,7 @@ export class MailService {
       orderId,
       transactionId: transactionDetails?.id ?? '',
       captureTime: transactionDetails?.create_time ?? '',
-      currency: 'USD', // O lo que uses
+      currency: 'USD',
       currentYear: new Date().getFullYear(),
     });
 
