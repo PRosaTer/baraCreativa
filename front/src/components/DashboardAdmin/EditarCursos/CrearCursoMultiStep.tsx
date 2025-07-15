@@ -5,7 +5,6 @@ import { CursoForm, Curso, Modulo, ClaseItem, EditableModuloForm } from '@/app/t
 import { useRouter } from 'next/navigation';
 
 interface Props {
-  // Este componente es para CREAR un curso, por lo tanto, NO espera una prop 'curso'.
   onGuardar: (curso: Curso) => Promise<void>;
   onCancelar: () => void;
 }
@@ -17,34 +16,24 @@ const CrearCursoMultiStep: React.FC<Props> = ({ onGuardar, onCancelar }) => {
   const [form, setForm] = useState<CursoForm>({
     titulo: '',
     descripcion: '',
-    precio: 0,
-    duracionHoras: 0,
-    tipo: 'Docentes',
+    precio: '',
+    duracionHoras: '',
+    tipo: '',
     categoria: '',
-    modalidad: 'grabado',
+    modalidad: '',
     certificadoDisponible: false,
     badgeDisponible: false,
     imagenCurso: null,
-    archivoScorm: null, // Ahora puede ser File o string
+    archivoScorm: null,
     modulos: [],
     newScormFile: null,
-    claseItem: ClaseItem.CURSO,
-    fechaInicio: null, // Asegurar que fechaInicio esté inicializado
+    claseItem: '',
+    fechaInicio: null,
   });
 
   const [error, setError] = useState('');
   const [exito, setExito] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const [currentModuloFiles, setCurrentModuloFiles] = useState<{
-    videoFile: File | null;
-    pdfFile: File | null;
-    imageFile: File | null;
-  }>({
-    videoFile: null,
-    pdfFile: null,
-    imageFile: null,
-  });
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -63,8 +52,8 @@ const CrearCursoMultiStep: React.FC<Props> = ({ onGuardar, onCancelar }) => {
     setForm(prev => ({
       ...prev,
       [name]:
-        name === 'precio' || name === 'duracionHoras'
-          ? value === '' ? '' : Number(value)
+        (name === 'precio' || name === 'duracionHoras')
+          ? (value === '' ? '' : Number(value))
           : value,
     }));
   };
@@ -89,44 +78,15 @@ const CrearCursoMultiStep: React.FC<Props> = ({ onGuardar, onCancelar }) => {
         setForm(prev => ({ ...prev, archivoScorm: null }));
         return;
       }
-      setForm(prev => ({ ...prev, archivoScorm: file })); // Asigna el objeto File
+      setForm(prev => ({ ...prev, archivoScorm: file }));
       setError('');
     }
-  };
-
-  const handleModuloFileChange = (e: ChangeEvent<HTMLInputElement>, fileType: 'video' | 'pdf' | 'image') => {
-    const { files } = e.target;
-    if (!files || files.length === 0) {
-      setCurrentModuloFiles(prev => ({ ...prev, [`${fileType}File`]: null }));
-      return;
-    }
-    const file = files[0];
-
-    if (fileType === 'video' && !file.type.startsWith('video/')) {
-      setError('Solo archivos de video permitidos.');
-      setCurrentModuloFiles(prev => ({ ...prev, videoFile: null }));
-      return;
-    }
-    if (fileType === 'pdf' && file.type !== 'application/pdf') {
-      setError('Solo archivos PDF permitidos.');
-      setCurrentModuloFiles(prev => ({ ...prev, pdfFile: null }));
-      return;
-    }
-    if (fileType === 'image' && !file.type.startsWith('image/')) {
-      setError('Solo archivos de imagen permitidos.');
-      setCurrentModuloFiles(prev => ({ ...prev, imageFile: null }));
-      return;
-    }
-
-    setCurrentModuloFiles(prev => ({ ...prev, [`${fileType}File`]: file }));
-    setError('');
   };
 
   const handleAddModulo = () => {
     setForm(prev => ({
       ...prev,
-      // Los módulos creados aquí no tienen ID real hasta que el backend los guarda
-      modulos: [...prev.modulos, { id: Date.now(), titulo: `Módulo ${prev.modulos.length + 1}`, descripcion: null, videoUrl: null, pdfUrl: null, imageUrl: null }],
+      modulos: [...prev.modulos, { id: Date.now(), titulo: `Módulo ${prev.modulos.length + 1}`, descripcion: null, videoUrl: null, pdfUrl: null, imageUrl: null, videoFile: null, pdfFile: null, imageFile: null }],
     }));
   };
 
@@ -154,8 +114,25 @@ const CrearCursoMultiStep: React.FC<Props> = ({ onGuardar, onCancelar }) => {
     setExito('');
     setLoading(true);
 
+
+    if (form.claseItem === '') {
+      setError('Por favor, selecciona una Clase de Ítem.');
+      setLoading(false);
+      return;
+    }
+    if (form.tipo === '') {
+      setError('Por favor, selecciona un Tipo de Curso.');
+      setLoading(false);
+      return;
+    }
+    if (form.modalidad === '') {
+      setError('Por favor, selecciona una Modalidad.');
+      setLoading(false);
+      return;
+    }
+
+
     try {
-      // 1. Crear el curso (información básica y módulos con títulos)
       const cursoDataToCreate = {
         titulo: form.titulo,
         descripcion: form.descripcion,
@@ -163,17 +140,17 @@ const CrearCursoMultiStep: React.FC<Props> = ({ onGuardar, onCancelar }) => {
         duracionHoras: Number(form.duracionHoras),
         tipo: form.tipo,
         categoria: form.categoria,
-        modalidad: form.modalidad,
+        modalidad: form.modalidad, 
         certificadoDisponible: form.certificadoDisponible,
         badgeDisponible: form.badgeDisponible,
         claseItem: form.claseItem,
-        fechaInicio: form.fechaInicio, // Incluir fechaInicio
-        modulos: form.modulos.map(m => ({ titulo: m.titulo, descripcion: m.descripcion || null })), // Asegurarse de enviar descripcion si existe
+        fechaInicio: form.fechaInicio,
+        modulos: form.modulos.map(m => ({ titulo: m.titulo, descripcion: m.descripcion || null })),
       };
 
       const resCurso = await fetch('http://localhost:3001/api/cursos', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, // Añadir Accept
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(cursoDataToCreate),
         credentials: 'include',
       });
@@ -185,7 +162,7 @@ const CrearCursoMultiStep: React.FC<Props> = ({ onGuardar, onCancelar }) => {
       const newCurso: Curso = await resCurso.json();
       const cursoId = newCurso.id;
 
-      // 2. Subir imagen del curso si existe
+ 
       if (form.imagenCurso instanceof File) {
         const formDataImagen = new FormData();
         formDataImagen.append('imagen', form.imagenCurso);
@@ -200,7 +177,7 @@ const CrearCursoMultiStep: React.FC<Props> = ({ onGuardar, onCancelar }) => {
         }
       }
 
-      // 3. Subir archivo SCORM si existe (desde archivoScorm para la creación inicial)
+  
       if (form.archivoScorm instanceof File) {
         const formDataScorm = new FormData();
         formDataScorm.append('scormFile', form.archivoScorm);
@@ -216,32 +193,27 @@ const CrearCursoMultiStep: React.FC<Props> = ({ onGuardar, onCancelar }) => {
         }
       }
 
-      // 4. Subir archivos para cada módulo (si se seleccionaron)
-      // Necesitamos obtener los módulos con sus IDs reales del backend después de la creación del curso
+  
       const updatedCursoWithModulos = await fetch(`http://localhost:3001/api/cursos/${cursoId}`, { credentials: 'include' }).then(res => res.json());
 
-      // Iterar sobre los módulos que el backend acaba de devolver (que ya tienen IDs)
       for (let i = 0; i < updatedCursoWithModulos.modulos.length; i++) {
-        const modulo = updatedCursoWithModulos.modulos[i];
-        const moduloId = modulo.id;
+        const moduloBackend = updatedCursoWithModulos.modulos[i];
+        const moduloForm = form.modulos[i];
 
+        const moduloId = moduloBackend.id;
         const formDataModuleFiles = new FormData();
         let filesAttached = false;
 
-        // Usamos currentModuloFiles para los archivos que el usuario seleccionó en el paso 3
-        // Asumimos que el orden de los módulos en `form.modulos` coincide con `updatedCursoWithModulos.modulos`
-        const originalModuloForm = form.modulos[i];
-
-        if (originalModuloForm.videoFile) {
-          formDataModuleFiles.append('files', originalModuloForm.videoFile);
+        if (moduloForm.videoFile) {
+          formDataModuleFiles.append('files', moduloForm.videoFile);
           filesAttached = true;
         }
-        if (originalModuloForm.pdfFile) {
-          formDataModuleFiles.append('files', originalModuloForm.pdfFile);
+        if (moduloForm.pdfFile) {
+          formDataModuleFiles.append('files', moduloForm.pdfFile);
           filesAttached = true;
         }
-        if (originalModuloForm.imageFile) {
-          formDataModuleFiles.append('files', originalModuloForm.imageFile);
+        if (moduloForm.imageFile) {
+          formDataModuleFiles.append('files', moduloForm.imageFile);
           filesAttached = true;
         }
 
@@ -255,14 +227,13 @@ const CrearCursoMultiStep: React.FC<Props> = ({ onGuardar, onCancelar }) => {
           if (!resModuleFiles.ok) {
             const errData = await resModuleFiles.json();
             console.error(`Error al subir archivos para el módulo ${moduloId}:`, errData.message || 'Error desconocido');
-            // Aquí puedes decidir si quieres lanzar un error o solo loguearlo
           }
         }
       }
 
       setExito('Curso creado y archivos subidos correctamente');
       await onGuardar(newCurso);
-      router.push('/admin/cursos');
+      router.push('/perfil');
     } catch (error) {
       if (error instanceof Error) setError(error.message);
       else setError('Error inesperado');
@@ -294,6 +265,13 @@ const CrearCursoMultiStep: React.FC<Props> = ({ onGuardar, onCancelar }) => {
       case 2:
         return (
           <>
+            <label style={labelStyle}>Clase de Ítem</label>
+            <select name="claseItem" value={form.claseItem} onChange={handleChange} required style={inputStyle}>
+              <option value="">Seleccione...</option>
+              <option value={ClaseItem.CURSO}>Curso</option>
+              <option value={ClaseItem.SERVICIO}>Servicio</option>
+            </select>
+
             <label style={labelStyle}>Tipo</label>
             <select name="tipo" value={form.tipo} onChange={handleChange} required style={inputStyle}>
               <option value="">Seleccione tipo</option>
@@ -350,8 +328,6 @@ const CrearCursoMultiStep: React.FC<Props> = ({ onGuardar, onCancelar }) => {
                   required
                   style={inputStyle}
                 />
-                {/* Aquí no usamos currentModuloFiles directamente, sino que los adjuntamos al form.modulos */}
-                {/* Para la creación, los archivos se asocian al módulo en el estado del formulario */}
                 <label style={labelStyle}>Video del Módulo (opcional)</label>
                 <input
                   type="file"

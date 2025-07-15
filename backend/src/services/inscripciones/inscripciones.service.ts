@@ -42,6 +42,24 @@ export class InscripcionesService {
     return this.inscripcionRepository.save(inscripcion);
   }
 
+  async markInscripcionAsPaid(usuarioId: number, cursoId: number): Promise<Inscripcion> {
+    let inscripcion = await this.findByUserAndCourse(usuarioId, cursoId);
+
+    if (!inscripcion) {
+      const usuario = await this.usuarioRepository.findOne({ where: { id: usuarioId } });
+      const curso = await this.cursoRepository.findOne({ where: { id: cursoId } });
+
+      if (!usuario || !curso) {
+        throw new Error('Usuario o Curso no encontrado para crear inscripción pagada.');
+      }
+      inscripcion = this.inscripcionRepository.create({ usuario, curso, estado: 'Pagado' });
+    } else {
+      inscripcion.estado = 'Pagado';
+    }
+    this.logger.log(`Inscripción para usuario ${usuarioId} y curso ${cursoId} marcada como 'Pagado'.`);
+    return this.inscripcionRepository.save(inscripcion);
+  }
+
   async save(inscripcion: Inscripcion): Promise<Inscripcion> {
     return this.inscripcionRepository.save(inscripcion);
   }
@@ -50,7 +68,7 @@ export class InscripcionesService {
     const inscripciones = await this.inscripcionRepository.find({
       where: {
         usuario: { id: usuarioId },
-        estado: 'Pagado',
+        estado: 'Completado',
       },
       relations: ['curso'],
     });

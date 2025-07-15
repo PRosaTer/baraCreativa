@@ -1,5 +1,3 @@
-// app/types/curso.ts
-
 export enum ClaseItem {
   CURSO = 'curso',
   SERVICIO = 'servicio',
@@ -24,9 +22,9 @@ export interface ModuloFormBase {
 
 export interface EditableModuloForm extends ModuloFormBase {
   id?: number;
-  videoFile?: File | null;
-  pdfFile?: File | null;
-  imageFile?: File | null;
+  videoFile?: File | null; 
+  pdfFile?: File | null; 
+  imageFile?: File | null; 
 }
 
 export interface Curso {
@@ -73,16 +71,16 @@ export interface CursoForm {
   descripcion: string;
   precio: number | '';
   duracionHoras: number | '';
-  tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
+  tipo: 'Docentes' | 'Estudiantes' | 'Empresas' | '';
   categoria: string;
   subcategoria?: string | null;
-  modalidad: 'en vivo' | 'grabado' | 'mixto';
+  modalidad: 'en vivo' | 'grabado' | 'mixto' | ''; 
   certificadoDisponible: boolean;
   badgeDisponible: boolean;
   imagenCurso?: File | string | null;
-  archivoScorm?: File | string | null; // <-- MODIFICADO: Ahora puede ser File o string
+  archivoScorm?: File | string | null;
   modulos: EditableModuloForm[];
   newScormFile?: File | null;
-  claseItem: ClaseItem;
+  claseItem: ClaseItem | '';
   fechaInicio?: Date | null;
 }
