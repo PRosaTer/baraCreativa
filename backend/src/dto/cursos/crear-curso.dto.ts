@@ -28,11 +28,12 @@ export class ModuloDto {
   @IsNumber()
   id?: number;
 
-  @IsString()
+  @IsString({ message: 'El título del módulo debe ser una cadena de texto.' })
   titulo: string;
 
   @IsString()
-  descripcion: string;
+  @IsOptional()
+  descripcion?: string | null;
 
   @IsOptional()
   @IsString()
@@ -48,10 +49,10 @@ export class ModuloDto {
 }
 
 export class CrearCursoDto {
-  @IsString({ message: 'El título debe ser una cadena de texto.' })
+  @IsString({ message: 'El título del curso debe ser una cadena de texto.' })
   titulo: string;
 
-  @IsString({ message: 'La descripción debe ser una cadena de texto.' })
+  @IsString({ message: 'La descripción del curso debe ser una cadena de texto.' })
   descripcion: string;
 
   @IsNumber({}, { message: 'El precio debe ser un número válido.' })
