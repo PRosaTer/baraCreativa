@@ -3,7 +3,7 @@ import { ReporteProgresoService } from '../../services/reporte-progreso/reporte-
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { MarcarModuloCompletadoDto, EstadoModuloUsuario } from '../../interfaces/reporte-progreso.interface';
 import { Usuario } from '../../entidades/usuario.entity';
-import { ModuloEntity, TipoModulo } from '../../entidades/modulo.entity';
+import { ModuloEntity, TipoModulo } from '../../entidades/modulo.entity'; 
 import { ReporteProgresoEntity } from '../../entidades/ReporteProgreso.entity'; 
 
 interface RequestConUsuario extends Request {
@@ -35,7 +35,6 @@ export class ReporteProgresoController {
   ): Promise<EstadoModuloUsuario[]> {
     this.logger.log(`Recibida solicitud para obtener estado de módulos: Usuario ${req.user.id}, Curso ${cursoId}`);
 
-
     const modulosDelCurso = await this.reporteProgresoService['moduloRepository'].find({
       where: { curso: { id: cursoId } },
       relations: ['curso'], 
@@ -51,28 +50,36 @@ export class ReporteProgresoController {
       const completado = progresoMap.has(modulo.id) ? progresoMap.get(modulo.id)!.completado : false;
       const fechaCompletado = completado ? progresoMap.get(modulo.id)!.fechaCompletado : null;
 
-      let urlContenido: string | null = null;
+
+      let videoUrls: string[] | null = null;
+      let pdfUrls: string[] | null = null;
+      let imageUrls: string[] | null = null;
+      let urlContenidoScorm: string | null = null;
+
       let descripcionContenido: string | null = modulo.descripcion;
 
- 
       this.logger.debug(`[EstadoModulos] Modulo ID: ${modulo.id}, Titulo: ${modulo.titulo}, Tipo en DB: ${modulo.tipo}, videoUrl: ${modulo.videoUrl}, pdfUrl: ${modulo.pdfUrl}, imageUrl: ${modulo.imageUrl}`);
 
 
-      if (modulo.tipo === TipoModulo.VIDEO && modulo.videoUrl) { 
-          urlContenido = `http://localhost:3001${modulo.videoUrl}`;
-          this.logger.debug(`[EstadoModulos] Asignado video URL: ${urlContenido}`);
-      } else if (modulo.tipo === TipoModulo.PDF && modulo.pdfUrl) { 
-          urlContenido = `http://localhost:3001${modulo.pdfUrl}`; 
-          this.logger.debug(`[EstadoModulos] Asignado PDF URL: ${urlContenido}`);
-      } else if (modulo.tipo === TipoModulo.IMAGEN && modulo.imageUrl) { 
-          urlContenido = `http://localhost:3001${modulo.imageUrl}`;
-          this.logger.debug(`[EstadoModulos] Asignado imagen URL: ${urlContenido}`);
-      } else if (modulo.tipo === TipoModulo.SCORM && modulo.curso && modulo.curso.archivoScorm) {
-          urlContenido = `http://localhost:3001${modulo.curso.archivoScorm}`;
-          this.logger.debug(`[EstadoModulos] Asignado SCORM URL: ${urlContenido}`);
+      if (modulo.videoUrl && modulo.videoUrl.length > 0) {
+          videoUrls = modulo.videoUrl.map(url => `http://localhost:3001${url}`);
+          this.logger.debug(`[EstadoModulos] Asignado video URLs: ${JSON.stringify(videoUrls)}`);
+      }
+      if (modulo.pdfUrl && modulo.pdfUrl.length > 0) {
+          pdfUrls = modulo.pdfUrl.map(url => `http://localhost:3001${url}`);
+          this.logger.debug(`[EstadoModulos] Asignado PDF URLs: ${JSON.stringify(pdfUrls)}`);
+      }
+      if (modulo.imageUrl && modulo.imageUrl.length > 0) {
+          imageUrls = modulo.imageUrl.map(url => `http://localhost:3001${url}`);
+          this.logger.debug(`[EstadoModulos] Asignado imagen URLs: ${JSON.stringify(imageUrls)}`);
+      }
+      
+
+      if (modulo.tipo === TipoModulo.SCORM && modulo.curso && modulo.curso.archivoScorm) { 
+          urlContenidoScorm = `http://localhost:3001${modulo.curso.archivoScorm}`;
+          this.logger.debug(`[EstadoModulos] Asignado SCORM URL: ${urlContenidoScorm}`);
       } else if (modulo.tipo === TipoModulo.TEXTO) { 
           this.logger.debug(`[EstadoModulos] Modulo tipo TEXTO, sin URL de archivo.`);
-         
       } else {
           this.logger.warn(`[EstadoModulos] Modulo ID: ${modulo.id} con tipo ${modulo.tipo} no manejado o URL faltante.`);
       }
@@ -82,7 +89,10 @@ export class ReporteProgresoController {
         titulo: modulo.titulo,
         tipo: modulo.tipo,
         orden: modulo.orden,
-        urlContenido: urlContenido,
+        videoUrls: videoUrls,
+        pdfUrls: pdfUrls,
+        imageUrls: imageUrls,
+        urlContenido: urlContenidoScorm,
         descripcionContenido: descripcionContenido,
         completado: completado,
         fechaCompletado: fechaCompletado,

@@ -7,7 +7,7 @@ interface PasoGestionModulosProps {
   handleModuloTitleChange: (index: number, value: string) => void;
   handleAddModulo: () => void;
   handleRemoveModulo: (index: number) => void;
-  setForm: React.Dispatch<React.SetStateAction<CursoForm>>;
+  setForm: React.Dispatch<React.SetStateAction<CursoForm>>; 
   onPrev: () => void;
   onSubmit: (e: React.FormEvent) => Promise<void>;
   loading: boolean;
@@ -36,45 +36,60 @@ const PasoGestionModulos: React.FC<PasoGestionModulosProps> = ({
             required
             style={inputStyle}
           />
-          <label style={labelStyle}>Video del Módulo (opcional)</label>
+          <label style={labelStyle}>Video(s) del Módulo (opcional)</label>
           <input
             type="file"
+            multiple 
             accept="video/*"
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const files = e.target.files;
               setForm(prev => {
                 const newModulos: EditableModuloForm[] = [...prev.modulos];
-                newModulos[index] = { ...newModulos[index], videoFile: files && files.length > 0 ? files[0] : null };
+                const currentFiles = newModulos[index].videoFile || [];
+                newModulos[index] = { 
+                  ...newModulos[index], 
+                  videoFile: files ? [...currentFiles, ...Array.from(files)] : currentFiles 
+                };
                 return { ...prev, modulos: newModulos };
               });
             }}
             style={{ marginBottom: 10 }}
           />
 
-          <label style={labelStyle}>PDF del Módulo (opcional)</label>
+          <label style={labelStyle}>PDF(s) del Módulo (opcional)</label>
           <input
             type="file"
+            multiple 
             accept="application/pdf"
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const files = e.target.files;
               setForm(prev => {
                 const newModulos: EditableModuloForm[] = [...prev.modulos];
-                newModulos[index] = { ...newModulos[index], pdfFile: files && files.length > 0 ? files[0] : null };
+                const currentFiles = newModulos[index].pdfFile || [];
+                newModulos[index] = { 
+                  ...newModulos[index], 
+                  pdfFile: files ? [...currentFiles, ...Array.from(files)] : currentFiles 
+                };
                 return { ...prev, modulos: newModulos };
               });
             }}
             style={{ marginBottom: 10 }}
           />
 
-          <label style={labelStyle}>Imagen del Módulo (opcional)</label>
+          <label style={labelStyle}>Imagen(es) del Módulo (opcional)</label>
           <input
             type="file"
+            multiple 
             accept="image/*"
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const files = e.target.files;
               setForm(prev => {
                 const newModulos: EditableModuloForm[] = [...prev.modulos];
-                newModulos[index] = { ...newModulos[index], imageFile: files && files.length > 0 ? files[0] : null };
+                const currentFiles = newModulos[index].imageFile || [];
+                newModulos[index] = { 
+                  ...newModulos[index], 
+                  imageFile: files ? [...currentFiles, ...Array.from(files)] : currentFiles 
+                };
                 return { ...prev, modulos: newModulos };
               });
             }}

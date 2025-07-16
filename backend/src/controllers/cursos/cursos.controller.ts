@@ -1,3 +1,4 @@
+// src/controllers/cursos/cursos.controller.ts
 import {
   Controller,
   Get,
@@ -122,7 +123,6 @@ export class CursosController {
     };
   }
 
-  // Endpoint para subir SCORM. Tu frontend lo llama con POST.
   @Post('scorm_unzipped_courses')
   @UseInterceptors(
     FileInterceptor('scormFile', {
@@ -179,7 +179,7 @@ export class CursosController {
 
   @Post('modulos/:id/files')
   @UseInterceptors(
-    FilesInterceptor('files', 3, { // 'files' es el nombre del campo en el FormData del frontend
+    FilesInterceptor('files', 100, { 
       storage: diskStorage({
         destination: (req, file, cb) => {
           const moduloUploadPath = join(process.cwd(), 'uploads', 'modulos');
@@ -215,14 +215,15 @@ export class CursosController {
       throw new BadRequestException('No se subieron archivos para el módulo.');
     }
 
+    // ¡Cambiado para que sean arrays!
     const updatedPaths: {
-      videoUrl: string | null;
-      pdfUrl: string | null;
-      imageUrl: string | null;
+      videoUrls: string[]; 
+      pdfUrls: string[]; 
+      imageUrls: string[]; 
     } = {
-      videoUrl: null,
-      pdfUrl: null,
-      imageUrl: null,
+      videoUrls: [],
+      pdfUrls: [],
+      imageUrls: [],
     };
 
     files.forEach(file => {
@@ -230,14 +231,14 @@ export class CursosController {
       console.log(`[CursosController] Procesando archivo: ${file.originalname}, MimeType: ${file.mimetype}, Path: ${filePath}`);
 
       if (file.mimetype.startsWith('video/')) {
-        updatedPaths.videoUrl = filePath;
-        console.log(`[CursosController] Asignado videoUrl: ${filePath}`);
+        updatedPaths.videoUrls.push(filePath); // Añadir al array
+        console.log(`[CursosController] Añadido videoUrl: ${filePath}`);
       } else if (file.mimetype === 'application/pdf') {
-        updatedPaths.pdfUrl = filePath;
-        console.log(`[CursosController] Asignado pdfUrl: ${filePath}`);
+        updatedPaths.pdfUrls.push(filePath); // Añadir al array
+        console.log(`[CursosController] Añadido pdfUrl: ${filePath}`);
       } else if (file.mimetype.startsWith('image/')) {
-        updatedPaths.imageUrl = filePath;
-        console.log(`[CursosController] Asignado imageUrl: ${filePath}`);
+        updatedPaths.imageUrls.push(filePath); // Añadir al array
+        console.log(`[CursosController] Añadido imageUrl: ${filePath}`);
       } else {
         console.warn(`[CursosController] Tipo de archivo no reconocido o no esperado: ${file.mimetype}`);
       }
@@ -246,6 +247,7 @@ export class CursosController {
     console.log('[CursosController] updatedPaths final antes de llamar al servicio:', updatedPaths);
 
     try {
+      // Pasar los arrays de URLs al servicio
       const updatedModulo = await this.cursosService.actualizarModuloFilePaths(moduloId, updatedPaths);
       console.log('[CursosController] Módulo actualizado en la BD:', updatedModulo);
       return {

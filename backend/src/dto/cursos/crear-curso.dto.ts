@@ -9,7 +9,8 @@ import {
   IsDateString, 
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ClaseItem } from '../../entidades/curso.entity';
+import { ClaseItem } from '../../entidades/curso.entity'; 
+
 
 export enum TipoCurso {
   DOCENTES = 'Docentes',
@@ -35,17 +36,23 @@ export class ModuloDto {
   @IsOptional()
   descripcion?: string | null;
 
-  @IsOptional()
-  @IsString()
-  videoUrl?: string | null;
 
   @IsOptional()
-  @IsString()
-  pdfUrl?: string | null;
+  @IsArray({ message: 'videoUrl debe ser un arreglo de cadenas de texto.' })
+  @IsString({ each: true, message: 'Cada videoUrl debe ser una cadena de texto.' })
+  videoUrl?: string[] | null;
+
 
   @IsOptional()
-  @IsString()
-  imageUrl?: string | null;
+  @IsArray({ message: 'pdfUrl debe ser un arreglo de cadenas de texto.' })
+  @IsString({ each: true, message: 'Cada pdfUrl debe ser una cadena de texto.' })
+  pdfUrl?: string[] | null;
+
+
+  @IsOptional()
+  @IsArray({ message: 'imageUrl debe ser un arreglo de cadenas de texto.' })
+  @IsString({ each: true, message: 'Cada imageUrl debe ser una cadena de texto.' })
+  imageUrl?: string[] | null;
 }
 
 export class CrearCursoDto {
@@ -58,7 +65,6 @@ export class CrearCursoDto {
   @IsNumber({}, { message: 'El precio debe ser un número válido.' })
   precio: number;
 
-
   @IsNumber({}, { message: 'La duración en horas debe ser un número válido.' })
   duracionHoras: number;
 
@@ -68,7 +74,11 @@ export class CrearCursoDto {
   @IsString({ message: 'La categoría debe ser una cadena de texto.' })
   categoria: string;
 
-  
+
+  @IsOptional()
+  @IsString({ message: 'La subcategoría debe ser una cadena de texto.' })
+  subcategoria?: string | null;
+
   @IsEnum(ModalidadCurso, { message: 'La modalidad de curso no es válida.' })
   modalidad: ModalidadCurso;
 
@@ -91,7 +101,6 @@ export class CrearCursoDto {
   @Type(() => ModuloDto)
   @IsArray({ message: 'Los módulos deben ser un arreglo.' })
   modulos?: ModuloDto[];
-
 
   @IsEnum(ClaseItem, { message: 'El tipo de ítem no es válido.' })
   @IsOptional() 

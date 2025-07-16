@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { EstadoModuloUsuario } from '@/app/types/reporte-progreso.interface';
+import { EstadoModuloUsuario } from '@/app/types/reporte-progreso.interface'; 
 
 const IS_DEVELOPMENT_MODE = process.env.NODE_ENV === 'development';
 
@@ -13,6 +13,7 @@ export default function ScormPage() {
 
   const [modulosDelCurso, setModulosDelCurso] = useState<EstadoModuloUsuario[]>([]);
   const [currentModuleIndex, setCurrentModuleIndex] = useState<number>(0);
+  const [currentContentIndex, setCurrentContentIndex] = useState<number>(0); 
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [cursoCompletadoGeneral, setCursoCompletadoGeneral] = useState<boolean>(false);
@@ -56,7 +57,6 @@ export default function ScormPage() {
 
       console.log(`Módulo ${moduloId} marcado como completado en el backend.`);
       
-     
       setModulosDelCurso(prevModulos =>
         prevModulos.map(m =>
           m.id === moduloId ? { ...m, completado: true, fechaCompletado: new Date() } : m
@@ -92,7 +92,6 @@ export default function ScormPage() {
         
         if (dataInscripcion.cursoCompletado) {
           setCursoCompletadoGeneral(true);
-        
         }
 
         console.log(`Obteniendo módulos y progreso para curso ${cursoId}.`);
@@ -115,8 +114,10 @@ export default function ScormPage() {
         const primerNoCompletadoIndex = modulos.findIndex(m => !m.completado);
         if (primerNoCompletadoIndex !== -1) {
           setCurrentModuleIndex(primerNoCompletadoIndex);
+          setCurrentContentIndex(0); 
         } else {
           setCurrentModuleIndex(modulos.length - 1);
+          setCurrentContentIndex(0); 
           if (!cursoCompletadoGeneral) {
             await markCourseAsCompletedGeneral();
           }
@@ -167,30 +168,68 @@ export default function ScormPage() {
     }
   }, [modulosDelCurso, cursoCompletadoGeneral, markCourseAsCompletedGeneral]);
 
+  const getCurrentContentUrls = useCallback(() => {
+    const module = modulosDelCurso[currentModuleIndex];
+    if (!module) return [];
+
+    switch (module.tipo) {
+      case 'video':
+        return module.videoUrls || [];
+      case 'pdf':
+        return module.pdfUrls || [];
+      case 'imagen':
+        return module.imageUrls || [];
+      default:
+        return [];
+    }
+  }, [modulosDelCurso, currentModuleIndex]);
+
+
   const handleNavigation = useCallback((direction: 'next' | 'prev') => {
     const currentModule = modulosDelCurso[currentModuleIndex];
     if (!currentModule) return;
+
+    const contentUrls = getCurrentContentUrls();
+    const totalContentItems = contentUrls.length;
 
 
     if (currentModule.tipo !== 'scorm' && !currentModule.completado) {
       marcarModuloCompletadoBackend(currentModule.id);
     }
 
-    if (direction === 'next' && currentModuleIndex < modulosDelCurso.length - 1) {
-      setCurrentModuleIndex(prevIndex => prevIndex + 1);
-    } else if (direction === 'prev' && currentModuleIndex > 0) {
-      setCurrentModuleIndex(prevIndex => prevIndex - 1);
+    if (direction === 'next') {
+      if (currentContentIndex < totalContentItems - 1) {
+        setCurrentContentIndex(prevIndex => prevIndex + 1);
+      } else if (currentModuleIndex < modulosDelCurso.length - 1) {
+        setCurrentModuleIndex(prevIndex => prevIndex + 1);
+        setCurrentContentIndex(0);
+      }
+    } else if (direction === 'prev') {
+      if (currentContentIndex > 0) {
+        setCurrentContentIndex(prevIndex => prevIndex - 1);
+      } else if (currentModuleIndex > 0) {
+        setCurrentModuleIndex(prevIndex => prevIndex - 1);
+        const prevModule = modulosDelCurso[currentModuleIndex - 1];
+        if (prevModule) {
+          let prevModuleContentCount = 0;
+          if (prevModule.tipo === 'video' && prevModule.videoUrls) prevModuleContentCount = prevModule.videoUrls.length;
+          else if (prevModule.tipo === 'pdf' && prevModule.pdfUrls) prevModuleContentCount = prevModule.pdfUrls.length;
+          else if (prevModule.tipo === 'imagen' && prevModule.imageUrls) prevModuleContentCount = prevModule.imageUrls.length;
+          setCurrentContentIndex(prevModuleContentCount > 0 ? prevModuleContentCount - 1 : 0);
+        } else {
+          setCurrentContentIndex(0);
+        }
+      }
     }
-  }, [currentModuleIndex, modulosDelCurso, marcarModuloCompletadoBackend]);
+  }, [currentModuleIndex, currentContentIndex, modulosDelCurso, marcarModuloCompletadoBackend, getCurrentContentUrls]);
 
   const handleModuleClick = useCallback((index: number) => {
     const currentModule = modulosDelCurso[currentModuleIndex];
-
-
     if (currentModule && currentModule.tipo !== 'scorm' && !currentModule.completado) {
       marcarModuloCompletadoBackend(currentModule.id);
     }
     setCurrentModuleIndex(index);
+    setCurrentContentIndex(0); 
   }, [currentModuleIndex, modulosDelCurso, marcarModuloCompletadoBackend]);
 
   const progresoGeneral = modulosDelCurso.length > 0
@@ -198,6 +237,19 @@ export default function ScormPage() {
     : 0;
 
   const currentModule = modulosDelCurso[currentModuleIndex];
+  const currentContentUrls = getCurrentContentUrls();
+  const currentContentUrl = currentContentUrls[currentContentIndex];
+
+  // --- ADICIÓN DE LOGS DE DEPURACIÓN ---
+  console.log('--- Depuración de ScormPage ---');
+  console.log('currentModule:', currentModule);
+  console.log('currentContentUrls (del módulo):', currentContentUrls);
+  console.log('currentContentIndex:', currentContentIndex);
+  console.log('currentContentUrl (final a mostrar):', currentContentUrl);
+  console.log('isPrevContentDisabled:', currentContentIndex === 0 && currentModuleIndex === 0);
+  console.log('isNextContentDisabled:', currentContentIndex === currentContentUrls.length - 1 && currentModuleIndex === modulosDelCurso.length - 1);
+  console.log('-----------------------------');
+  // --- FIN ADICIÓN DE LOGS DE DEPURACIÓN ---
 
   if (loading) {
     return <p className="text-center text-lg mt-8 text-gray-700">Cargando curso y módulos...</p>;
@@ -210,6 +262,11 @@ export default function ScormPage() {
   if (!currentModule) {
     return <p className="text-center text-lg mt-8 text-gray-700">No hay módulos disponibles para este curso.</p>;
   }
+
+
+  const isPrevContentDisabled = currentContentIndex === 0 && currentModuleIndex === 0;
+  const isNextContentDisabled = currentContentIndex === currentContentUrls.length - 1 && currentModuleIndex === modulosDelCurso.length - 1;
+
 
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gray-100 p-4 gap-4">
@@ -258,21 +315,21 @@ export default function ScormPage() {
               allowFullScreen
               title={currentModule.titulo}
             />
-          ) : currentModule.tipo === 'video' && currentModule.urlContenido ? (
+          ) : currentModule.tipo === 'video' && currentContentUrl ? ( 
             <video controls className="w-full h-full object-contain">
-              <source src={currentModule.urlContenido} type="video/mp4" />
+              <source src={currentContentUrl} type="video/mp4" /> 
               Tu navegador no soporta la etiqueta de video.
             </video>
-          ) : currentModule.tipo === 'pdf' && currentModule.urlContenido ? (
+          ) : currentModule.tipo === 'pdf' && currentContentUrl ? ( 
             <iframe
-              src={currentModule.urlContenido}
+              src={currentContentUrl}
               className="w-full h-full"
               style={{ border: 'none' }}
               title={currentModule.titulo}
             />
-          ) : currentModule.tipo === 'imagen' && currentModule.urlContenido ? (
+          ) : currentModule.tipo === 'imagen' && currentContentUrl ? ( 
             <img
-              src={currentModule.urlContenido}
+              src={currentContentUrl}
               alt={currentModule.titulo}
               className="max-w-full max-h-full object-contain"
             />
@@ -290,7 +347,7 @@ export default function ScormPage() {
         <div className="flex justify-between gap-4 mt-6">
           <button
             onClick={() => handleNavigation('prev')}
-            disabled={currentModuleIndex === 0}
+            disabled={isPrevContentDisabled} 
             className="px-6 py-3 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Anterior
@@ -305,7 +362,7 @@ export default function ScormPage() {
           )}
           <button
             onClick={() => handleNavigation('next')}
-            disabled={currentModuleIndex === modulosDelCurso.length - 1}
+            disabled={isNextContentDisabled} 
             className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Siguiente

@@ -20,14 +20,17 @@ export class ModuloEntity {
   @Column({ type: 'text', nullable: true })
   descripcion: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  videoUrl?: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
-  pdfUrl?: string | null;
+  @Column('simple-array', { nullable: true })
+  videoUrl?: string[] | null;
 
-  @Column({ type: 'varchar', nullable: true })
-  imageUrl?: string | null;
+
+  @Column('simple-array', { nullable: true })
+  pdfUrl?: string[] | null;
+
+
+  @Column('simple-array', { nullable: true })
+  imageUrl?: string[] | null;
 
   @Column({ type: 'int', nullable: true })
   orden: number | null; 
