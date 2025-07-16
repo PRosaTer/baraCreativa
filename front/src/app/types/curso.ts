@@ -3,6 +3,13 @@ export enum ClaseItem {
   SERVICIO = 'servicio',
 }
 
+
+export enum TipoCurso {
+  DOCENTES = 'Docentes',
+  ESTUDIANTES = 'Estudiantes',
+  EMPRESAS = 'Empresas',
+}
+
 export interface Modulo {
   id: number;
   titulo: string;
@@ -33,7 +40,7 @@ export interface Curso {
   descripcion: string;
   precio: number;
   duracionHoras: number;
-  tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
+  tipo: 'Docentes' | 'Estudiantes' | 'Empresas'; 
   categoria: string;
   subcategoria?: string | null;
   modalidad: 'en vivo' | 'grabado' | 'mixto';
@@ -52,7 +59,7 @@ export interface RawCursoApiResponse {
   descripcion: string;
   fechaInicio: string | null;
   duracionHoras: number;
-  tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
+  tipo: 'Docentes' | 'Estudiantes' | 'Empresas'; 
   categoria: string;
   subcategoria?: string;
   precio: string | number;
@@ -71,7 +78,7 @@ export interface CursoForm {
   descripcion: string;
   precio: number | '';
   duracionHoras: number | '';
-  tipo: 'Docentes' | 'Estudiantes' | 'Empresas' | '';
+  tipo: TipoCurso | ''; 
   categoria: string;
   subcategoria?: string | null;
   modalidad: 'en vivo' | 'grabado' | 'mixto' | ''; 

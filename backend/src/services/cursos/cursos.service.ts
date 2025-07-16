@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Curso } from '../../entidades/curso.entity';
-import { ModuloEntity } from '../../entidades/modulo.entity';
+import { ModuloEntity, TipoModulo } from '../../entidades/modulo.entity';
 import { Repository, DeepPartial } from 'typeorm';
 import { CrearCursoDto } from '../../dto/cursos/crear-curso.dto';
 import { join } from 'path';
@@ -50,12 +50,9 @@ export class CursosService {
     const curso = await this.obtenerCursoPorId(id);
 
     if (datos.modulos !== undefined) {
-
     }
 
-
     Object.assign(curso, datos);
-
 
     return this.cursosRepository.save(curso);
   }
@@ -179,21 +176,42 @@ export class CursosService {
     moduloId: number,
     updatedPaths: { videoUrl?: string | null; pdfUrl?: string | null; imageUrl?: string | null },
   ): Promise<ModuloEntity> {
+    console.log(`[CursosService] Intentando actualizar módulo ID: ${moduloId}`);
+    console.log('[CursosService] Rutas recibidas para actualizar:', updatedPaths);
+
     const modulo = await this.modulosRepository.findOneBy({ id: moduloId });
     if (!modulo) {
+      console.error(`[CursosService] Módulo con ID ${moduloId} no encontrado.`);
       throw new NotFoundException(`Módulo con ID ${moduloId} no encontrado`);
     }
+    console.log('[CursosService] Módulo encontrado:', modulo.id, modulo.titulo, `Tipo inicial de la BD: ${modulo.tipo}`); // Log del tipo inicial
 
-    if (updatedPaths.videoUrl !== undefined) {
+ 
+    if (updatedPaths.videoUrl) { 
+      console.log(`[CursosService] Actualizando videoUrl de ${modulo.videoUrl} a ${updatedPaths.videoUrl}`);
       modulo.videoUrl = updatedPaths.videoUrl;
+      modulo.tipo = TipoModulo.VIDEO;
+      console.log(`[CursosService] Tipo de módulo establecido a: ${modulo.tipo}`);
     }
-    if (updatedPaths.pdfUrl !== undefined) {
+    if (updatedPaths.pdfUrl) {
+      console.log(`[CursosService] Actualizando pdfUrl de ${modulo.pdfUrl} a ${updatedPaths.pdfUrl}`);
       modulo.pdfUrl = updatedPaths.pdfUrl;
+      modulo.tipo = TipoModulo.PDF;
+      console.log(`[CursosService] Tipo de módulo establecido a: ${modulo.tipo}`);
     }
-    if (updatedPaths.imageUrl !== undefined) {
+    if (updatedPaths.imageUrl) { 
+      console.log(`[CursosService] Actualizando imageUrl de ${modulo.imageUrl} a ${updatedPaths.imageUrl}`);
       modulo.imageUrl = updatedPaths.imageUrl;
+      modulo.tipo = TipoModulo.IMAGEN;
+      console.log(`[CursosService] Tipo de módulo establecido a: ${modulo.tipo}`);
     }
 
-    return this.modulosRepository.save(modulo);
+ 
+    console.log('[CursosService] Objeto ModuloEntity ANTES de guardar:', JSON.stringify(modulo, null, 2));
+
+
+    const savedModulo = await this.modulosRepository.save(modulo);
+    console.log('[CursosService] Módulo guardado en la base de datos:', savedModulo);
+    return savedModulo;
   }
 }
