@@ -23,6 +23,18 @@ const PasoInfoBasica: React.FC<PasoInfoBasicaProps> = ({ form, handleChange, onN
       <label style={labelStyle}>Duración (horas)</label>
       <input type="number" name="duracionHoras" value={form.duracionHoras} onChange={handleChange} min={0} step={1} style={inputStyle} />
 
+ 
+      <label style={labelStyle}>Fecha de Inicio (opcional)</label>
+      <input 
+        type="date" 
+        name="fechaInicio" 
+        value={form.fechaInicio instanceof Date 
+          ? form.fechaInicio.toISOString().split('T')[0] 
+          : (form.fechaInicio || '')} 
+        onChange={handleChange} 
+        style={inputStyle} 
+      />
+
       <button type="button" onClick={onNext} style={buttonStyle}>Siguiente</button>
     </>
   );

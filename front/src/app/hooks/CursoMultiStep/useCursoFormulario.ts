@@ -15,7 +15,7 @@ interface UseCursoFormularioReturn {
   nextStep: () => void;
   prevStep: () => void;
   handleSubmit: (e: FormEvent) => Promise<void>;
-  setForm: React.Dispatch<React.SetStateAction<CursoForm>>;
+  setForm: React.Dispatch<React.SetStateAction<CursoForm>>; 
 }
 
 export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, routerPush: (path: string) => void): UseCursoFormularioReturn => {
@@ -94,7 +94,17 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
   const handleAddModulo = () => {
     setForm(prev => ({
       ...prev,
-      modulos: [...prev.modulos, { id: Date.now(), titulo: `Módulo ${prev.modulos.length + 1}`, descripcion: null, videoUrl: null, pdfUrl: null, imageUrl: null, videoFile: null, pdfFile: null, imageFile: null }],
+      modulos: [...prev.modulos, { 
+        id: Date.now(), 
+        titulo: `Módulo ${prev.modulos.length + 1}`, 
+        descripcion: null, 
+        videoUrl: null,
+        pdfUrl: null, 
+        imageUrl: null, 
+        videoFile: null,
+        pdfFile: null, 
+        imageFile: null 
+      }],
     }));
   };
 
@@ -210,16 +220,17 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
         const formDataModuleFiles = new FormData();
         let filesAttached = false;
 
-        if (moduloForm.videoFile) {
-          formDataModuleFiles.append('files', moduloForm.videoFile);
+        
+        if (moduloForm.videoFile && moduloForm.videoFile.length > 0) {
+          moduloForm.videoFile.forEach(file => formDataModuleFiles.append('files', file));
           filesAttached = true;
         }
-        if (moduloForm.pdfFile) {
-          formDataModuleFiles.append('files', moduloForm.pdfFile);
+        if (moduloForm.pdfFile && moduloForm.pdfFile.length > 0) {
+          moduloForm.pdfFile.forEach(file => formDataModuleFiles.append('files', file));
           filesAttached = true;
         }
-        if (moduloForm.imageFile) {
-          formDataModuleFiles.append('files', moduloForm.imageFile);
+        if (moduloForm.imageFile && moduloForm.imageFile.length > 0) {
+          moduloForm.imageFile.forEach(file => formDataModuleFiles.append('files', file));
           filesAttached = true;
         }
 

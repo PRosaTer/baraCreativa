@@ -3,7 +3,6 @@ export enum ClaseItem {
   SERVICIO = 'servicio',
 }
 
-
 export enum TipoCurso {
   DOCENTES = 'Docentes',
   ESTUDIANTES = 'Estudiantes',
@@ -14,24 +13,24 @@ export interface Modulo {
   id: number;
   titulo: string;
   descripcion: string | null;
-  videoUrl: string | null;
-  pdfUrl: string | null;
-  imageUrl: string | null;
+  videoUrl: string[] | null; 
+  pdfUrl: string[] | null; 
+  imageUrl: string[] | null; 
 }
 
 export interface ModuloFormBase {
   titulo: string;
   descripcion: string | null;
-  videoUrl?: string | null;
-  pdfUrl?: string | null;
-  imageUrl?: string | null;
+  videoUrl?: string[] | null; 
+  pdfUrl?: string[] | null; 
+  imageUrl?: string[] | null; 
 }
 
 export interface EditableModuloForm extends ModuloFormBase {
   id?: number;
-  videoFile?: File | null; 
-  pdfFile?: File | null; 
-  imageFile?: File | null; 
+  videoFile?: File[] | null; 
+  pdfFile?: File[] | null; 
+  imageFile?: File[] | null; 
 }
 
 export interface Curso {
@@ -59,7 +58,7 @@ export interface RawCursoApiResponse {
   descripcion: string;
   fechaInicio: string | null;
   duracionHoras: number;
-  tipo: 'Docentes' | 'Estudiantes' | 'Empresas'; 
+  tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
   categoria: string;
   subcategoria?: string;
   precio: string | number;

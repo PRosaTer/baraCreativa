@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Curso } from '../../entidades/curso.entity';
-import { ModuloEntity, TipoModulo } from '../../entidades/modulo.entity';
+import { ModuloEntity, TipoModulo } from '../../entidades/modulo.entity'; 
 import { Repository, DeepPartial } from 'typeorm';
 import { CrearCursoDto } from '../../dto/cursos/crear-curso.dto';
 import { join } from 'path';
@@ -174,7 +174,7 @@ export class CursosService {
 
   async actualizarModuloFilePaths(
     moduloId: number,
-    updatedPaths: { videoUrl?: string | null; pdfUrl?: string | null; imageUrl?: string | null },
+    updatedPaths: { videoUrls?: string[]; pdfUrls?: string[]; imageUrls?: string[] }, 
   ): Promise<ModuloEntity> {
     console.log(`[CursosService] Intentando actualizar módulo ID: ${moduloId}`);
     console.log('[CursosService] Rutas recibidas para actualizar:', updatedPaths);
@@ -184,31 +184,46 @@ export class CursosService {
       console.error(`[CursosService] Módulo con ID ${moduloId} no encontrado.`);
       throw new NotFoundException(`Módulo con ID ${moduloId} no encontrado`);
     }
-    console.log('[CursosService] Módulo encontrado:', modulo.id, modulo.titulo, `Tipo inicial de la BD: ${modulo.tipo}`); // Log del tipo inicial
+    console.log('[CursosService] Módulo encontrado:', modulo.id, modulo.titulo, `Tipo inicial de la BD: ${modulo.tipo}`);
+
+
+    modulo.videoUrl = modulo.videoUrl || [];
+    modulo.pdfUrl = modulo.pdfUrl || [];
+    modulo.imageUrl = modulo.imageUrl || [];
 
  
-    if (updatedPaths.videoUrl) { 
-      console.log(`[CursosService] Actualizando videoUrl de ${modulo.videoUrl} a ${updatedPaths.videoUrl}`);
-      modulo.videoUrl = updatedPaths.videoUrl;
-      modulo.tipo = TipoModulo.VIDEO;
+    if (updatedPaths.videoUrls && updatedPaths.videoUrls.length > 0) {
+      console.log(`[CursosService] Añadiendo videoUrls: ${JSON.stringify(updatedPaths.videoUrls)} al array existente.`);
+      updatedPaths.videoUrls.forEach(url => {
+        if (!modulo.videoUrl!.includes(url)) { 
+          modulo.videoUrl!.push(url);
+        }
+      });
+      modulo.tipo = TipoModulo.VIDEO; 
       console.log(`[CursosService] Tipo de módulo establecido a: ${modulo.tipo}`);
     }
-    if (updatedPaths.pdfUrl) {
-      console.log(`[CursosService] Actualizando pdfUrl de ${modulo.pdfUrl} a ${updatedPaths.pdfUrl}`);
-      modulo.pdfUrl = updatedPaths.pdfUrl;
+    if (updatedPaths.pdfUrls && updatedPaths.pdfUrls.length > 0) {
+      console.log(`[CursosService] Añadiendo pdfUrls: ${JSON.stringify(updatedPaths.pdfUrls)} al array existente.`);
+      updatedPaths.pdfUrls.forEach(url => {
+        if (!modulo.pdfUrl!.includes(url)) {
+          modulo.pdfUrl!.push(url);
+        }
+      });
       modulo.tipo = TipoModulo.PDF;
       console.log(`[CursosService] Tipo de módulo establecido a: ${modulo.tipo}`);
     }
-    if (updatedPaths.imageUrl) { 
-      console.log(`[CursosService] Actualizando imageUrl de ${modulo.imageUrl} a ${updatedPaths.imageUrl}`);
-      modulo.imageUrl = updatedPaths.imageUrl;
+    if (updatedPaths.imageUrls && updatedPaths.imageUrls.length > 0) {
+      console.log(`[CursosService] Añadiendo imageUrls: ${JSON.stringify(updatedPaths.imageUrls)} al array existente.`);
+      updatedPaths.imageUrls.forEach(url => {
+        if (!modulo.imageUrl!.includes(url)) {
+          modulo.imageUrl!.push(url);
+        }
+      });
       modulo.tipo = TipoModulo.IMAGEN;
       console.log(`[CursosService] Tipo de módulo establecido a: ${modulo.tipo}`);
     }
 
- 
     console.log('[CursosService] Objeto ModuloEntity ANTES de guardar:', JSON.stringify(modulo, null, 2));
-
 
     const savedModulo = await this.modulosRepository.save(modulo);
     console.log('[CursosService] Módulo guardado en la base de datos:', savedModulo);
