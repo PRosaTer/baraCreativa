@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import TablaCursosAdmin from './TablaCursosAdmin';
-import CrearCursoMultiStep from '../DashboardAdmin/EditarCursos/CrearCursoMultiStep';
+import CrearCursoMultiStep from './EditarCursos/CursoMultiStep/CrearCursoMultiStep';
 import EditarCursoAdmin from '../DashboardAdmin/EditarCursos/EditarCursoAdmin';
 import { Curso } from '@/app/types/curso';
 

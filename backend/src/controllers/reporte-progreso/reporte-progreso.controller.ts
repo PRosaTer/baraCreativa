@@ -3,7 +3,7 @@ import { ReporteProgresoService } from '../../services/reporte-progreso/reporte-
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { MarcarModuloCompletadoDto, EstadoModuloUsuario } from '../../interfaces/reporte-progreso.interface';
 import { Usuario } from '../../entidades/usuario.entity';
-import { ModuloEntity } from '../../entidades/modulo.entity';
+import { ModuloEntity, TipoModulo } from '../../entidades/modulo.entity';
 import { ReporteProgresoEntity } from '../../entidades/ReporteProgreso.entity'; 
 
 interface RequestConUsuario extends Request {
@@ -35,9 +35,10 @@ export class ReporteProgresoController {
   ): Promise<EstadoModuloUsuario[]> {
     this.logger.log(`Recibida solicitud para obtener estado de módulos: Usuario ${req.user.id}, Curso ${cursoId}`);
 
+
     const modulosDelCurso = await this.reporteProgresoService['moduloRepository'].find({
       where: { curso: { id: cursoId } },
-      relations: ['curso'],
+      relations: ['curso'], 
       order: { orden: 'ASC', id: 'ASC' },
     });
 
@@ -53,14 +54,27 @@ export class ReporteProgresoController {
       let urlContenido: string | null = null;
       let descripcionContenido: string | null = modulo.descripcion;
 
-      if (modulo.tipo === 'video' && modulo.videoUrl) {
-          urlContenido = modulo.videoUrl;
-      } else if (modulo.tipo === 'pdf' && modulo.pdfUrl) {
-          urlContenido = modulo.pdfUrl;
-      } else if (modulo.tipo === 'imagen' && modulo.imageUrl) {
-          urlContenido = modulo.imageUrl;
-      } else if (modulo.tipo === 'scorm' && modulo.curso && modulo.curso.archivoScorm) {
+ 
+      this.logger.debug(`[EstadoModulos] Modulo ID: ${modulo.id}, Titulo: ${modulo.titulo}, Tipo en DB: ${modulo.tipo}, videoUrl: ${modulo.videoUrl}, pdfUrl: ${modulo.pdfUrl}, imageUrl: ${modulo.imageUrl}`);
+
+
+      if (modulo.tipo === TipoModulo.VIDEO && modulo.videoUrl) { 
+          urlContenido = `http://localhost:3001${modulo.videoUrl}`;
+          this.logger.debug(`[EstadoModulos] Asignado video URL: ${urlContenido}`);
+      } else if (modulo.tipo === TipoModulo.PDF && modulo.pdfUrl) { 
+          urlContenido = `http://localhost:3001${modulo.pdfUrl}`; 
+          this.logger.debug(`[EstadoModulos] Asignado PDF URL: ${urlContenido}`);
+      } else if (modulo.tipo === TipoModulo.IMAGEN && modulo.imageUrl) { 
+          urlContenido = `http://localhost:3001${modulo.imageUrl}`;
+          this.logger.debug(`[EstadoModulos] Asignado imagen URL: ${urlContenido}`);
+      } else if (modulo.tipo === TipoModulo.SCORM && modulo.curso && modulo.curso.archivoScorm) {
           urlContenido = `http://localhost:3001${modulo.curso.archivoScorm}`;
+          this.logger.debug(`[EstadoModulos] Asignado SCORM URL: ${urlContenido}`);
+      } else if (modulo.tipo === TipoModulo.TEXTO) { 
+          this.logger.debug(`[EstadoModulos] Modulo tipo TEXTO, sin URL de archivo.`);
+         
+      } else {
+          this.logger.warn(`[EstadoModulos] Modulo ID: ${modulo.id} con tipo ${modulo.tipo} no manejado o URL faltante.`);
       }
 
       return {
