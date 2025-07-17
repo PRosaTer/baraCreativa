@@ -24,23 +24,21 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="w-full bg-primary py-2 sm:py-4 relative z-30">
+    <nav className="w-full bg-primary py-2 md:py-4 relative z-30">
       <div
-        className="
-        flex items-center justify-between
-        w-full max-w-screen-xl mx-auto
-        px-2 sm:px-4 md:px-8 lg:px-20
-        gap-x-[54px]
-      "
+        className="flex items-center justify-between
+          w-full max-w-screen-xl mx-auto
+          px-2 sm:px-4 md:px-8 lg:px-20
+          gap-x-[54px]"
       >
         {/* Logo y botón hamburguesa */}
-        <div className="flex items-center justify-between w-full sm:w-auto">
+        <div className="flex items-center justify-between w-full md:w-auto">
           <div className="flex-shrink-0">
             <Logo />
           </div>
-          {/* Botón hamburguesa para móviles */}
+          {/* Botón hamburguesa visible hasta md */}
           <button
-            className="sm:hidden text-white focus:outline-none"
+            className="md:hidden text-white focus:outline-none"
             onClick={toggleMenu}
             aria-label="Toggle menu"
           >
@@ -68,26 +66,28 @@ export default function Navbar() {
         {/* Menú principal */}
         <div
           className={`
-            flex flex-col sm:flex-row items-center justify-start w-full gap-x-[34px]
-            ${isMenuOpen ? "flex" : "hidden"} sm:flex
-            absolute sm:static top-[100%] left-0 w-full bg-primary
-            p-4 sm:p-0 z-20
-            border-t border-white/10 sm:border-0
+            flex flex-col md:flex-row items-center justify-start w-full gap-x-[1em]
+            ${isMenuOpen ? "flex" : "hidden"} md:flex
+            absolute md:static top-[100%] left-0 w-full bg-primary
+            p-4 md:p-0 z-20
+            border-t border-white/10 md:border-0
+
+            max-w-screen-md
+            max-h-[70vh]
+            overflow-auto
+            mx-auto
+            rounded-b-lg
+            shadow-lg
           `}
         >
           <SobreComunidadButton />
           <ComunidadButton />
-          <BarraBusqueda className="flex-grow min-w-[200px] max-w-[656px] sm:max-w-[400px] md:max-w-[656px]" />
+          <BarraBusqueda className="flex-grow min-w-[200px] max-w-[656px] md:max-w-[400px] lg:max-w-[656px]" />
           <Cursos />
           <Contactenos />
 
           {cargandoUsuario ? (
-            <div
-              className="
-              px-4 py-2 rounded-lg font-medium text-white bg-gray-400
-              transition duration-300 whitespace-nowrap animate-pulse
-            "
-            >
+            <div className="px-4 py-2 rounded-lg font-medium text-white bg-gray-400 animate-pulse whitespace-nowrap">
               Cargando...
             </div>
           ) : usuario ? (
@@ -105,9 +105,9 @@ export default function Navbar() {
                 <button
                   onClick={cerrarSesion}
                   className="px-8 py-2 text-sm whitespace-nowrap
-                             bg-gray-800 text-gray-200 font-bold rounded-lg shadow-sm border border-transparent
-                             hover:bg-gray-700 hover:text-cyan-400 hover:shadow-md hover:shadow-cyan-500/30 hover:border-cyan-400
-                             transition-all duration-300 ease-in-out"
+                    bg-gray-800 text-gray-200 font-bold rounded-lg shadow-sm border border-transparent
+                    hover:bg-gray-700 hover:text-cyan-400 hover:shadow-md hover:shadow-cyan-500/30 hover:border-cyan-400
+                    transition-all duration-300 ease-in-out"
                 >
                   Cerrar sesión
                 </button>
