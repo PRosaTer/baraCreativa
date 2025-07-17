@@ -3,200 +3,302 @@
 <head>
   <title>Certificado de Finalización</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: 'Montserrat', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f4f4f4;
+      background-color: #f0f0f0;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      overflow: auto;
     }
+
     .certificate-container {
       width: 297mm;
       height: 210mm;
-      border: 10px solid #004d40;
-      padding: 20mm;
+      border: 5px solid #000;
+      padding: 0;
       box-sizing: border-box;
-      background: linear-gradient(to bottom right, #e0f2f7, #ffffff);
+      background-color: #ffffff;
       text-align: center;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    }
-    .header { margin-bottom: 20px; }
-    .header h1 { color: #004d40; font-size: 3em; margin: 0; }
-    .header p { color: #555; font-size: 1.2em; }
-    .content h2 { color: #00796b; font-size: 2.5em; margin-top: 30px; }
-    .content p { font-size: 1.5em; color: #333; margin-top: 10px; }
-    .signature { margin-top: 50px; display: flex; justify-content: space-around; }
-    .signature div { border-top: 1px solid #333; padding-top: 10px; width: 40%; }
-    .footer { position: absolute; bottom: 20mm; width: calc(100% - 40mm); font-size: 0.9em; color: #777; }
-    .badge {
-      position: absolute;
-      top: 20mm;
-      left: 20mm;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background-color: #ffd700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8em;
-      font-weight: bold;
-      color: #333;
-      border: 3px solid #ccac00;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
 
-    .linkedin-logo {
+    .left-column {
       position: absolute;
-      top: 20mm;
-      right: 20mm;
-      width: 150px;
-      height: auto;
+      left: 23.94mm;
+      top: 0;
+      bottom: 0;
+      width: 25mm;
+      background-color: #e6e6e6;
+      z-index: 0;
     }
-    .main-title {
-      font-size: 2.8em;
-      font-weight: bold;
-      color: #0077B5; 
-      margin-bottom: 5px;
+
+    .badge-wrapper {
+        position: absolute;
+        left: -7mm;
+        top: 25%;
+        transform: translateY(-50%);
+        width: 150px;
+        height: 150px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1;
     }
-    .subtitle {
-      font-size: 1.5em;
-      color: #333;
-      margin-bottom: 20px;
-    }
-    .course-title {
-      font-size: 2.2em;
-      font-weight: bold;
-      color: #000;
-      margin-top: 30px;
-      margin-bottom: 10px;
-    }
-    .completion-info {
-      font-size: 1.2em;
-      color: #555;
-      margin-bottom: 30px;
-    }
-    .description {
-      font-size: 1.1em;
-      color: #444;
-      line-height: 1.6;
-      max-width: 80%;
-      margin: 0 auto 40px auto;
-    }
-    .signature-area {
+
+    .badge-outer-white-circle {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background-color: #fff;
+      border: 8px solid #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
       display: flex;
-      justify-content: space-between;
-      width: 80%;
-      margin: 0 auto 30px auto;
+      justify-content: center;
+      align-items: center;
     }
-    .signature-block {
-      text-align: center;
-      width: 45%;
-    }
-    .signature-line {
-      border-top: 1px solid #aaa;
-      padding-top: 5px;
-      margin-bottom: 5px;
-    }
-    .signer-name {
-      font-weight: bold;
-      color: #333;
-    }
-    .signer-title {
-      font-size: 0.9em;
-      color: #777;
-    }
-    .footer-id {
+
+    .badge-inner-gold-white-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: #ffffff;
+      border: 2px solid #d4af37;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       position: absolute;
-      bottom: 10mm;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.8em;
-      color: #999;
+      transform: translate(-50%, -50%);
     }
-    .side-badge {
+
+    .badge-center-logo {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+    }
+
+    .right-column {
       position: absolute;
       left: 0;
       top: 0;
       bottom: 0;
-      width: 100px;
-      background-color: #f0f2f5; 
+      right: 0;
+      padding: 20mm 20mm 20mm 100mm;
+      box-sizing: border-box;
+      text-align: left;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 10px;
-      box-sizing: border-box;
-      border-right: 1px solid #ddd;
+      justify-content: space-between;
     }
-    .side-badge .circle {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background-color: #ffd700;
+
+    .main-header {
+      margin-top: 20px;
+    }
+
+    .company-name-container {
       display: flex;
-      justify-content: center;
       align-items: center;
-      font-size: 0.9em;
-      font-weight: bold;
-      color: #333;
-      border: 3px solid #ccac00;
-      box-shadow: 0 0 8px rgba(0,0,0,0.2);
+      margin-bottom: 5px;
+    }
+
+    .company-name-bara {
+      color: #ff0000;
+      font-size: 1.5em;
+      font-weight: 700;
+      margin-right: 2px;
+    }
+
+    .company-name-creativa {
+      color: #000;
+      font-size: 1.5em;
+      font-weight: 700;
+    }
+
+    .lightbulb-icon {
+      width: 25px;
+      height: 25px;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+
+    .main-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8em;
+      font-weight: 700;
+      color: #000;
       margin-bottom: 10px;
     }
-    .side-badge .text {
+
+    .subtitle {
+      font-size: 1.4em;
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: 400;
+    }
+
+    .course-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.2em;
+      font-weight: 700;
+      color: #000;
+      margin-top: 30px;
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+
+    .completion-info {
       font-size: 1.1em;
-      font-weight: bold;
       color: #555;
-      text-transform: uppercase;
-      transform: rotate(-90deg); 
-      white-space: nowrap;
+      margin-bottom: 30px;
+    }
+
+    .description {
+      font-size: 1.1em;
+      color: #444;
+      line-height: 1.6;
+      max-width: 90%;
+      margin-bottom: 40px;
+    }
+
+    .signature-area {
+      display: flex;
+      justify-content: space-between;
+      width: 90%;
+      margin-top: auto;
+      padding-top: 30px;
+    }
+
+    .signature-block {
+      text-align: center;
+      width: 48%;
+    }
+
+    .signature-image {
+      width: 150px;
+      height: auto;
+      margin-bottom: 5px;
+      object-fit: contain;
+    }
+
+    .signer-name {
+      font-weight: 600;
+      color: #333;
+      font-size: 1em;
+    }
+
+    .signer-title {
+      font-size: 0.85em;
+      color: #777;
+    }
+
+    .footer-id {
       position: absolute;
-      left: -10px;
+      bottom: 15mm;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8em;
+      color: #999;
+      width: 100%;
+    }
+
+    @media print {
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .certificate-container {
+        border: none;
+        box-shadow: none;
+        width: 297mm;
+        height: 210mm;
+        margin: 0;
+        padding: 0;
+      }
+      .footer-id {
+        bottom: 15mm;
+      }
     }
   </style>
 </head>
 <body>
   <div class="certificate-container">
-    <div class="side-badge">
-      <div class="circle">🏅</div>
-      <span class="text">COMPLETADO</span>
-    </div>
+    <div class="left-column">
+      <div class="badge-wrapper">
+        <div class="badge-outer-white-circle">
+          <!-- SVG corregido -->
+          <svg width="120" height="130" viewBox="0 0 120 130" style="position: absolute; top: 0; left: 0;">
+            <defs>
+              <path id="cursoPath" d="M 10 80 A 50 50 0 0 1 110 80" fill="none" />
+              <path id="completadoPath" d="M 110 80 A 50 50 0 0 1 10 80" fill="none" />
+            </defs>
 
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Linkedin_logo_PNG_Transparent.png/800px-Linkedin_logo_PNG_Transparent.png" alt="LinkedIn Learning Logo" class="linkedin-logo">
+            <text text-anchor="middle" dominant-baseline="middle" fill="#333" font-family="Montserrat, sans-serif" font-size="12px" font-weight="600">
+              <textPath href="#cursoPath" startOffset="50%">
+                Curso
+              </textPath>
+            </text>
 
-    <div style="margin-left: 120px; text-align: left;">
-      <p style="color: #0077B5; font-size: 1.2em; font-weight: bold; margin-bottom: 5px;">LinkedIn Learning</p>
-      <h1 class="main-title">CERTIFICADO de finalización</h1>
-      <p class="subtitle">¡Felicidades, {{userName}}!</p>
+            <text text-anchor="middle" dominant-baseline="middle" fill="#333" font-family="Montserrat, sans-serif" font-size="12px" font-weight="600">
+              <textPath href="#completadoPath" startOffset="50%">
+                Completado
+              </textPath>
+            </text>
+          </svg>
 
-      <h2 class="course-title">{{courseTitle}}</h2>
-      <p class="completion-info">Curso completado el {{issueDate}}</p>
-
-      <p class="description">
-        Seguir aprendiendo te ha permitido ampliar horizontes, perfeccionar tus
-        aptitudes y mejorar tus posibilidades profesionales.
-      </p>
-
-      <div class="signature-area">
-        <div class="signature-block">
-          <div class="signature-line"></div>
-          <p class="signer-name">Dany Bednartz</p>
-          <p class="signer-title">Responsable de estrategia de contenido de Learning</p>
-        </div>
-        <div class="signature-block">
-          <div class="signature-line"></div>
-          <p class="signer-name">LinkedIn Learning</p>
-          <p class="signer-title">1000 W Maude Ave<br>Sunnyvale, CA 94085</p>
+          <div class="badge-inner-gold-white-circle">
+            <img src="{{certificadoLogoBase64}}" alt="Logo Certificado" class="badge-center-logo">
+          </div>
         </div>
       </div>
     </div>
-    <p class="footer-id">ID del certificado: {{certificateId}}</p>
+
+    <div class="right-column">
+      <div class="main-header">
+        <div class="company-name-container">
+          <span class="company-name-bara">Bara</span>
+          <span class="company-name-creativa">Creativa</span>
+          <img src="{{bombilloBase64}}" alt="Foco" class="lightbulb-icon">
+        </div>
+        <h1 class="main-title">Certificado de finalización</h1>
+        <p class="subtitle">¡Felicidades, {{userName}}!</p>
+      </div>
+
+      <div class="content-body">
+        <h2 class="course-title">{{courseTitle}}</h2>
+        <p class="completion-info">Curso completado el {{issueDate}}</p>
+        <p class="description">
+          Reconocemos tu dedicación, esfuerzo y compromiso con el aprendizaje continuo,
+          demostrando excelencia y constancia en tu desarrollo personal y profesional.
+        </p>
+      </div>
+
+      <div class="signature-area">
+        <div class="signature-block">
+          <img src="{{firmaBase64}}" alt="Firma Víctor Manuel Padilla" class="signature-image">
+          <p class="signer-name">{{signerName}}</p>
+          <p class="signer-title">{{signerTitle}}</p>
+        </div>
+        <div class="signature-block">
+          <img src="{{dynamisBase64}}" alt="Dynamis HN Logo" class="signature-image">
+          <p class="signer-name">DYNAMIS HN</p>
+          <p class="signer-title">TU TALENTO EN PODER</p>
+        </div>
+      </div>
+    </div>
+    <p class="footer-id">ID de certificado: {{certificateId}}</p>
   </div>
 </body>
 </html>
