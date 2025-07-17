@@ -66,9 +66,6 @@ export class CertificadosService {
     const nombreCurso = curso.titulo;
     const nombreUsuario = usuario.nombreCompleto;
 
-    // --- Cargar y preparar el logo de BaraCreativa ---
-    // ¡IMPORTANTE! Asegúrate de que esta ruta sea correcta para tu logo en el backend.
-    // El logo debe estar en 'uploads/logo-bc.png' dentro de la raíz de tu proyecto backend.
     const baraCreativaLogoPath = path.join(process.cwd(), 'uploads', 'logo-bc.png');
     let baraCreativaLogoBase64: string = '';
     try {
@@ -76,15 +73,15 @@ export class CertificadosService {
       baraCreativaLogoBase64 = `data:image/png;base64,${logoBuffer.toString('base64')}`;
     } catch (error) {
       this.logger.error(`No se pudo cargar el logo de BaraCreativa desde ${baraCreativaLogoPath}. Asegúrate de que la ruta sea correcta y el archivo exista.`);
-      baraCreativaLogoBase64 = ''; // Deja el logo vacío si no se encuentra
+      baraCreativaLogoBase64 = ''; 
     }
-    // ----------------------------------------------------
+ 
 
     const htmlContent = await this.generateCertificateHtml(
       nombreUsuario,
       nombreCurso,
       fechaEmision,
-      baraCreativaLogoBase64 // Pasar el logo al template
+      baraCreativaLogoBase64
     );
 
     const pdfBuffer = await this.generatePdfFromHtml(htmlContent);
@@ -128,7 +125,7 @@ export class CertificadosService {
     userName: string,
     courseTitle: string,
     issueDate: Date,
-    baraCreativaLogoBase64: string // Recibir el logo
+    baraCreativaLogoBase64: string
   ): Promise<string> {
     const formattedDate = issueDate.toLocaleDateString('es-ES', {
       year: 'numeric',
@@ -141,13 +138,13 @@ export class CertificadosService {
     const signerTitle = 'CEO de Bara Creativa';
     // ---------------------------------
 
-    const templatePath = path.join(process.cwd(), 'src', 'certificados', 'templates', 'certificate.hbs');
+    const templatePath = path.join(process.cwd(), 'src', 'certificados', 'certificados.hbs');
+
     let templateContent: string;
     try {
       templateContent = await fs.readFile(templatePath, 'utf-8');
     } catch (error) {
       this.logger.error(`No se encontró la plantilla de certificado en ${templatePath}. Usando plantilla por defecto.`);
-      // --- PLANTILLA HTML POR DEFECTO MEJORADA Y AJUSTADA ---
       templateContent = `
         <!DOCTYPE html>
         <html>
@@ -318,9 +315,9 @@ export class CertificadosService {
       courseTitle,
       issueDate: formattedDate,
       certificateId: 'BCERT_' + Math.random().toString(36).substring(2, 12).toUpperCase(), // ID de ejemplo
-      signerName, // Pasar a Handlebars
-      signerTitle, // Pasar a Handlebars
-      baraCreativaLogoBase64 // Pasar el logo al template
+      signerName,
+      signerTitle,
+      baraCreativaLogoBase64
     });
 
     return html;

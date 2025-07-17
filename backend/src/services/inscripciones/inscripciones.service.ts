@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm'; 
 import { Inscripcion } from '../../entidades/inscripcion.entity';
 import { Usuario } from '../../entidades/usuario.entity';
 import { Curso } from '../../entidades/curso.entity';
@@ -64,11 +64,12 @@ export class InscripcionesService {
     return this.inscripcionRepository.save(inscripcion);
   }
 
+
   async obtenerCursosPorUsuario(usuarioId: number) {
     const inscripciones = await this.inscripcionRepository.find({
       where: {
         usuario: { id: usuarioId },
-        estado: 'Completado',
+        estado: In(['Pagado', 'Completado']),
       },
       relations: ['curso'],
     });
@@ -77,6 +78,7 @@ export class InscripcionesService {
       id: insc.curso.id,
       titulo: insc.curso.titulo,
       imagenCurso: insc.curso.imagenCurso || null,
+      estado: insc.estado, 
     }));
   }
 }

@@ -77,6 +77,6 @@ export class InscripcionesController {
     this.logger.log(`Obteniendo cursos para usuario ${usuarioId}`);
 
     const cursos = await this.inscripcionesService.obtenerCursosPorUsuario(usuarioId);
-    return cursos;
+    return cursos; 
   }
 }
