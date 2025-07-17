@@ -1,3 +1,4 @@
+// src/certificados/certificados.service.ts
 import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -8,7 +9,7 @@ import puppeteer from 'puppeteer';
 import { Certificado } from '../../entidades/certificado.entity';
 import { Usuario } from '../../entidades/usuario.entity';
 import { Curso } from '../../entidades/curso.entity';
-import { ReporteProgresoEntity } from '../../entidades/ReporteProgreso.entity';
+import { ReporteProgresoEntity } from '../../entidades/ReporteProgreso.entity'; 
 import { Inscripcion } from '../../entidades/inscripcion.entity';
 
 @Injectable()
@@ -22,7 +23,7 @@ export class CertificadosService {
     private usuariosRepository: Repository<Usuario>,
     @InjectRepository(Curso)
     private cursosRepository: Repository<Curso>,
-    @InjectRepository(ReporteProgresoEntity)
+    @InjectRepository(ReporteProgresoEntity) 
     private reporteProgresoRepository: Repository<ReporteProgresoEntity>,
     @InjectRepository(Inscripcion)
     private inscripcionRepository: Repository<Inscripcion>,
@@ -35,69 +36,153 @@ export class CertificadosService {
    * @returns La ruta al certificado generado en formato PDF.
    */
   async generarCertificado(usuarioId: number, cursoId: number): Promise<string> {
+    this.logger.log(`Iniciando generación de certificado para Usuario ID: ${usuarioId}, Curso ID: ${cursoId}`);
+
+
     const usuario = await this.usuariosRepository.findOne({ where: { id: usuarioId } });
     const curso = await this.cursosRepository.findOne({ where: { id: cursoId } });
 
     if (!usuario) {
+      this.logger.error(`Usuario con ID ${usuarioId} no encontrado.`);
       throw new NotFoundException(`Usuario con ID ${usuarioId} no encontrado.`);
     }
     if (!curso) {
+      this.logger.error(`Curso con ID ${cursoId} no encontrado.`);
       throw new NotFoundException(`Curso con ID ${cursoId} no encontrado.`);
     }
+    this.logger.log(`Usuario "${usuario.nombreCompleto}" y Curso "${curso.titulo}" encontrados.`);
+
 
     const inscripcion = await this.inscripcionRepository.findOne({
       where: { usuario: { id: usuarioId }, curso: { id: cursoId } },
+      relations: ['usuario', 'curso'],
     });
 
-    if (!inscripcion || !inscripcion.cursoCompletado) {
+    if (!inscripcion) {
+      this.logger.error(`Inscripción no encontrada para Usuario ID: ${usuarioId} y Curso ID: ${cursoId}.`);
+      throw new BadRequestException(`El usuario ${usuario.nombreCompleto} no está inscrito en el curso "${curso.titulo}".`);
+    }
+
+    if (!inscripcion.cursoCompletado) {
+      this.logger.warn(`El usuario ${usuario.nombreCompleto} NO ha completado el curso "${curso.titulo}".`);
       throw new BadRequestException(`El usuario ${usuario.nombreCompleto} no ha completado el curso "${curso.titulo}".`);
     }
+    this.logger.log(`Usuario "${usuario.nombreCompleto}" ha completado el curso "${curso.titulo}".`);
+
+
 
     const certificadoExistente = await this.certificadosRepository.findOne({
       where: { usuario: { id: usuarioId }, curso: { id: cursoId } },
     });
 
     if (certificadoExistente) {
-      this.logger.warn(`Certificado ya existe para usuario ${usuarioId} y curso ${cursoId}. Devolviendo el existente.`);
+      this.logger.warn(`Certificado ya existe para usuario ${usuarioId} y curso ${cursoId}. Devolviendo el existente: ${certificadoExistente.rutaArchivo}`);
       return certificadoExistente.rutaArchivo;
     }
+    this.logger.log(`No existe un certificado previo para Usuario ID: ${usuarioId} y Curso ID: ${cursoId}. Procediendo a generar uno nuevo.`);
 
     const fechaEmision = new Date();
     const nombreCurso = curso.titulo;
     const nombreUsuario = usuario.nombreCompleto;
 
-    const baraCreativaLogoPath = path.join(process.cwd(), 'uploads', 'logo-bc.png');
+
+    const uploadsDir = path.join(process.cwd(), 'uploads');
+    this.logger.log(`Directorio base para cargas (uploadsDir): ${uploadsDir}`);
+
+    const baraCreativaLogoPath = path.join(uploadsDir, 'logo-bc.png');
+    const bombilloPath = path.join(uploadsDir, 'bombillo.png');
+    const firmaPath = path.join(uploadsDir, 'firma.png');
+    const dynamisPath = path.join(uploadsDir, 'dynamis.png');
+
     let baraCreativaLogoBase64: string = '';
+    let bombilloBase64: string = '';
+    let firmaBase64: string = '';
+    let dynamisBase64: string = '';
+
     try {
       const logoBuffer = await fs.readFile(baraCreativaLogoPath);
       baraCreativaLogoBase64 = `data:image/png;base64,${logoBuffer.toString('base64')}`;
+      this.logger.log(`Logo BaraCreativa cargado exitosamente desde: ${baraCreativaLogoPath}`);
     } catch (error) {
-      this.logger.error(`No se pudo cargar el logo de BaraCreativa desde ${baraCreativaLogoPath}. Asegúrate de que la ruta sea correcta y el archivo exista.`);
+      this.logger.error(`ERROR: No se pudo cargar el logo de BaraCreativa desde ${baraCreativaLogoPath}. Asegúrate de que la ruta sea correcta y el archivo exista. Detalle: ${(error as Error).message}`);
       baraCreativaLogoBase64 = ''; 
     }
- 
 
-    const htmlContent = await this.generateCertificateHtml(
-      nombreUsuario,
-      nombreCurso,
-      fechaEmision,
-      baraCreativaLogoBase64
-    );
+    try {
+      const bombilloBuffer = await fs.readFile(bombilloPath);
+      bombilloBase64 = `data:image/png;base64,${bombilloBuffer.toString('base64')}`;
+      this.logger.log(`Icono bombillo cargado exitosamente desde: ${bombilloPath}`);
+    } catch (error) {
+      this.logger.error(`ERROR: No se pudo cargar el icono del bombillo desde ${bombilloPath}. Detalle: ${(error as Error).message}`);
+      bombilloBase64 = '';
+    }
 
-    const pdfBuffer = await this.generatePdfFromHtml(htmlContent);
+    try {
+      const firmaBuffer = await fs.readFile(firmaPath);
+      firmaBase64 = `data:image/png;base64,${firmaBuffer.toString('base64')}`;
+      this.logger.log(`Firma cargada exitosamente desde: ${firmaPath}`);
+    } catch (error) {
+      this.logger.error(`ERROR: No se pudo cargar la firma desde ${firmaPath}. Detalle: ${(error as Error).message}`);
+      firmaBase64 = '';
+    }
 
-    const certificadosDir = path.join(process.cwd(), 'uploads', 'certificados');
-    await fs.mkdir(certificadosDir, { recursive: true });
+    try {
+      const dynamisBuffer = await fs.readFile(dynamisPath);
+      dynamisBase64 = `data:image/png;base64,${dynamisBuffer.toString('base64')}`;
+      this.logger.log(`Logo Dynamis cargado exitosamente desde: ${dynamisPath}`);
+    } catch (error) {
+      this.logger.error(`ERROR: No se pudo cargar el logo de Dynamis desde ${dynamisPath}. Detalle: ${(error as Error).message}`);
+      dynamisBase64 = '';
+    }
+
+    let htmlContent: string;
+    try {
+        htmlContent = await this.generateCertificateHtml(
+            nombreUsuario,
+            nombreCurso,
+            fechaEmision,
+            baraCreativaLogoBase64,
+            bombilloBase64,
+            firmaBase64,
+            dynamisBase64
+        );
+        this.logger.log(`Contenido HTML del certificado generado con éxito.`);
+    } catch (error) {
+        this.logger.error(`ERROR al generar el contenido HTML del certificado: ${(error as Error).message}`);
+        throw new InternalServerErrorException('Error al generar el contenido HTML del certificado.');
+    }
+
+
+
+    let pdfBuffer: Buffer;
+    try {
+        pdfBuffer = await this.generatePdfFromHtml(htmlContent);
+        this.logger.log(`PDF generado con éxito a partir del HTML.`);
+    } catch (error) {
+        this.logger.error(`ERROR al generar el PDF con Puppeteer: ${(error as Error).message}`);
+        throw new InternalServerErrorException('Error al generar el certificado PDF.');
+    }
+
+    const certificadosDir = path.join(uploadsDir, 'certificados');
+    try {
+      await fs.mkdir(certificadosDir, { recursive: true });
+      this.logger.log(`Directorio de certificados '${certificadosDir}' asegurado.`);
+    } catch (error) {
+      this.logger.error(`ERROR: No se pudo crear/asegurar el directorio de certificados '${certificadosDir}'. Detalle: ${(error as Error).message}`);
+      throw new InternalServerErrorException('Error al preparar el directorio para guardar el certificado.');
+    }
+
     const fileName = `certificado_${usuarioId}_${cursoId}_${Date.now()}.pdf`;
     const filePath = path.join(certificadosDir, fileName);
 
     try {
       await fs.writeFile(filePath, pdfBuffer);
-      this.logger.log(`Certificado guardado en: ${filePath}`);
+      this.logger.log(`Certificado PDF guardado exitosamente en el sistema de archivos: ${filePath}`);
     } catch (error) {
-      this.logger.error(`Error al guardar el certificado en ${filePath}:`, (error as Error).message);
-      throw new InternalServerErrorException('Error al guardar el certificado.');
+      this.logger.error(`ERROR al guardar el certificado PDF en ${filePath}. Detalle: ${(error as Error).message}`);
+      throw new InternalServerErrorException('Error al guardar el certificado PDF en el sistema de archivos.');
     }
+
 
     const nuevoCertificado = this.certificadosRepository.create({
       usuario,
@@ -107,8 +192,13 @@ export class CertificadosService {
       rutaArchivo: filePath,
     });
 
-    await this.certificadosRepository.save(nuevoCertificado);
-    this.logger.log(`Certificado registrado en la base de datos para usuario ${usuarioId} y curso ${cursoId}.`);
+    try {
+      await this.certificadosRepository.save(nuevoCertificado);
+      this.logger.log(`Certificado registrado exitosamente en la base de datos para usuario ${usuarioId} y curso ${cursoId}.`);
+    } catch (error) {
+      this.logger.error(`CRÍTICO: ERROR al registrar el certificado en la base de datos para usuario ${usuarioId} y curso ${cursoId}. Detalle: ${(error as Error).message}`);
+      throw new InternalServerErrorException('Error al registrar el certificado en la base de datos. Por favor, revise los logs del servidor para más detalles.');
+    }
 
     return filePath;
   }
@@ -119,13 +209,19 @@ export class CertificadosService {
    * @param courseTitle Título del curso.
    * @param issueDate Fecha de emisión.
    * @param baraCreativaLogoBase64 String Base64 del logo de BaraCreativa.
+   * @param bombilloBase64 String Base64 del icono del bombillo.
+   * @param firmaBase64 String Base64 de la imagen de la firma.
+   * @param dynamisBase64 String Base64 del logo de Dynamis.
    * @returns String con el contenido HTML.
    */
   private async generateCertificateHtml(
     userName: string,
     courseTitle: string,
     issueDate: Date,
-    baraCreativaLogoBase64: string
+    baraCreativaLogoBase64: string,
+    bombilloBase64: string,
+    firmaBase64: string,
+    dynamisBase64: string
   ): Promise<string> {
     const formattedDate = issueDate.toLocaleDateString('es-ES', {
       year: 'numeric',
@@ -133,18 +229,21 @@ export class CertificadosService {
       day: 'numeric',
     });
 
-    // --- Datos para la firma ---
     const signerName = 'Victor Padilla';
     const signerTitle = 'CEO de Bara Creativa';
-    // ---------------------------------
-
     const templatePath = path.join(process.cwd(), 'src', 'certificados', 'certificados.hbs');
+
+    // --- LOGS DE DEPURACIÓN PARA LA PLANTILLA HBS ---
+    this.logger.log(`[generateCertificateHtml] Directorio de trabajo actual (process.cwd()): ${process.cwd()}`);
+    this.logger.log(`[generateCertificateHtml] Intentando cargar plantilla desde la ruta calculada: ${templatePath}`);
+    // --- FIN LOGS DE DEPURACIÓN ---
 
     let templateContent: string;
     try {
       templateContent = await fs.readFile(templatePath, 'utf-8');
+      this.logger.log(`[generateCertificateHtml] Plantilla 'certificados.hbs' encontrada y leída correctamente desde: ${templatePath}`);
     } catch (error) {
-      this.logger.error(`No se encontró la plantilla de certificado en ${templatePath}. Usando plantilla por defecto.`);
+      this.logger.error(`[generateCertificateHtml] ERROR: No se encontró la plantilla de certificado en ${templatePath}. Usando plantilla por defecto. Detalle del error: ${(error as Error).message}`);
       templateContent = `
         <!DOCTYPE html>
         <html>
@@ -306,7 +405,6 @@ export class CertificadosService {
         </body>
         </html>
       `;
-      // ----------------------------------------------------
     }
 
     const template = Handlebars.compile(templateContent);
@@ -314,10 +412,14 @@ export class CertificadosService {
       userName,
       courseTitle,
       issueDate: formattedDate,
-      certificateId: 'BCERT_' + Math.random().toString(36).substring(2, 12).toUpperCase(), // ID de ejemplo
+      certificateId: 'BCERT_' + Math.random().toString(36).substring(2, 12).toUpperCase(),
       signerName,
       signerTitle,
-      baraCreativaLogoBase64
+      baraCreativaLogoBase64,
+      certificadoLogoBase64: baraCreativaLogoBase64, 
+      bombilloBase64: bombilloBase64,
+      firmaBase64: firmaBase64,
+      dynamisBase64: dynamisBase64
     });
 
     return html;
@@ -333,27 +435,40 @@ export class CertificadosService {
     try {
       browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage'
+        ],
       });
       const page = await browser.newPage();
+      await page.setViewport({ width: 1200, height: 800 });
       await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+      await new Promise(resolve => setTimeout(resolve, 1000)); 
+
+
       const pdfBuffer = await page.pdf({
         format: 'A4',
-        printBackground: true,
+        landscape: true,
+        printBackground: true, 
         margin: {
-          top: '10mm',
-          right: '10mm',
-          bottom: '10mm',
-          left: '10mm',
+          top: '0mm',  
+          right: '0mm',
+          bottom: '0mm',
+          left: '0mm',
         },
       });
       return pdfBuffer;
     } catch (error) {
-      this.logger.error('Error al generar el PDF con Puppeteer:', (error as Error).message);
+      this.logger.error(`ERROR Puppeteer: Error al generar el PDF. Detalle: ${(error as Error).message}`);
+      if ((error as Error).message.includes('Executable path not found')) {
+        this.logger.error('Sugerencia: Asegúrate de que Chromium esté instalado y sea accesible por Puppeteer. En Docker, esto a menudo requiere instalar paquetes adicionales.');
+      }
       throw new InternalServerErrorException('Error al generar el certificado PDF.');
     } finally {
       if (browser) {
         await browser.close();
+        this.logger.log('Navegador Puppeteer cerrado.');
       }
     }
   }
@@ -364,13 +479,16 @@ export class CertificadosService {
    * @returns El objeto Certificado.
    */
   async getCertificadoById(certificadoId: number): Promise<Certificado> {
+    this.logger.log(`Buscando certificado por ID: ${certificadoId}`);
     const certificado = await this.certificadosRepository.findOne({
       where: { id: certificadoId },
       relations: ['usuario', 'curso'],
     });
     if (!certificado) {
+      this.logger.warn(`Certificado con ID ${certificadoId} no encontrado.`);
       throw new NotFoundException(`Certificado con ID ${certificadoId} no encontrado.`);
     }
+    this.logger.log(`Certificado ID: ${certificadoId} encontrado.`);
     return certificado;
   }
 
@@ -380,10 +498,12 @@ export class CertificadosService {
    * @returns Un array de objetos Certificado.
    */
   async getCertificadosByUsuario(usuarioId: number): Promise<Certificado[]> {
+    this.logger.log(`Buscando certificados para Usuario ID: ${usuarioId}`);
     const certificados = await this.certificadosRepository.find({
       where: { usuario: { id: usuarioId } },
       relations: ['curso'],
     });
+    this.logger.log(`Se encontraron ${certificados.length} certificados para Usuario ID: ${usuarioId}.`);
     return certificados;
   }
 }
