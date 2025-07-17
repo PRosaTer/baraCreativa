@@ -21,7 +21,7 @@ export default function Home() {
         </p>
       </section>
       {/* Sección de los dos contenedores */}
-      <section className="container mx-auto py-8 flex flex-col md:flex-row gap-4 justify-center items-center">
+      <section className="container mx-auto py-8 flex flex-col lg:flex-row gap-4 justify-center items-center">
         <Contenedor_1 />
         <DynamicContenedor2 />
       </section>
