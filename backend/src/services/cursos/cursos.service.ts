@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Curso } from '../../entidades/curso.entity';
-import { ModuloEntity, TipoModulo } from '../../entidades/modulo.entity'; 
+import { ModuloEntity, TipoModulo } from '../../entidades/modulo.entity';
 import { Repository, DeepPartial } from 'typeorm';
 import { CrearCursoDto } from '../../dto/cursos/crear-curso.dto';
 import { join } from 'path';
@@ -174,7 +174,7 @@ export class CursosService {
 
   async actualizarModuloFilePaths(
     moduloId: number,
-    updatedPaths: { videoUrls?: string[]; pdfUrls?: string[]; imageUrls?: string[] }, 
+    updatedPaths: { videoUrls?: string[]; pdfUrls?: string[]; imageUrls?: string[] },
   ): Promise<ModuloEntity> {
     console.log(`[CursosService] Intentando actualizar módulo ID: ${moduloId}`);
     console.log('[CursosService] Rutas recibidas para actualizar:', updatedPaths);
@@ -191,15 +191,15 @@ export class CursosService {
     modulo.pdfUrl = modulo.pdfUrl || [];
     modulo.imageUrl = modulo.imageUrl || [];
 
- 
+
     if (updatedPaths.videoUrls && updatedPaths.videoUrls.length > 0) {
       console.log(`[CursosService] Añadiendo videoUrls: ${JSON.stringify(updatedPaths.videoUrls)} al array existente.`);
       updatedPaths.videoUrls.forEach(url => {
-        if (!modulo.videoUrl!.includes(url)) { 
+        if (!modulo.videoUrl!.includes(url)) {
           modulo.videoUrl!.push(url);
         }
       });
-      modulo.tipo = TipoModulo.VIDEO; 
+      modulo.tipo = TipoModulo.VIDEO;
       console.log(`[CursosService] Tipo de módulo establecido a: ${modulo.tipo}`);
     }
     if (updatedPaths.pdfUrls && updatedPaths.pdfUrls.length > 0) {
