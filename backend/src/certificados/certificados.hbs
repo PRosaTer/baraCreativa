@@ -45,8 +45,8 @@
         left: -7mm;
         top: 25%;
         transform: translateY(-50%);
-        width: 150px;
-        height: 150px;
+        width: 150px; /* Mantener el ancho del wrapper */
+        height: 150px; /* Mantener la altura del wrapper */
         display: flex;
         justify-content: center;
         align-items: center;
@@ -55,20 +55,21 @@
 
     .badge-outer-white-circle {
       position: relative;
-      width: 120px;
-      height: 120px;
+      width: 140px; /* Mantiene el tamaño general */
+      height: 140px; /* Mantiene el tamaño general */
       border-radius: 50%;
       background-color: #fff;
-      border: 8px solid #fff;
+      border: 2px solid #d4af37; /* Borde dorado */
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow: hidden; /* Para que el contenido SVG no se desborde */
     }
 
     .badge-inner-gold-white-circle {
-      width: 100px;
-      height: 100px;
+      width: 90px; /* Reducido de 110px a 90px */
+      height: 90px; /* Reducido de 110px a 90px */
       border-radius: 50%;
       background-color: #ffffff;
       border: 2px solid #d4af37;
@@ -79,13 +80,38 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+      z-index: 1; /* Asegura que esté por encima del SVG de texto */
     }
 
     .badge-center-logo {
-      width: 50px;
-      height: 50px;
+      width: 45px; /* Reducido de 55px a 45px */
+      height: 45px; /* Reducido de 55px a 45px */
       object-fit: contain;
     }
+
+    /* Estilos para el texto en el SVG */
+    .badge-text {
+      text-anchor: middle;
+      dominant-baseline: middle;
+      fill: #333;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px; /* Reducido de 14px a 11px */
+      font-weight: 600;
+      letter-spacing: 0.5px; /* Espaciado entre letras para mejor lectura en arco */
+    }
+
+    /* Ajuste para el SVG para que se centre mejor */
+    .badge-svg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 140px; /* Igual que el tamaño del círculo blanco exterior */
+        height: 140px; /* Igual que el tamaño del círculo blanco exterior */
+        viewBox: 0 0 140 140; /* AHORA COINCIDE CON WIDTH/HEIGHT */
+        z-index: 0; /* Detrás del círculo central con el logo */
+    }
+
 
     .right-column {
       position: absolute;
@@ -172,15 +198,33 @@
 
     .signature-area {
       display: flex;
-      justify-content: space-between;
+      justify-content: space-around; /* Ajustado para distribuir los elementos */
       width: 90%;
       margin-top: auto;
       padding-top: 30px;
+      align-items: flex-end; /* Alinea los elementos a la parte inferior */
+    }
+
+    .signature-group { /* Nuevo contenedor para la firma y el sello */
+        display: flex;
+        align-items: flex-end; /* Alinea la firma y el sello en la parte inferior */
+        gap: 15px; /* Espacio entre la firma y el sello */
     }
 
     .signature-block {
       text-align: center;
-      width: 48%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end; /* Empuja el contenido hacia abajo */
+    }
+
+    .seal-block { /* Nuevo bloque para el sello */
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end; /* Empuja el contenido hacia abajo */
     }
 
     .signature-image {
@@ -188,6 +232,14 @@
       height: auto;
       margin-bottom: 5px;
       object-fit: contain;
+    }
+
+    .seal-image { /* Estilo para la imagen del sello */
+        width: 80px;
+        height: 80px; /* Asegura que la imagen se renderice en un cuadrado */
+        object-fit: contain; /* Mantiene la proporción de la imagen */
+        margin-bottom: 5px; /* Espacio para alinear con la firma */
+        transform: rotate(-1deg); /* Pequeña rotación para corregir la inclinación visual */
     }
 
     .signer-name {
@@ -203,7 +255,7 @@
 
     .footer-id {
       position: absolute;
-      bottom: 15mm;
+      bottom: 10mm; /* Ajustado de 15mm a 10mm para moverlo más abajo */
       left: 50%;
       transform: translateX(-50%);
       font-size: 0.8em;
@@ -228,7 +280,7 @@
         padding: 0;
       }
       .footer-id {
-        bottom: 15mm;
+        bottom: 10mm; /* Asegura que se mantenga en la parte inferior al imprimir */
       }
     }
   </style>
@@ -238,20 +290,24 @@
     <div class="left-column">
       <div class="badge-wrapper">
         <div class="badge-outer-white-circle">
-          <!-- SVG corregido -->
-          <svg width="120" height="130" viewBox="0 0 120 130" style="position: absolute; top: 0; left: 0;">
+          <!-- SVG ajustado para centrar el texto -->
+          <svg class="badge-svg" width="140" height="140" viewBox="0 0 140 140">
             <defs>
-              <path id="cursoPath" d="M 10 80 A 50 50 0 0 1 110 80" fill="none" />
-              <path id="completadoPath" d="M 110 80 A 50 50 0 0 1 10 80" fill="none" />
+              <!-- Arco superior para "Curso" -->
+              <path id="cursoPath" d="M 35 50 A 35 35 0 0 1 105 50" fill="none" />
+              <!-- Arco inferior para "Completado" -->
+              <path id="completadoPath" d="M 30 108 A 50 50 0 0 0 110 108" fill="none" />
             </defs>
 
-            <text text-anchor="middle" dominant-baseline="middle" fill="#333" font-family="Montserrat, sans-serif" font-size="12px" font-weight="600">
+            <!-- Texto "Curso" en el arco superior -->
+            <text class="badge-text">
               <textPath href="#cursoPath" startOffset="50%">
                 Curso
               </textPath>
             </text>
 
-            <text text-anchor="middle" dominant-baseline="middle" fill="#333" font-family="Montserrat, sans-serif" font-size="12px" font-weight="600">
+            <!-- Texto "Completado" en el arco inferior -->
+            <text class="badge-text">
               <textPath href="#completadoPath" startOffset="50%">
                 Completado
               </textPath>
@@ -286,10 +342,15 @@
       </div>
 
       <div class="signature-area">
-        <div class="signature-block">
-          <img src="{{firmaBase64}}" alt="Firma Víctor Manuel Padilla" class="signature-image">
-          <p class="signer-name">{{signerName}}</p>
-          <p class="signer-title">{{signerTitle}}</p>
+        <div class="signature-group">
+          <div class="signature-block">
+            <img src="{{firmaBase64}}" alt="Firma Víctor Manuel Padilla" class="signature-image">
+            <p class="signer-name">{{signerName}}</p>
+            <p class="signer-title">{{signerTitle}}</p>
+          </div>
+          <div class="seal-block">
+            <img src="{{selloBaraCreativaBase64}}" alt="Sello Bara Creativa" class="seal-image">
+          </div>
         </div>
         <div class="signature-block">
           <img src="{{dynamisBase64}}" alt="Dynamis HN Logo" class="signature-image">
