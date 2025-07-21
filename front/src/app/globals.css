@@ -20,7 +20,7 @@
 
 :root {
   --color-primary: #282323;
-  --color-secondary: #FF0000;
+  --color-secondary: #ff0000;
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -90,7 +90,7 @@ a {
 @font-face {
   font-family: "Sansation";
   src: url("/fonts/Sansation.woff2") format("woff2"),
-       url("/fonts/Sansation.woff") format("woff");
+    url("/fonts/Sansation.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
@@ -98,7 +98,6 @@ a {
 .font-sansation {
   font-family: "Sansation", sans-serif;
 }
-
 
 #__next-build-watcher,
 .__nextjs-dev-overlay {
