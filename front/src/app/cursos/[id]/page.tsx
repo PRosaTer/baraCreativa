@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import type { OnApproveData } from '@paypal/paypal-js/types/components/buttons';
+import toast from 'react-hot-toast';
 
 import { Curso } from '@/app/types/curso';
 
@@ -22,6 +23,17 @@ export default function CursoDetalle() {
         const resCurso = await fetch(`http://localhost:3001/api/cursos/${cursoId}`, {
           credentials: 'include',
         });
+
+        if (resCurso.status === 401) {
+          toast.error('Necesitas iniciar sesión o registrarte para continuar.', {
+            duration: 3000,
+          });
+          setTimeout(() => {
+            router.push('/login');
+          }, 3000);
+          return;
+        }
+
         if (!resCurso.ok) throw new Error('No se pudo cargar el curso');
         const dataCurso: Curso = await resCurso.json();
 
@@ -33,6 +45,17 @@ export default function CursoDetalle() {
         const resUsuario = await fetch('http://localhost:3001/api/usuarios/me', {
           credentials: 'include',
         });
+
+        if (resUsuario.status === 401) {
+          toast.error('Necesitas iniciar sesión o registrarte para continuar.', {
+            duration: 3000,
+          });
+          setTimeout(() => {
+            router.push('/login');
+          }, 3000);
+          return;
+        }
+
         if (!resUsuario.ok) throw new Error('No se pudo obtener el usuario');
         const usuario = await resUsuario.json();
         setUsuarioId(usuario.id);
@@ -44,7 +67,7 @@ export default function CursoDetalle() {
       }
     }
     fetchDatos();
-  }, [cursoId]);
+  }, [cursoId, router]);
 
   const crearOrden = async (): Promise<string> => {
     if (!usuarioId) throw new Error('Usuario no autenticado');
@@ -99,8 +122,8 @@ export default function CursoDetalle() {
   return (
     <div
       className="p-6 md:p-8 lg:p-10 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700
-                   rounded-2xl shadow-xl text-white font-sans max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-4xl
-                   mx-auto my-8 md:my-12"
+                    rounded-2xl shadow-xl text-white font-sans max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-4xl
+                    mx-auto my-8 md:my-12"
     >
       <h1 className="mb-4 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-blue-300 text-center">
         {curso?.titulo}
@@ -142,8 +165,7 @@ export default function CursoDetalle() {
             <p className="text-sm sm:text-base mb-4">Horas: <span className="font-bold">{curso?.duracionHoras}</span></p>
           </div>
 
-      
-          <div className='mt-10'> 
+          <div className='mt-10'>
             <h3 className="text-xl sm:text-2xl font-bold text-blue-200 mb-3">Descripción:</h3>
             <div
               className="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg
@@ -154,9 +176,8 @@ export default function CursoDetalle() {
           </div>
         </div>
 
-
         <div className="flex flex-col">
-    
+
           {curso?.imagenCurso && typeof curso.imagenCurso === 'string' && (
             <div className="w-full flex justify-center md:justify-start mb-6">
               <img
@@ -167,8 +188,7 @@ export default function CursoDetalle() {
             </div>
           )}
 
-    
-          <div> 
+          <div>
             <h3 className="text-xl sm:text-2xl font-bold text-blue-200 mb-3">Módulos:</h3>
             <div
               className="grid grid-cols-1 gap-4 w-full"
