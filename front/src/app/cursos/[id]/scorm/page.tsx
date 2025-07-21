@@ -16,7 +16,7 @@ export default function ScormPage() {
 
   const [modulosDelCurso, setModulosDelCurso] = useState<EstadoModuloUsuario[]>([]);
   const [currentModuleIndex, setCurrentModuleIndex] = useState<number>(0);
-  const [currentContentIndex, setCurrentContentIndex] = useState<number>(0); 
+  const [currentContentIndex, setCurrentContentIndex] = useState<number>(0);
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [cursoCompletadoGeneral, setCursoCompletadoGeneral] = useState<boolean>(false);
@@ -229,7 +229,6 @@ export default function ScormPage() {
           </ul>
         </div>
 
-
         <div className="lg:w-3/4 bg-white rounded-lg shadow-lg p-6 flex flex-col">
           {cursoCompletadoGeneral && (
             <div className="mb-6 p-3 bg-green-100 text-green-700 rounded-lg text-center font-semibold">
@@ -244,7 +243,7 @@ export default function ScormPage() {
             {currentModule.tipo === 'scorm' && currentModule.urlContenido ? (
               <iframe src={currentModule.urlContenido} style={{ width: '100%', height: '100%' }} />
             ) : currentModule.tipo === 'video' && currentContentUrl ? (
-              <video controls className="w-full h-full object-contain">
+              <video key={currentContentUrl} controls className="w-full h-full object-contain">
                 <source src={currentContentUrl} type="video/mp4" />
               </video>
             ) : currentModule.tipo === 'pdf' && currentContentUrl ? (

@@ -3,10 +3,15 @@
 <head>
   <title>Certificado de Finalización</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+    @font-face {
+      font-family: 'Sansation';
+      src: url('/uploads/sansation/Sansation-Regular.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
 
     body {
-      font-family: 'Montserrat', sans-serif;
+      font-family: 'Sansation', sans-serif;
       margin: 0;
       padding: 0;
       background-color: #f0f0f0;
@@ -41,35 +46,35 @@
     }
 
     .badge-wrapper {
-        position: absolute;
-        left: -7mm;
-        top: 25%;
-        transform: translateY(-50%);
-        width: 150px; /* Mantener el ancho del wrapper */
-        height: 150px; /* Mantener la altura del wrapper */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1;
+      position: absolute;
+      left: -7mm;
+      top: 25%;
+      transform: translateY(-50%);
+      width: 150px;
+      height: 150px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1;
     }
 
     .badge-outer-white-circle {
       position: relative;
-      width: 140px; /* Mantiene el tamaño general */
-      height: 140px; /* Mantiene el tamaño general */
+      width: 140px;
+      height: 140px;
       border-radius: 50%;
       background-color: #fff;
-      border: 2px solid #d4af37; /* Borde dorado */
+      border: 2px solid #d4af37;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden; /* Para que el contenido SVG no se desborde */
+      overflow: hidden;
     }
 
     .badge-inner-gold-white-circle {
-      width: 90px; /* Reducido de 110px a 90px */
-      height: 90px; /* Reducido de 110px a 90px */
+      width: 90px;
+      height: 90px;
       border-radius: 50%;
       background-color: #ffffff;
       border: 2px solid #d4af37;
@@ -80,38 +85,35 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 1; /* Asegura que esté por encima del SVG de texto */
+      z-index: 1;
     }
 
     .badge-center-logo {
-      width: 45px; /* Reducido de 55px a 45px */
-      height: 45px; /* Reducido de 55px a 45px */
+      width: 45px;
+      height: 45px;
       object-fit: contain;
     }
 
-    /* Estilos para el texto en el SVG */
     .badge-text {
       text-anchor: middle;
       dominant-baseline: middle;
       fill: #333;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 11px; /* Reducido de 14px a 11px */
+      font-family: 'Sansation', sans-serif;
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.5px; /* Espaciado entre letras para mejor lectura en arco */
+      letter-spacing: 0.5px;
     }
 
-    /* Ajuste para el SVG para que se centre mejor */
     .badge-svg {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 140px; /* Igual que el tamaño del círculo blanco exterior */
-        height: 140px; /* Igual que el tamaño del círculo blanco exterior */
-        viewBox: 0 0 140 140; /* AHORA COINCIDE CON WIDTH/HEIGHT */
-        z-index: 0; /* Detrás del círculo central con el logo */
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 140px;
+      height: 140px;
+      viewBox: 0 0 140 140;
+      z-index: 0;
     }
-
 
     .right-column {
       position: absolute;
@@ -158,7 +160,6 @@
     }
 
     .main-title {
-      font-family: 'Playfair Display', serif;
       font-size: 2.8em;
       font-weight: 700;
       color: #000;
@@ -173,7 +174,6 @@
     }
 
     .course-title {
-      font-family: 'Montserrat', sans-serif;
       font-size: 2.2em;
       font-weight: 700;
       color: #000;
@@ -198,17 +198,17 @@
 
     .signature-area {
       display: flex;
-      justify-content: space-around; /* Ajustado para distribuir los elementos */
+      justify-content: space-around;
       width: 90%;
       margin-top: auto;
       padding-top: 30px;
-      align-items: flex-end; /* Alinea los elementos a la parte inferior */
+      align-items: flex-end;
     }
 
-    .signature-group { /* Nuevo contenedor para la firma y el sello */
-        display: flex;
-        align-items: flex-end; /* Alinea la firma y el sello en la parte inferior */
-        gap: 15px; /* Espacio entre la firma y el sello */
+    .signature-group {
+      display: flex;
+      align-items: flex-end;
+      gap: 15px;
     }
 
     .signature-block {
@@ -216,15 +216,15 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-end; /* Empuja el contenido hacia abajo */
+      justify-content: flex-end;
     }
 
-    .seal-block { /* Nuevo bloque para el sello */
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-end; /* Empuja el contenido hacia abajo */
+    .seal-block {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
     }
 
     .signature-image {
@@ -234,12 +234,12 @@
       object-fit: contain;
     }
 
-    .seal-image { /* Estilo para la imagen del sello */
-        width: 80px;
-        height: 80px; /* Asegura que la imagen se renderice en un cuadrado */
-        object-fit: contain; /* Mantiene la proporción de la imagen */
-        margin-bottom: 5px; /* Espacio para alinear con la firma */
-        transform: rotate(-1deg); /* Pequeña rotación para corregir la inclinación visual */
+    .seal-image {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      margin-bottom: 5px;
+      transform: rotate(-1deg);
     }
 
     .signer-name {
@@ -255,7 +255,7 @@
 
     .footer-id {
       position: absolute;
-      bottom: 10mm; /* Ajustado de 15mm a 10mm para moverlo más abajo */
+      bottom: 10mm;
       left: 50%;
       transform: translateX(-50%);
       font-size: 0.8em;
@@ -280,7 +280,7 @@
         padding: 0;
       }
       .footer-id {
-        bottom: 10mm; /* Asegura que se mantenga en la parte inferior al imprimir */
+        bottom: 10mm;
       }
     }
   </style>
@@ -290,30 +290,18 @@
     <div class="left-column">
       <div class="badge-wrapper">
         <div class="badge-outer-white-circle">
-          <!-- SVG ajustado para centrar el texto -->
           <svg class="badge-svg" width="140" height="140" viewBox="0 0 140 140">
             <defs>
-              <!-- Arco superior para "Curso" -->
               <path id="cursoPath" d="M 35 50 A 35 35 0 0 1 105 50" fill="none" />
-              <!-- Arco inferior para "Completado" -->
               <path id="completadoPath" d="M 30 108 A 50 50 0 0 0 110 108" fill="none" />
             </defs>
-
-            <!-- Texto "Curso" en el arco superior -->
             <text class="badge-text">
-              <textPath href="#cursoPath" startOffset="50%">
-                Curso
-              </textPath>
+              <textPath href="#cursoPath" startOffset="50%">Curso</textPath>
             </text>
-
-            <!-- Texto "Completado" en el arco inferior -->
             <text class="badge-text">
-              <textPath href="#completadoPath" startOffset="50%">
-                Completado
-              </textPath>
+              <textPath href="#completadoPath" startOffset="50%">Completado</textPath>
             </text>
           </svg>
-
           <div class="badge-inner-gold-white-circle">
             <img src="{{certificadoLogoBase64}}" alt="Logo Certificado" class="badge-center-logo">
           </div>
@@ -344,12 +332,12 @@
       <div class="signature-area">
         <div class="signature-group">
           <div class="signature-block">
-            <img src="{{firmaBase64}}" alt="Firma Víctor Manuel Padilla" class="signature-image">
+            <img src="{{firmaBase64}}" alt="Firma" class="signature-image">
             <p class="signer-name">{{signerName}}</p>
             <p class="signer-title">{{signerTitle}}</p>
           </div>
           <div class="seal-block">
-            <img src="{{selloBaraCreativaBase64}}" alt="Sello Bara Creativa" class="seal-image">
+            <img src="{{selloBaraCreativaBase64}}" alt="Sello" class="seal-image">
           </div>
         </div>
         <div class="signature-block">
