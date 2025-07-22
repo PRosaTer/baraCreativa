@@ -1,361 +1,398 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Certificado de Finalización</title>
-  <style>
-    @font-face {
-      font-family: 'Sansation';
-      src: url('/uploads/sansation/Sansation-Regular.ttf') format('truetype');
-      font-weight: normal;
-      font-style: normal;
-    }
+    <title>Certificado de Finalización</title>
+    <style>
+        @font-face {
+            font-family: 'Sansation';
+            src: url('/uploads/sansation/Sansation-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
 
-    body {
-      font-family: 'Sansation', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f0f0f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      overflow: auto;
-    }
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+            font-family: 'Sansation', sans-serif;
+            overflow: auto;
+        }
 
-    .certificate-container {
-      width: 297mm;
-      height: 210mm;
-      border: 5px solid #000;
-      padding: 0;
-      box-sizing: border-box;
-      background-color: #ffffff;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
+        .page-wrapper {
+            width: 297mm;
+            height: 210mm;
+            box-sizing: border-box;
+            background-color: white;
+            padding: 15mm;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-    .left-column {
-      position: absolute;
-      left: 23.94mm;
-      top: 0;
-      bottom: 0;
-      width: 25mm;
-      background-color: #e6e6e6;
-      z-index: 0;
-    }
+        .frame-wrapper {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            position: relative;
+            background-color: white;
+            border: 1px solid black;
+            box-shadow:
+                inset 0 0 0 5px white,
+                inset 0 0 0 6px black;
+        }
 
-    .badge-wrapper {
-      position: absolute;
-      left: -7mm;
-      top: 25%;
-      transform: translateY(-50%);
-      width: 150px;
-      height: 150px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1;
-    }
+        .certificate-container {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            box-sizing: border-box;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .badge-outer-white-circle {
-      position: relative;
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      background-color: #fff;
-      border: 2px solid #d4af37;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      padding: 0;
-      z-index: 2;
-    }
+        .left-column {
+            position: absolute;
+            left: 23.94mm;
+            top: 6px;
+            bottom: 0;
+            width: 25mm;
+            height: 176.3mm;
+            background-color: #e6e6e6;
+            z-index: 0;
+        }
 
-    .badge-inner-gold-white-circle {
-      width: 102px;
-      height: 104px;
-      border-radius: 50%;
-      border: 2px solid #d4af37;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 3;
-    }
+        .badge-wrapper {
+            position: absolute;
+            left: -7mm;
+            top: 25%;
+            transform: translateY(-50%);
+            width: 150px;
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
 
-    .badge-center-logo-fixed {
-      width: 137px;
-      height: 137px;
-      border-radius: 50%;
-      object-fit: cover;
-      position: relative;
-      z-index: 4;
-    }
+        .badge-outer-white-circle {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background-color: #fff;
+            border: 2px solid #d4af37;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            padding: 0;
+            z-index: 2;
+        }
 
-    .badge-text {
-      text-anchor: middle;
-      dominant-baseline: middle;
-      fill: #333;
-      font-family: 'Sansation', sans-serif;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
+        .badge-inner-gold-white-circle {
+            width: 102px;
+            height: 104px;
+            border-radius: 50%;
+            border: 2px solid #d4af37;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+        }
 
-    .badge-svg {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 140px;
-      height: 140px;
-      viewBox: 0 0 140 140;
-      z-index: 1;
-    }
+        .badge-center-logo-fixed {
+            width: 137px;
+            height: 137px;
+            border-radius: 50%;
+            object-fit: cover;
+            position: relative;
+            z-index: 4;
+        }
 
-    .right-column {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      padding: 20mm 20mm 20mm 100mm;
-      box-sizing: border-box;
-      text-align: left;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
+        .badge-text {
+            text-anchor: middle;
+            dominant-baseline: middle;
+            fill: #333;
+            font-family: 'Sansation', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
 
-    .main-header {
-      margin-top: 20px;
-    }
+        .badge-svg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 140px;
+            z-index: 1;
+        }
 
-    .company-name-container {
-      display: flex;
-      align-items: center;
-      margin-bottom: 5px;
-    }
+        .right-column {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            padding: 10mm 20mm 20mm 80mm;
+            box-sizing: border-box;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
 
-    .company-name-bara {
-      color: #ff0000;
-      font-size: 1.5em;
-      font-weight: 700;
-      margin-right: 2px;
-    }
+        .main-header {
+            margin-top: 10px;
+        }
 
-    .company-name-creativa {
-      color: #000;
-      font-size: 1.5em;
-      font-weight: 700;
-    }
+        .company-name-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
 
-    .lightbulb-icon {
-      width: 25px;
-      height: 25px;
-      margin-left: 5px;
-      vertical-align: middle;
-    }
+        .company-name-bara {
+            color: #ff0000;
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-right: 2px;
+        }
 
-    .main-title {
-      font-size: 2.8em;
-      font-weight: 700;
-      color: #000;
-      margin-bottom: 10px;
-    }
+        .company-name-creativa {
+            color: #000;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
 
-    .subtitle {
-      font-size: 1.4em;
-      color: #333;
-      margin-bottom: 20px;
-      font-weight: 400;
-    }
+        .lightbulb-icon {
+            width: 25px;
+            height: 25px;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
 
-    .course-title {
-      font-size: 2.2em;
-      font-weight: 700;
-      color: #000;
-      margin-top: 30px;
-      margin-bottom: 10px;
-      line-height: 1.2;
-    }
+        .main-title {
+            font-size: 2.8em;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 10px;
+        }
 
-    .completion-info {
-      font-size: 1.1em;
-      color: #555;
-      margin-bottom: 30px;
-    }
+        .subtitle {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
 
-    .description {
-      font-size: 1.1em;
-      color: #444;
-      line-height: 1.6;
-      max-width: 90%;
-      margin-bottom: 40px;
-    }
+        .course-title {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #000;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
 
-    .signature-area {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      margin-top: auto;
-      padding-top: 30px;
-      align-items: flex-start;
-    }
+        .completion-info {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 30px;
+        }
 
-    .signature-group {
-      display: flex;
-      align-items: flex-start;
-      gap: 15px;
-    }
+        .description {
+            font-size: 1.1em;
+            color: #444;
+            line-height: 1.6;
+            max-width: 90%;
+            margin-bottom: 40px;
+        }
 
-    .signature-block {
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-    }
+        .signature-area {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: auto;
+            padding-top: 30px;
+            align-items: flex-start;
+        }
 
-    .seal-block {
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      margin-top: 0;
-    }
+        .signature-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
 
-    .signature-image {
-      width: 150px;
-      height: auto;
-      margin-bottom: 5px;
-      object-fit: contain;
-    }
+        .signature-block {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-width: 200px;
+        }
 
-    .seal-image {
-      width: 80px;
-      height: 80px;
-      object-fit: contain;
-      margin-top: 0;
-      transform: rotate(270deg);
-    }
+        .seal-block {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            margin-top: 0;
+        }
 
-    .signer-name {
-      font-weight: 600;
-      color: #333;
-      font-size: 1em;
-      line-height: 1.1;
-    }
+        .signature-image {
+            width: 150px;
+            height: auto;
+            margin-bottom: 5px;
+            object-fit: contain;
+        }
 
-    .signer-title {
-      font-size: 0.85em;
-      color: #777;
-      line-height: 1.2;
-    }
+        .seal-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-top: 0;
+            transform: rotate(270deg);
+        }
 
-    .footer-id {
-      font-size: 0.8em;
-      color: #999;
-      margin-top: 4px;
-    }
+        .signer-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 1em;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
 
-    .dynamis-logo {
-      width: 300px;
-      height: auto;
-      object-fit: contain;
-    }
+        .signer-title {
+            font-size: 0.85em;
+            color: #777;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
 
-    @media print {
-      body {
-        margin: 0;
-        padding: 0;
-        background-color: #fff;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      .certificate-container {
-        border: none;
-        box-shadow: none;
-        width: 297mm;
-        height: 210mm;
-        margin: 0;
-        padding: 0;
-      }
-      .footer-id {
-        bottom: 10mm;
-      }
-    }
-  </style>
+        .footer-id {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 4px;
+            white-space: nowrap;
+        }
+
+        .dynamis-logo {
+            width: 300px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        @media print {
+            html, body {
+                margin: 0;
+                padding: 0;
+                background-color: #fff;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .page-wrapper {
+                padding: 15mm;
+                background-color: white;
+            }
+            .frame-wrapper {
+                border: 1px solid black;
+                box-shadow:
+                    inset 0 0 0 5px white,
+                    inset 0 0 0 6px black;
+                background-color: white;
+            }
+            .certificate-container {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .footer-id {
+                bottom: 10mm;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="certificate-container">
-    <div class="left-column">
-      <div class="badge-wrapper">
-        <div class="badge-outer-white-circle">
-          <svg class="badge-svg" width="140" height="140" viewBox="0 0 140 140" aria-hidden="true" focusable="false">
-            <defs>
-              <path id="cursoPath" d="M 35 50 A 35 35 0 0 1 105 50" fill="none" />
-              <path id="completadoPath" d="M 30 113 A 50 50 0 0 0 110 113" fill="none" />
-            </defs>
-            <text class="badge-text" transform="translate(0, -6)">
-              <textPath href="#cursoPath" startOffset="50%">Curso</textPath>
-            </text>
-            <text class="badge-text">
-              <textPath href="#completadoPath" startOffset="50%">Completado</textPath>
-            </text>
-          </svg>
-          <div class="badge-inner-gold-white-circle">
-            <img src="{{certificadoLogoBase64}}" alt="Logo Certificado" class="badge-center-logo-fixed">
-          </div>
+    <div class="page-wrapper">
+        <div class="frame-wrapper">
+            <div class="certificate-container">
+                <div class="left-column">
+                    <div class="badge-wrapper">
+                        <div class="badge-outer-white-circle">
+                            <svg class="badge-svg" width="140" height="140" viewBox="0 0 140 140" aria-hidden="true" focusable="false">
+                                <defs>
+                                    <path id="cursoPath" d="M 35 50 A 35 35 0 0 1 105 50" fill="none" />
+                                    <path id="completadoPath" d="M 30 113 A 50 50 0 0 0 110 113" fill="none" />
+                                </defs>
+                                <text class="badge-text" transform="translate(0, -6)">
+                                    <textPath href="#cursoPath" startOffset="50%">Curso</textPath>
+                                </text>
+                                <text class="badge-text">
+                                    <textPath href="#completadoPath" startOffset="50%">Completado</textPath>
+                                </text>
+                            </svg>
+                            <div class="badge-inner-gold-white-circle">
+                                <img src="{{certificadoLogoBase64}}" alt="Logo Certificado" class="badge-center-logo-fixed">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-column">
+                    <div class="main-header">
+                        <div class="company-name-container">
+                            <span class="company-name-bara">Bara</span>
+                            <span class="company-name-creativa">Creativa</span>
+                            <img src="{{bombilloBase64}}" alt="Foco" class="lightbulb-icon">
+                        </div>
+                        <h1 class="main-title">Certificado de finalización</h1>
+                        <p class="subtitle">¡Felicidades, {{userName}}!</p>
+                    </div>
+
+                    <div class="content-body">
+                        <h2 class="course-title"><p>Por la certificación en </p> {{courseTitle}}</h2>
+                        <p class="completion-info">Curso completado el {{issueDate}} <strong>UTC</strong></p>
+                        <p class="description">
+                            Reconocemos tu dedicación, esfuerzo y compromiso con el aprendizaje continuo,
+                            demostrando excelencia y constancia en tu desarrollo personal y profesional.
+                        </p>
+                    </div>
+
+                    <div class="signature-area">
+                        <div class="signature-group">
+                            <div class="signature-block">
+                                <img src="{{firmaBase64}}" alt="Firma" class="signature-image">
+                                <p class="signer-name">Victor Manuel Padilla Rodriguez</p>
+                                <p class="signer-title">Director E-Learning Bara Creativa HN</p>
+                                <p class="signer-title footer-id">ID de certificado: {{certificateId}}</p>
+                            </div>
+                            <div class="seal-block">
+                                <img src="{{selloBaraCreativaBase64}}" alt="Sello" class="seal-image">
+                            </div>
+                        </div>
+                        <div class="signature-block">
+                            <img src="{{dynamisBase64}}" alt="Dynamis HN Logo" class="dynamis-logo">
+                            <p class="signer-name">DYNAMIS HN</p>
+                            <p class="signer-title">¡YO SI PUEDO!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-
-    <div class="right-column">
-      <div class="main-header">
-        <div class="company-name-container">
-          <span class="company-name-bara">Bara</span>
-          <span class="company-name-creativa">Creativa</span>
-          <img src="{{bombilloBase64}}" alt="Foco" class="lightbulb-icon">
-        </div>
-        <h1 class="main-title">Certificado de finalización</h1>
-        <p class="subtitle">¡Felicidades, {{userName}}!</p>
-      </div>
-
-      <div class="content-body">
-        <h2 class="course-title">{{courseTitle}}</h2>
-        <p class="completion-info">Curso completado el {{issueDate}} <strong>UTC</strong></p>
-        <p class="description">
-          Reconocemos tu dedicación, esfuerzo y compromiso con el aprendizaje continuo,
-          demostrando excelencia y constancia en tu desarrollo personal y profesional.
-        </p>
-      </div>
-
-      <div class="signature-area">
-        <div class="signature-group">
-          <div class="signature-block">
-            <img src="{{firmaBase64}}" alt="Firma" class="signature-image">
-            <p class="signer-name">Victor Manuel Padilla Rodriguez</p>
-            <p class="signer-title">Director E-Learning Bara Creativa HN</p>
-            <p class="signer-title footer-id">ID de certificado: {{certificateId}}</p>
-          </div>
-          <div class="seal-block">
-            <img src="{{selloBaraCreativaBase64}}" alt="Sello" class="seal-image">
-          </div>
-        </div>
-        <div class="signature-block">
-          <img src="{{dynamisBase64}}" alt="Dynamis HN Logo" class="dynamis-logo">
-          <p class="signer-name">DYNAMIS HN</p>
-          <p class="signer-title">¡YO SI PUEDO!</p>
-        </div>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
