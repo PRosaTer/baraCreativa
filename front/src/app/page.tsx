@@ -3,7 +3,8 @@ import Contenedor_1 from "@/components/contenedor_1/page";
 import DynamicContenedor2 from "@/components/DynamicContenedor2/page";
 import LogoSlider from "@/components/logoSlider/page";
 import ThreeCoursesSection from "@/components/cursos-principales/page";
-import ThreeServicesSection from "@/components/servicios-pricipales/page"; // Importa el nuevo componente
+import ThreeServicesSection from "@/components/servicios-pricipales/page";
+import Introduction from "@/components/introduccion/page"; // Asegurate de que esta ruta coincida con la real
 
 export default function Home() {
   return (
@@ -31,6 +32,8 @@ export default function Home() {
       <ThreeCoursesSection />
       {/* Sección de tres servicios */}
       <ThreeServicesSection />
+      {/* Sección de presentación personal */}
+      <Introduction />
     </div>
   );
 }
