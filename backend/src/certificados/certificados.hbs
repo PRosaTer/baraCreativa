@@ -65,18 +65,18 @@
       border-radius: 50%;
       background-color: #fff;
       border: 2px solid #d4af37;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
       display: flex;
       justify-content: center;
       align-items: center;
       overflow: hidden;
+      padding: 0;
+      z-index: 2;
     }
 
     .badge-inner-gold-white-circle {
-      width: 90px;
-      height: 90px;
+      width: 102px;
+      height: 104px;
       border-radius: 50%;
-      background-color: #ffffff;
       border: 2px solid #d4af37;
       display: flex;
       justify-content: center;
@@ -85,13 +85,16 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 1;
+      z-index: 3;
     }
 
-    .badge-center-logo {
-      width: 45px;
-      height: 45px;
-      object-fit: contain;
+    .badge-center-logo-fixed {
+      width: 137px;
+      height: 137px;
+      border-radius: 50%;
+      object-fit: cover;
+      position: relative;
+      z-index: 4;
     }
 
     .badge-text {
@@ -112,7 +115,7 @@
       width: 140px;
       height: 140px;
       viewBox: 0 0 140 140;
-      z-index: 0;
+      z-index: 1;
     }
 
     .right-column {
@@ -198,16 +201,16 @@
 
     .signature-area {
       display: flex;
-      justify-content: space-around;
-      width: 90%;
+      justify-content: space-between;
+      width: 100%;
       margin-top: auto;
       padding-top: 30px;
-      align-items: flex-end;
+      align-items: flex-start;
     }
 
     .signature-group {
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
       gap: 15px;
     }
 
@@ -216,7 +219,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: flex-start;
     }
 
     .seal-block {
@@ -224,7 +227,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: flex-start;
+      margin-top: 0;
     }
 
     .signature-image {
@@ -238,29 +242,33 @@
       width: 80px;
       height: 80px;
       object-fit: contain;
-      margin-bottom: 5px;
-      transform: rotate(-1deg);
+      margin-top: 0;
+      transform: rotate(270deg);
     }
 
     .signer-name {
       font-weight: 600;
       color: #333;
       font-size: 1em;
+      line-height: 1.1;
     }
 
     .signer-title {
       font-size: 0.85em;
       color: #777;
+      line-height: 1.2;
     }
 
     .footer-id {
-      position: absolute;
-      bottom: 10mm;
-      left: 50%;
-      transform: translateX(-50%);
       font-size: 0.8em;
       color: #999;
-      width: 100%;
+      margin-top: 4px;
+    }
+
+    .dynamis-logo {
+      width: 300px;
+      height: auto;
+      object-fit: contain;
     }
 
     @media print {
@@ -290,12 +298,12 @@
     <div class="left-column">
       <div class="badge-wrapper">
         <div class="badge-outer-white-circle">
-          <svg class="badge-svg" width="140" height="140" viewBox="0 0 140 140">
+          <svg class="badge-svg" width="140" height="140" viewBox="0 0 140 140" aria-hidden="true" focusable="false">
             <defs>
               <path id="cursoPath" d="M 35 50 A 35 35 0 0 1 105 50" fill="none" />
-              <path id="completadoPath" d="M 30 108 A 50 50 0 0 0 110 108" fill="none" />
+              <path id="completadoPath" d="M 30 113 A 50 50 0 0 0 110 113" fill="none" />
             </defs>
-            <text class="badge-text">
+            <text class="badge-text" transform="translate(0, -6)">
               <textPath href="#cursoPath" startOffset="50%">Curso</textPath>
             </text>
             <text class="badge-text">
@@ -303,7 +311,7 @@
             </text>
           </svg>
           <div class="badge-inner-gold-white-circle">
-            <img src="{{certificadoLogoBase64}}" alt="Logo Certificado" class="badge-center-logo">
+            <img src="{{certificadoLogoBase64}}" alt="Logo Certificado" class="badge-center-logo-fixed">
           </div>
         </div>
       </div>
@@ -322,7 +330,7 @@
 
       <div class="content-body">
         <h2 class="course-title">{{courseTitle}}</h2>
-        <p class="completion-info">Curso completado el {{issueDate}}</p>
+        <p class="completion-info">Curso completado el {{issueDate}} <strong>UTC</strong></p>
         <p class="description">
           Reconocemos tu dedicación, esfuerzo y compromiso con el aprendizaje continuo,
           demostrando excelencia y constancia en tu desarrollo personal y profesional.
@@ -333,21 +341,21 @@
         <div class="signature-group">
           <div class="signature-block">
             <img src="{{firmaBase64}}" alt="Firma" class="signature-image">
-            <p class="signer-name">{{signerName}}</p>
-            <p class="signer-title">{{signerTitle}}</p>
+            <p class="signer-name">Victor Manuel Padilla Rodriguez</p>
+            <p class="signer-title">Director E-Learning Bara Creativa HN</p>
+            <p class="signer-title footer-id">ID de certificado: {{certificateId}}</p>
           </div>
           <div class="seal-block">
             <img src="{{selloBaraCreativaBase64}}" alt="Sello" class="seal-image">
           </div>
         </div>
         <div class="signature-block">
-          <img src="{{dynamisBase64}}" alt="Dynamis HN Logo" class="signature-image">
+          <img src="{{dynamisBase64}}" alt="Dynamis HN Logo" class="dynamis-logo">
           <p class="signer-name">DYNAMIS HN</p>
-          <p class="signer-title">TU TALENTO EN PODER</p>
+          <p class="signer-title">¡YO SI PUEDO!</p>
         </div>
       </div>
     </div>
-    <p class="footer-id">ID de certificado: {{certificateId}}</p>
   </div>
 </body>
 </html>

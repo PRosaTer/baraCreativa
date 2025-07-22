@@ -254,8 +254,8 @@ export class CertificadosService {
       day: 'numeric',
     });
 
-    const signerName = 'Victor Padilla';
-    const signerTitle = 'CEO de Bara Creativa';
+    const signerName = 'Victor Manuel Padilla Rodríguez';
+    const signerTitle = 'Director E-Learning Bara Creativa HN';
 
     const templatePath = path.join(process.cwd(), 'src', 'certificados', 'certificados.hbs');
 
