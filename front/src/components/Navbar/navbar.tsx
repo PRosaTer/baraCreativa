@@ -15,43 +15,43 @@ export default function Navbar() {
   const router = useRouter();
   const { usuario, cargandoUsuario, cerrarSesion } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
-  // Toggle menu on image click
   const toggleProfileMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+    setIsProfileOpen(!isProfileOpen);
   };
 
-  // Close menu if clicked outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
         profileMenuRef.current &&
         !profileMenuRef.current.contains(event.target as Node)
       ) {
-        setIsMenuOpen(false);
+        setIsProfileOpen(false);
       }
     }
-    if (isMenuOpen) {
+
+    if (isProfileOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     } else {
       document.removeEventListener("mousedown", handleClickOutside);
     }
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isMenuOpen]);
+  }, [isProfileOpen]);
 
   return (
-    <nav className="w-full bg-primary py-2 md:py-4 relative z-30">
-      <div className="flex items-center justify-between w-full max-w-screen-xl mx-auto px-2 sm:px-4 md:px-8 lg:px-20 gap-x-[54px]">
-        <div className="flex items-center justify-between w-full md:w-auto">
-          <div className="flex-shrink-0">
-            <Logo />
-          </div>
+    <nav className="w-full bg-primary py-2 lg:py-4 relative z-30">
+      <div className="flex items-center justify-between w-full max-w-screen-xl mx-auto px-4 lg:px-8">
+        <div className="flex items-center justify-between w-full lg:w-auto">
+          <Logo />
+          {/* Botón de menú hamburguesa */}
           <button
-            className="md:hidden text-white focus:outline-none"
-            onClick={() => setIsMenuOpen(false)} // optionally close profile menu on hamburger toggle
+            className="lg:hidden text-white ml-2 z-50 relative"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
           >
             <svg
@@ -67,30 +67,32 @@ export default function Navbar() {
                 strokeWidth="2"
                 d={
                   isMenuOpen
-                    ? "M6 18L18 6M6 6l12 12"
-                    : "M4 6h16M4 12h16M4 18h16"
+                    ? "M6 18L18 6M6 6l12 12" // X icon
+                    : "M4 6h16M4 12h16M4 18h16" // Hamburger icon
                 }
               />
             </svg>
           </button>
         </div>
 
+        {/* Menú de navegación */}
         <div
-          className={`flex flex-col md:flex-row items-center justify-start w-full gap-x-[1em]
-            md:flex
-            absolute md:static top-[100%] left-0  bg-primary
-            p-4 md:p-0 z-20
-            border-t border-white/10 md:border-0
-            max-w-screen-md
-            max-h-full
-            overflow-visible
-            mx-auto
-            rounded-b-lg
-            shadow-lg`}
+          className={`
+            ${isMenuOpen ? "flex" : "hidden"}
+            lg:flex flex-col lg:flex-row lg:items-center
+            w-full lg:w-auto
+            gap-4 lg:gap-6
+            fixed lg:static inset-0 lg:inset-auto
+            p-6 lg:p-0
+            bg-primary/95 lg:bg-transparent backdrop-blur
+            z-40
+            transition-all duration-300 ease-in-out
+            overflow-y-auto lg:overflow-visible
+          `}
         >
           <SobreComunidadButton />
           <ComunidadButton />
-          <BarraBusqueda className="flex-grow min-w-[200px] max-w-[656px] md:max-w-[400px] lg:max-w-[656px]" />
+          <BarraBusqueda className="flex-grow min-w-[200px] max-w-[656px] lg:max-w-[400px] xl:max-w-[656px]" />
           <Cursos />
           <Contactenos />
 
@@ -102,7 +104,7 @@ export default function Navbar() {
             <div className="relative z-50" ref={profileMenuRef}>
               <button
                 onClick={toggleProfileMenu}
-                className="relative w-16 h-16 rounded-full overflow-hidden z-10 border-2 border-white"
+                className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white"
               >
                 {usuario.fotoPerfil ? (
                   <img
@@ -115,21 +117,19 @@ export default function Navbar() {
                     ?
                   </div>
                 )}
-                {/* Efectos amarillos animados */}
-                <span className="absolute bg-yellow-300 w-36 h-36 rounded-full group-hover:scale-100 scale-0 -z-10 -left-10 -top-16 group-hover:duration-500 duration-700 origin-center transform transition-all"></span>
-                <span className="absolute bg-yellow-500 w-36 h-36 -left-10 -top-16 rounded-full group-hover:scale-100 scale-0 -z-10 group-hover:duration-700 duration-500 origin-center transform transition-all"></span>
               </button>
 
-              {/* Menú desplegable */}
               <div
-                className={`absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg py-2 z-50
-                  flex flex-col items-center
-                  transition-opacity duration-300 ease-out
-                  ${isMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"}`}
+                className={`${
+                  isProfileOpen ? "opacity-100 visible" : "opacity-0 invisible"
+                } transition-all duration-300 ease-out
+                  fixed lg:absolute right-4 lg:right-0 top-[80px] lg:top-full mt-2
+                  w-44 bg-white rounded-lg shadow-lg py-2 z-50`}
               >
                 <button
                   onClick={() => {
                     router.push("/perfil");
+                    setIsProfileOpen(false);
                     setIsMenuOpen(false);
                   }}
                   className="w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 font-medium hover:text-cyan-600 transition-colors duration-200"
@@ -139,6 +139,7 @@ export default function Navbar() {
                 <button
                   onClick={() => {
                     cerrarSesion();
+                    setIsProfileOpen(false);
                     setIsMenuOpen(false);
                   }}
                   className="w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 font-medium hover:text-red-700 transition-colors duration-200"
