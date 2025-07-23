@@ -149,11 +149,11 @@
             text-align: left;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
         }
 
         .main-header {
-            margin-top: 10px;
+            margin-top: 10mm;
         }
 
         .company-name-container {
@@ -165,14 +165,14 @@
         .company-name-bara {
             color: #ff0000;
             font-size: 1.5em;
-            font-weight: 700;
+            font-weight: normal;
             margin-right: 2px;
         }
 
         .company-name-creativa {
             color: #000;
             font-size: 1.5em;
-            font-weight: 700;
+            font-weight: normal;
         }
 
         .lightbulb-icon {
@@ -200,9 +200,10 @@
             font-size: 2.2em;
             font-weight: 700;
             color: #000;
-            margin-top: 30px;
+            margin-top: 10mm;
             margin-bottom: 10px;
             line-height: 1.2;
+            white-space: nowrap;
         }
 
         .completion-info {
@@ -216,70 +217,77 @@
             color: #444;
             line-height: 1.6;
             max-width: 90%;
-            margin-bottom: 40px;
+            margin-bottom: 0px;
         }
 
         .signature-area {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
+            align-items: center;
             width: 100%;
             margin-top: auto;
-            padding-top: 30px;
-            align-items: flex-start;
+            padding-top: 20px;
         }
 
         .signature-group {
             display: flex;
             align-items: flex-start;
-            gap: 15px;
+            gap: 0px;
+            margin-left: 0;
         }
 
         .signature-block {
-            text-align: center;
+            text-align: left;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-start;
             justify-content: flex-start;
-            min-width: 200px;
+            min-width: 220px;
         }
 
         .seal-block {
-            text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            margin-top: 0;
+            margin-left: -75px;
+            padding-top: -220px;
+            margin-top: -10px;
         }
 
         .signature-image {
-            width: 150px;
+            width: 280px;
             height: auto;
-            margin-bottom: 5px;
+            margin-bottom: 0px;
             object-fit: contain;
+            margin-left: -60px;
         }
 
         .seal-image {
             width: 80px;
             height: 80px;
             object-fit: contain;
-            margin-top: 0;
             transform: rotate(270deg);
+            transform-origin: center center;
+            margin-top: 0;
+            margin-bottom: 0;
         }
 
-        .signer-name {
+        .signature-group .signature-block .signer-name {
             font-weight: 600;
             color: #333;
             font-size: 1em;
             line-height: 1.1;
             white-space: nowrap;
+            margin-bottom: 0px;
         }
 
-        .signer-title {
+        .signature-group .signature-block .signer-title {
             font-size: 0.85em;
             color: #777;
-            line-height: 1.2;
+            line-height: 1.1;
             white-space: nowrap;
+            margin-top: 0px;
         }
 
         .footer-id {
@@ -287,12 +295,23 @@
             color: #999;
             margin-top: 4px;
             white-space: nowrap;
+            text-align: left;
+            margin-left: 0;
+        }
+
+        .dynamis-logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-left: 25px;
+            margin-top: -90px;
         }
 
         .dynamis-logo {
-            width: 300px;
+            width: 380px;
             height: auto;
             object-fit: contain;
+            margin-top: 0;
         }
 
         @media print {
@@ -303,10 +322,12 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+
             .page-wrapper {
                 padding: 15mm;
                 background-color: white;
             }
+
             .frame-wrapper {
                 border: 1px solid black;
                 box-shadow:
@@ -314,12 +335,14 @@
                     inset 0 0 0 6px black;
                 background-color: white;
             }
+
             .certificate-container {
                 width: 100%;
                 height: 100%;
                 margin: 0;
                 padding: 0;
             }
+
             .footer-id {
                 bottom: 10mm;
             }
@@ -364,8 +387,8 @@
                     </div>
 
                     <div class="content-body">
-                        <h2 class="course-title"><p>Por la certificación en </p> {{courseTitle}}</h2>
-                        <p class="completion-info">Curso completado el {{issueDate}} <strong>UTC</strong></p>
+                        <h2 class="course-title">Por la certificación en {{courseTitle}}</h2>
+                        <p class="completion-info">Completado el {{issueDate}}</p>
                         <p class="description">
                             Reconocemos tu dedicación, esfuerzo y compromiso con el aprendizaje continuo,
                             demostrando excelencia y constancia en tu desarrollo personal y profesional.
@@ -384,10 +407,9 @@
                                 <img src="{{selloBaraCreativaBase64}}" alt="Sello" class="seal-image">
                             </div>
                         </div>
-                        <div class="signature-block">
+
+                        <div class="dynamis-logo-container">
                             <img src="{{dynamisBase64}}" alt="Dynamis HN Logo" class="dynamis-logo">
-                            <p class="signer-name">DYNAMIS HN</p>
-                            <p class="signer-title">¡YO SI PUEDO!</p>
                         </div>
                     </div>
                 </div>

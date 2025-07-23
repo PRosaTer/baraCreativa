@@ -10,6 +10,7 @@ import { Usuario } from '../../entidades/usuario.entity';
 import { Curso } from '../../entidades/curso.entity';
 import { ReporteProgresoEntity } from '../../entidades/ReporteProgreso.entity';
 import { Inscripcion } from '../../entidades/inscripcion.entity';
+import { formatInTimeZone } from 'date-fns-tz';
 
 @Injectable()
 export class CertificadosService {
@@ -213,11 +214,8 @@ export class CertificadosService {
     selloBaraCreativaBase64: string,
     certificateId: string
   ): Promise<string> {
-    const formattedDate = issueDate.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    const hondurasTimeZone = 'America/Tegucigalpa';
+    const formattedDate = formatInTimeZone(issueDate, hondurasTimeZone, "dd/MM/yyyy HH:mm:ss");
 
     const signerName = 'Victor Manuel Padilla Rodriguez';
     const signerTitle = 'Director E-Learning Bara Creativa HN';
@@ -260,11 +258,11 @@ export class CertificadosService {
       browser = await puppeteer.launch({
         headless: true,
         args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-gpu',
-            '--no-zygote',
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--no-zygote',
         ],
       });
       const page = await browser.newPage();
