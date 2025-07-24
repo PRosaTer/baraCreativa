@@ -1,7 +1,7 @@
 "use client";
 
-import React from 'react';
-import Link from 'next/link';
+import React from "react";
+import Link from "next/link";
 
 interface BotonConEfectoProps {
   texto: string;
@@ -10,26 +10,32 @@ interface BotonConEfectoProps {
   className?: string;
 }
 
-export default function BotonConEfecto({ texto, href, onClick, className }: BotonConEfectoProps) {
+export default function BotonConEfecto({
+  texto,
+  href,
+  onClick,
+  className,
+}: BotonConEfectoProps) {
   const commonClasses = `
     flex items-center justify-center
     bg-red-600 text-white relative overflow-hidden group z-10
-    duration-1000 rounded-[20px]
-    h-10 sm:h-12
+    duration-1000 rounded-[1.25rem]  /* 20px */
+    h-auto py-2 sm:py-3
     text-xs sm:text-sm md:text-base lg:text-xl
-    w-24 sm:w-28 md:w-32 lg:w-40 // Clases de ancho solicitadas
-    px-2 sm:px-2 md:px-4 lg:px-6 // Clases de padding solicitadas
-    whitespace-nowrap
+    w-auto min-w-[6rem] max-w-[12rem]
+    px-4
+    text-center
+    whitespace-normal
   `;
 
-  const allClasses = `${commonClasses} ${className || ''}`;
+  const allClasses = `${commonClasses} ${className || ""}`;
 
   const buttonContent = (
     <>
-      
-      <span className="absolute bg-yellow-300 w-36 h-36 rounded-full group-hover:scale-100 scale-0 -z-10 -left-2 -top-10 group-hover:duration-500 duration-700 origin-center transform transition-all"></span>
-      <span className="absolute bg-yellow-500 w-36 h-36 -left-2 -top-10 rounded-full group-hover:scale-100 scale-0 -z-10 group-hover:duration-700 duration-500 origin-center transform transition-all"></span>
-      <span className="absolute bg-red-600 w-36 h-36 -left-2 -top-10 rounded-full group-hover:scale-100 scale-0 -z-10 group-hover:duration-700 duration-500 origin-center transform transition-all"></span>
+      {/* Círculos animados posicionados relativos y centrados */}
+      <span className="absolute bg-yellow-300 w-[9rem] h-[9rem] rounded-full group-hover:scale-100 scale-0 -z-10 left-0 top-0 transform -translate-x-1/2 -translate-y-1/2 group-hover:duration-500 duration-700 origin-center transition-all"></span>
+      <span className="absolute bg-yellow-500 w-[9rem] h-[9rem] rounded-full group-hover:scale-100 scale-0 -z-10 left-0 top-0 transform -translate-x-1/2 -translate-y-1/2 group-hover:duration-700 duration-500 origin-center transition-all"></span>
+      <span className="absolute bg-red-600 w-[9rem] h-[9rem] rounded-full group-hover:scale-100 scale-0 -z-10 left-0 top-0 transform -translate-x-1/2 -translate-y-1/2 group-hover:duration-700 duration-500 origin-center transition-all"></span>
       {texto}
     </>
   );

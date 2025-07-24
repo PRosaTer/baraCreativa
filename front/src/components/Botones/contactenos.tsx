@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import React from "react";
 
@@ -8,14 +7,13 @@ export default function ComunidadButton() {
     <Link
       href="/contacto"
       className="
-        flex items-center justify-center 
-        bg-red-600 text-white relative overflow-hidden group z-10 
-        hover:text-white duration-1000 rounded-[20px] 
-        
-        h-10 sm:h-12 
-        text-xs sm:text-sm md:text-base lg:text-xl 
-        w-24 sm:w-28 md:w-32 lg:w-64
-        px-2 sm:px-3 md:px-4 lg:px-6 
+        flex items-center justify-center
+        bg-red-600 text-white relative overflow-hidden group z-10
+        hover:text-white duration-1000 rounded-[1.25rem]
+        py-2 sm:py-3
+        px-3 sm:px-4
+        text-[clamp(0.75rem,2vw,1.25rem)]
+        w-fit min-w-[6rem] max-w-[16rem]
       "
     >
       <span className="absolute bg-yellow-300 w-44 h-36 rounded-full group-hover:scale-100 scale-0 -z-10 -left-2 -top-10 group-hover:duration-500 duration-700 origin-center transform transition-all"></span>
