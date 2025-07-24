@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { TypeAnimation } from "react-type-animation";
-import FondoParticulas from "@/components/fondoparticulas/page";
+import FondoParticulas from "@/components/fondoParticulas/page";
 
 const Introduction = () => {
   return (
