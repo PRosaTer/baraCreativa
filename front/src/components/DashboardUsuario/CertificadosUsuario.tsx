@@ -1,4 +1,3 @@
-// src/components/DashboardUsuario/CertificadosUsuario.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -21,14 +20,12 @@ export default function CertificadosUsuario() {
   const [certificados, setCertificados] = useState<Certificado[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Función para cargar los certificados desde el backend
   const fetchCertificados = async () => {
     try {
-      setLoading(true); // Indica que la carga está en progreso
-      setError(null);   // Limpia cualquier error previo
+      setLoading(true);
+      setError(null);
       const res = await fetch('http://localhost:3001/certificados/mis-certificados', {
-        credentials: 'include', // Importante para enviar cookies de sesión/autenticación
+        credentials: 'include',
       });
 
       if (!res.ok) {
@@ -37,34 +34,18 @@ export default function CertificadosUsuario() {
       }
 
       const data: Certificado[] = await res.json();
-      setCertificados(data); // Actualiza el estado con los nuevos certificados
+      setCertificados(data);
     } catch (err) {
       console.error('Error fetching certificates:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido al cargar los certificados.');
     } finally {
-      setLoading(false); // Finaliza el estado de carga
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    // 1. Realiza una carga inicial de los certificados cuando el componente se monta
     fetchCertificados();
-
-    // 2. Configura un intervalo para realizar el sondeo (polling)
-    // Esto hará que fetchCertificados se llame cada 5000 milisegundos (5 segundos).
-    const intervalId = setInterval(() => {
-      console.log('Realizando sondeo para actualizar certificados...');
-      fetchCertificados();
-    }, 5000); // Puedes ajustar este valor (en milisegundos) si necesitas una actualización más o menos frecuente
-
-    // 3. Función de limpieza:
-    // Es crucial limpiar el intervalo cuando el componente se desmonta
-    // para evitar fugas de memoria y llamadas innecesarias al servidor.
-    return () => {
-      console.log('Limpiando intervalo de sondeo de certificados.');
-      clearInterval(intervalId);
-    };
-  }, []); // El array de dependencias vacío [] asegura que este efecto se ejecute solo una vez al montar el componente.
+  }, []);
 
   if (loading) {
     return (
