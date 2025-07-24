@@ -8,7 +8,7 @@ interface ListaModulosProps {
 export function ListaModulos({ modulos }: ListaModulosProps) {
   return (
     <PanelTarjeta
-      titulo="Módulos de Programa:"
+      titulo="Módulos:"
       claseAdicional="overflow-y-auto max-h-[450px] custom-scrollbar"
       colorBordeHover="accent-cyan" 
     >

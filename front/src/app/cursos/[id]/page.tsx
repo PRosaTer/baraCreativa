@@ -62,74 +62,87 @@ export default function CursoDetalle() {
 
         <div className="flex flex-col gap-8 md:gap-10">
           {curso?.imagenCurso && typeof curso.imagenCurso === 'string' && (
-            <PanelTarjeta colorBordeHover="accent-cyan" claseAdicional="p-4 md:p-6" conEfectoBrilloImagen>
-              <img
-                src={curso.imagenCurso}
-                alt={`Imagen de ${curso.titulo}`}
-                className="max-w-full h-auto object-contain rounded-md shadow-md
-                           border border-transparent group-hover:border-accent-magenta transition-all duration-300
-                           image-hover-tilt max-h-96 w-full"
-              />
-            </PanelTarjeta>
+            <div className="animate-fade-in-up animation-delay-[100ms]">
+              <PanelTarjeta colorBordeHover="accent-cyan" claseAdicional="p-4 md:p-6" conEfectoBrilloImagen>
+                <img
+                  src={curso.imagenCurso}
+                  alt={`Imagen de ${curso.titulo}`}
+                  className="max-w-full h-auto object-contain rounded-md shadow-md
+                             border border-transparent group-hover:border-accent-magenta transition-all duration-300
+                             image-hover-tilt max-h-96 w-full"
+                />
+              </PanelTarjeta>
+            </div>
           )}
 
-          <PanelTarjeta titulo="Descripción:" colorBordeHover="accent-cyan" conEfectoEscaneo>
-            <p className="text-text-light text-base sm:text-lg leading-relaxed opacity-90">{curso?.descripcion}</p>
-          </PanelTarjeta>
+          <div className="animate-fade-in-up animation-delay-[200ms]">
+            <PanelTarjeta titulo="Descripción:" colorBordeHover="accent-cyan" conEfectoEscaneo>
+              <p className="text-text-light text-base sm:text-lg leading-relaxed opacity-90">{curso?.descripcion}</p>
+            </PanelTarjeta>
+          </div>
         </div>
 
         <div className="flex flex-col gap-8 md:gap-10">
-          <PanelTarjeta titulo="Detalles del Curso:" colorBordeHover="accent-cyan">
-            <p className="font-bold text-base sm:text-lg text-accent-lime mb-3 group cursor-default">
-              💲 Precio: <span className="text-text-light">${curso?.precio}</span>
-              <span className="inline-block group-hover:animate-bounce-once origin-bottom ml-1"></span>
-            </p>
-            <div className="text-text-muted text-sm sm:text-base space-y-3">
-              <p>
-                Certificado:{' '}
-                {curso?.certificadoDisponible ? (
-                  <span className="text-accent-lime inline-flex items-center group cursor-help relative animate-pulse-light">
-                    ✅ Disponible
-                    <span className="absolute -top-7 left-1/2 -translate-x-1/2 bg-dark-bg text-xs text-text-light px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap border border-accent-cyan">
-                      Obtén tu certificado al finalizar
+          <div className="animate-fade-in-up animation-delay-[300ms]">
+            <PanelTarjeta titulo="Detalles del Curso:" colorBordeHover="accent-cyan">
+              <p className="font-bold text-base sm:text-lg text-accent-lime mb-3 group cursor-default">
+                💲 Precio: <span className="text-text-light">${curso?.precio}</span>
+                <span className="inline-block group-hover:animate-bounce-once origin-bottom ml-1"></span>
+              </p>
+              <div className="text-text-muted text-sm sm:text-base space-y-3">
+                <p>
+                  Certificado:{' '}
+                  {curso?.certificadoDisponible ? (
+                    <span className="text-accent-lime inline-flex items-center group cursor-help relative animate-pulse-light">
+                      ✅ Disponible
+                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 bg-dark-bg text-xs text-text-light px-2 py-1 rounded
+                                       opacity-0 group-hover:opacity-100
+                                       transition-opacity duration-200 pointer-events-none whitespace-nowrap border border-accent-cyan
+                                       group-hover:animate-tooltip-pop-in">
+                        Obtén tu certificado al finalizar
+                      </span>
                     </span>
-                  </span>
-                ) : (
-                  <span className="text-border-glitch animate-glitch-subtle">❌ No disponible</span>
-                )}
-              </p>
-              <p>
-                Badge:{' '}
-                {curso?.badgeDisponible ? (
-                  <span className="text-accent-lime animate-pulse-light">✅ Disponible</span>
-                ) : (
-                  <span className="text-border-glitch animate-glitch-subtle">❌ No disponible</span>
-                )}
-              </p>
-              <p>
-                Archivo Scorm:{' '}
-                {curso?.archivoScorm ? (
-                  <span className="text-accent-lime animate-pulse-light">✅ Disponible</span>
-                ) : (
-                  <span className="text-border-glitch animate-glitch-subtle">❌ No disponible</span>
-                )}
-              </p>
-              <p>Tipo: <span className="font-bold text-accent-cyan">{curso?.tipo}</span></p>
-              <p>Categoría: <span className="font-bold text-accent-cyan">{curso?.categoria ?? 'Sin categoría'}</span></p>
-              <p>Modalidad: <span className="font-bold text-accent-cyan">{curso?.modalidad}</span></p>
-              <p>Horas: <span className="font-bold text-accent-cyan">{curso?.duracionHoras}</span></p>
-            </div>
-          </PanelTarjeta>
+                  ) : (
+                    <span className="text-border-glitch animate-glitch-subtle">❌ No disponible</span>
+                  )}
+                </p>
+                <p>
+                  Badge:{' '}
+                  {curso?.badgeDisponible ? (
+                    <span className="text-accent-lime animate-pulse-light">✅ Disponible</span>
+                  ) : (
+                    <span className="text-border-glitch animate-glitch-subtle">❌ No disponible</span>
+                  )}
+                </p>
+                <p>
+                  Archivo Scorm:{' '}
+                  {curso?.archivoScorm ? (
+                    <span className="text-accent-lime animate-pulse-light">✅ Disponible</span>
+                  ) : (
+                    <span className="text-border-glitch animate-glitch-subtle">❌ No disponible</span>
+                  )}
+                </p>
+                <p>Tipo: <span className="font-bold text-accent-cyan">{curso?.tipo}</span></p>
+                <p>Categoría: <span className="font-bold text-accent-cyan">{curso?.categoria ?? 'Sin categoría'}</span></p>
+                <p>Modalidad: <span className="font-bold text-accent-cyan">{curso?.modalidad}</span></p>
+                <p>Horas: <span className="font-bold text-accent-cyan">{curso?.duracionHoras}</span></p>
+              </div>
+            </PanelTarjeta>
+          </div>
 
-          <ListaModulos modulos={curso?.modulos} />
+          <div className="animate-fade-in-up animation-delay-[400ms]">
+            <ListaModulos modulos={curso?.modulos} />
+          </div>
         </div>
       </div>
 
-      <SeccionPago
-        crearOrden={crearOrden}
-        onApprove={onApprove}
-        onError={handlePayPalError}
-      />
+      <div className="animate-fade-in animation-delay-[500ms]">
+        <SeccionPago
+          crearOrden={crearOrden}
+          onApprove={onApprove}
+          onError={handlePayPalError}
+        />
+      </div>
     </div>
   );
 }
