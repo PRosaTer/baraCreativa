@@ -12,7 +12,7 @@ export default function ComunidadButton() {
         hover:text-white duration-1000 rounded-[1.25rem]
         py-2 sm:py-3
         px-3 sm:px-4
-        text-[clamp(0.75rem,2vw,1.25rem)]
+        text-[clamp(0.65rem,1.5vw,1rem)] tracking-tight
         w-fit min-w-[6rem] max-w-[16rem]
       "
     >
