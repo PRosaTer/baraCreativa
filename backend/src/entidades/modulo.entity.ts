@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, Column, ManyToOne } from 'typeorm';
 import { Curso } from './curso.entity';
 
 export enum TipoModulo {
@@ -11,7 +11,7 @@ export enum TipoModulo {
 
 @Entity('modulos')
 export class ModuloEntity {
-  @PrimaryGeneratedColumn()
+  @Column({ primary: true })
   id: number;
 
   @Column()
@@ -20,14 +20,11 @@ export class ModuloEntity {
   @Column({ type: 'text', nullable: true })
   descripcion: string;
 
-
   @Column('simple-array', { nullable: true })
   videoUrl?: string[] | null;
 
-
   @Column('simple-array', { nullable: true })
   pdfUrl?: string[] | null;
-
 
   @Column('simple-array', { nullable: true })
   imageUrl?: string[] | null;

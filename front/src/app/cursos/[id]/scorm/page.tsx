@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { ToastContainer } from 'react-toastify';
+import React from 'react';
 
 import { useCursoScorm } from '@/app/hooks/Scorm/useCursoScorm';
 
@@ -24,8 +25,6 @@ export default function ScormPage() {
     error,
     loading,
     cursoCompletadoGeneral,
-    markCourseAsCompletedGeneral,
-    marcarModuloCompletadoBackend,
     handleNavigation, 
     handleModuleClick,
     progresoGeneral,
@@ -35,9 +34,9 @@ export default function ScormPage() {
     isNextContentDisabled,
   } = useCursoScorm(cursoId);
 
-  if (loading) return <p className="text-center mt-8">Cargando curso...</p>;
-  if (error) return <p className="text-red-600 text-center mt-8">{error}</p>;
-  if (!currentModule) return <p className="text-center mt-8">No hay módulos disponibles para este curso.</p>;
+  if (loading) return <p className="text-center mt-8 text-lg text-gray-700">Cargando curso y módulos...</p>;
+  if (error) return <p className="text-red-600 text-center mt-8 text-lg font-bold">Error al cargar el curso: {error}</p>;
+  if (!currentModule) return <p className="text-center mt-8 text-lg text-gray-700">No hay contenido disponible para este curso.</p>;
 
   return (
     <>
@@ -52,43 +51,25 @@ export default function ScormPage() {
           />
         </div>
 
-
         <div className="lg:w-3/4 bg-white rounded-lg shadow-lg p-6 flex flex-col">
           <MensajeFinal mostrar={cursoCompletadoGeneral} />
 
           <h1 className="text-3xl font-bold mb-4 text-gray-900">{currentModule.titulo}</h1>
           <p className="text-gray-600 mb-6">{currentModule.descripcionContenido}</p>
 
-     
           <div className="flex-grow flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
             <ContenedorContenido
               tipo={currentModule.tipo}
-              urlContenido={currentModule.tipo !== 'texto' ? currentContentUrl : undefined}
+              urlContenido={currentContentUrl}
               contenidoTexto={currentModule.tipo === 'texto' ? currentModule.descripcionContenido : undefined}
             />
           </div>
 
-       
           <Navegacion
             onNavigate={handleNavigation} 
             disablePrev={isPrevContentDisabled}
             disableNext={isNextContentDisabled}
           />
-
-
-          <div className="mt-6 text-center">
-            <button
-              onClick={markCourseAsCompletedGeneral}
-              disabled={progresoGeneral < 100 || cursoCompletadoGeneral}
-              className={`px-8 py-4 text-lg font-bold rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg
-                ${progresoGeneral === 100 && !cursoCompletadoGeneral
-                  ? 'bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-300'
-                  : 'bg-gray-300 text-gray-600 cursor-not-allowed opacity-70'
-                }`}
-            >
-              {cursoCompletadoGeneral ? 'Curso Ya Completado 🎉' : 'Marcar Curso como Completado'}
-            </button>
-          </div>
         </div>
       </div>
       <ToastContainer />

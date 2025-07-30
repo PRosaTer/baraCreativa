@@ -13,5 +13,6 @@ import { ProgresoModule } from '../../modules/progreso/progreso.module';
   ],
   controllers: [CursosController],
   providers: [CursosService],
+  exports: [CursosService], 
 })
 export class CursosModule {}

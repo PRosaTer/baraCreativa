@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Unique } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Unique, JoinColumn } from 'typeorm'; // Añadir JoinColumn
 import { Usuario } from './usuario.entity';
 import { Curso } from './curso.entity';
 import { ModuloEntity } from './modulo.entity';
@@ -16,6 +16,7 @@ export class ReporteProgresoEntity {
   curso: Curso;
 
   @ManyToOne(() => ModuloEntity, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'moduloId' })
   modulo: ModuloEntity;
 
   @Column({ default: false })
