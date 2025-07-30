@@ -1,5 +1,3 @@
-// src/main.ts
-
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -14,7 +12,6 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function createFolderIfNotExist(path: string) {
   try {
     await fsPromises.mkdir(path, { recursive: true });
-    console.log(`✔️ Carpeta creada o ya existente: ${path}`);
   } catch (err) {
     console.error(`Error creando carpeta ${path}:`, err);
   }
@@ -23,10 +20,14 @@ async function createFolderIfNotExist(path: string) {
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+
   app.enableCors({
     origin: 'http://localhost:3000',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    allowedHeaders: 'Content-Type, Authorization',
   });
+
 
   app.use(cookieParser());
 
@@ -38,7 +39,6 @@ async function bootstrap() {
     }),
   );
 
-  // Carpetas para uploads y SCORM
   const uploadPath = join(process.cwd(), 'uploads', 'imagenes-cursos');
   const scormUploadPath = join(process.cwd(), 'uploads', 'scorm');
   const scormUnzippedPath = join(process.cwd(), 'uploads', 'scorm_unzipped_courses');
@@ -52,9 +52,8 @@ async function bootstrap() {
   ]);
 
   app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
-  app.use('/scorm_courses', express.static(scormUnzippedPath));
+  app.use('/scorm_courses', express.static(scormUnzippedPath)); 
 
-  // Swagger config
   const config = new DocumentBuilder()
     .setTitle('API Bara Creativa')
     .setDescription('Documentación de la API para pagos, cursos y usuarios')
@@ -66,8 +65,6 @@ async function bootstrap() {
   app.useWebSocketAdapter(new IoAdapter(app));
 
   await app.listen(3001);
-  console.log('🚀 Backend corriendo en http://localhost:3001');
-  console.log('📄 Swagger disponible en http://localhost:3001/api');
 }
 
 bootstrap();

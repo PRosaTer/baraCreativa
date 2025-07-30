@@ -8,11 +8,13 @@ import { Curso } from '../../entidades/curso.entity';
 import { ModuloEntity } from '../../entidades/modulo.entity';
 import { Inscripcion } from '../../entidades/inscripcion.entity';
 import { CertificadosModule } from '../../modules/certificados/certificados.module'; 
+import { CursosModule } from '../../modules/cursos/cursos.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ReporteProgresoEntity, Usuario, Curso, ModuloEntity, Inscripcion]),
     CertificadosModule, 
+    CursosModule,
   ],
   controllers: [ReporteProgresoController],
   providers: [ReporteProgresoService],

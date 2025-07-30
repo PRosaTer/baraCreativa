@@ -1,4 +1,3 @@
-// src/controllers/cursos/cursos.controller.ts
 import {
   Controller,
   Get,
@@ -207,15 +206,10 @@ export class CursosController {
     @Param('id', ParseIntPipe) moduloId: number,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
-    console.log(`[CursosController] Recibida petición para subir archivos de módulo para ID: ${moduloId}`);
-    console.log(`[CursosController] Archivos recibidos (cantidad): ${files ? files.length : 0}`);
-
     if (!files || files.length === 0) {
-      console.log('[CursosController] No se subieron archivos para el módulo.');
       throw new BadRequestException('No se subieron archivos para el módulo.');
     }
 
-    // ¡Cambiado para que sean arrays!
     const updatedPaths: {
       videoUrls: string[]; 
       pdfUrls: string[]; 
@@ -228,34 +222,24 @@ export class CursosController {
 
     files.forEach(file => {
       const filePath = `/uploads/modulos/${file.filename}`;
-      console.log(`[CursosController] Procesando archivo: ${file.originalname}, MimeType: ${file.mimetype}, Path: ${filePath}`);
-
       if (file.mimetype.startsWith('video/')) {
-        updatedPaths.videoUrls.push(filePath); // Añadir al array
-        console.log(`[CursosController] Añadido videoUrl: ${filePath}`);
+        updatedPaths.videoUrls.push(filePath);
       } else if (file.mimetype === 'application/pdf') {
-        updatedPaths.pdfUrls.push(filePath); // Añadir al array
-        console.log(`[CursosController] Añadido pdfUrl: ${filePath}`);
+        updatedPaths.pdfUrls.push(filePath);
       } else if (file.mimetype.startsWith('image/')) {
-        updatedPaths.imageUrls.push(filePath); // Añadir al array
-        console.log(`[CursosController] Añadido imageUrl: ${filePath}`);
+        updatedPaths.imageUrls.push(filePath);
       } else {
-        console.warn(`[CursosController] Tipo de archivo no reconocido o no esperado: ${file.mimetype}`);
+        console.warn(`Tipo de archivo no reconocido o no esperado: ${file.mimetype}`);
       }
     });
 
-    console.log('[CursosController] updatedPaths final antes de llamar al servicio:', updatedPaths);
-
     try {
-      // Pasar los arrays de URLs al servicio
       const updatedModulo = await this.cursosService.actualizarModuloFilePaths(moduloId, updatedPaths);
-      console.log('[CursosController] Módulo actualizado en la BD:', updatedModulo);
       return {
         message: 'Archivos de módulo subidos y rutas actualizadas correctamente',
         modulo: updatedModulo,
       };
     } catch (error) {
-      console.error('[CursosController] Error al procesar la subida de archivos del módulo:', error);
       throw new InternalServerErrorException('Error al procesar la subida de archivos del módulo');
     }
   }

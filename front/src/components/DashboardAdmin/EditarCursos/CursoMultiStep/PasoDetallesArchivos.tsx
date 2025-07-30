@@ -29,7 +29,6 @@ const PasoDetallesArchivos: React.FC<PasoDetallesArchivosProps> = ({
       <label style={labelStyle}>Tipo</label>
       <select name="tipo" value={form.tipo} onChange={handleChange} required style={inputStyle}>
         <option value="">Seleccione tipo</option>
-        {/* Usar TipoCurso enum para consistencia */}
         <option value={TipoCurso.DOCENTES}>Docentes</option>
         <option value={TipoCurso.ESTUDIANTES}>Estudiantes</option>
         <option value={TipoCurso.EMPRESAS}>Empresas</option>

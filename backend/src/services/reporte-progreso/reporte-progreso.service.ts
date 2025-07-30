@@ -1,13 +1,15 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not } from 'typeorm';
 import { ReporteProgresoEntity } from '../../entidades/ReporteProgreso.entity';
 import { Usuario } from '../../entidades/usuario.entity';
 import { Curso } from '../../entidades/curso.entity';
-import { ModuloEntity } from '../../entidades/modulo.entity';
+import { ModuloEntity, TipoModulo } from '../../entidades/modulo.entity';
 import { Inscripcion } from '../../entidades/inscripcion.entity'; 
 import { MarcarModuloCompletadoDto } from '../../interfaces/reporte-progreso.interface';
 import { CertificadosService } from '../../services/certificados/certificados.service'; 
+
+const SCORM_VIRTUAL_MODULE_ID_OFFSET = 1000000;
 
 @Injectable()
 export class ReporteProgresoService {
@@ -27,29 +29,121 @@ export class ReporteProgresoService {
     private readonly certificadosService: CertificadosService,
   ) {}
 
+  async marcarSCORMCompletado(usuarioId: number, cursoId: number): Promise<ReporteProgresoEntity> {
+    this.logger.log(`[marcarSCORMCompletado] Iniciando para Usuario ID: ${usuarioId}, Curso ID: ${cursoId}`);
+
+    const usuario = await this.usuarioRepository.findOne({ where: { id: usuarioId } });
+    if (!usuario) {
+      this.logger.warn(`[marcarSCORMCompletado] Usuario ${usuarioId} no encontrado.`);
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const curso = await this.cursoRepository.findOne({ where: { id: cursoId } });
+    if (!curso) {
+      this.logger.warn(`[marcarSCORMCompletado] Curso ${cursoId} no encontrado.`);
+      throw new NotFoundException('Curso no encontrado');
+    }
+
+    const scormVirtualModuloId = cursoId + SCORM_VIRTUAL_MODULE_ID_OFFSET;
+
+    let scormModuloEnBD: ModuloEntity | null;
+    try {
+      scormModuloEnBD = await this.moduloRepository.findOne({
+        where: { id: scormVirtualModuloId }
+      });
+      this.logger.log(`[marcarSCORMCompletado] Búsqueda de Modulo SCORM virtual (ID: ${scormVirtualModuloId}): ${scormModuloEnBD ? 'Encontrado' : 'No encontrado'}.`);
+
+      if (!scormModuloEnBD) {
+        this.logger.log(`[marcarSCORMCompletado] Creando nuevo Modulo SCORM virtual (ID: ${scormVirtualModuloId}) en la base de datos.`);
+        const nuevoScormModulo = this.moduloRepository.create({
+          id: scormVirtualModuloId,
+          titulo: curso.titulo + ' (Módulo SCORM Principal)',
+          tipo: TipoModulo.SCORM,
+          curso: curso,
+          orden: 0
+        });
+        scormModuloEnBD = await this.moduloRepository.save(nuevoScormModulo);
+        this.logger.log(`[marcarSCORMCompletado] Modulo SCORM virtual (ID: ${scormVirtualModuloId}) GUARDADO exitosamente en la tabla 'modulos'.`);
+        this.logger.log(`[marcarSCORMCompletado] ID REAL del Modulo SCORM virtual DESPUÉS DE GUARDAR: ${scormModuloEnBD.id}`);
+      }
+    } catch (error) {
+      this.logger.error(`[marcarSCORMCompletado] ERROR CRÍTICO al buscar/crear Modulo SCORM virtual (ID: ${scormVirtualModuloId}): ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Error al asegurar la existencia del módulo SCORM virtual.');
+    }
+
+    let reporteProgreso: ReporteProgresoEntity | null;
+    try {
+      reporteProgreso = await this.reporteProgresoRepository.findOne({
+        where: { usuario: { id: usuarioId }, modulo: { id: scormVirtualModuloId }, curso: { id: cursoId } },
+      });
+      this.logger.log(`[marcarSCORMCompletado] Búsqueda de ReporteProgreso existente para Modulo SCORM virtual: ${reporteProgreso ? 'Encontrado' : 'No encontrado'}.`);
+
+      if (reporteProgreso && reporteProgreso.completado) {
+        this.logger.log(`[marcarSCORMCompletado] Módulo SCORM virtual del curso ${cursoId} ya estaba completado para usuario ${usuarioId}.`);
+        return reporteProgreso;
+      }
+
+      if (!reporteProgreso) {
+        this.logger.log(`[marcarSCORMCompletado] Creando nuevo ReporteProgreso para módulo SCORM virtual (ID: ${scormVirtualModuloId}).`);
+        reporteProgreso = this.reporteProgresoRepository.create({
+          usuario,
+          curso,
+          modulo: scormModuloEnBD,
+        });
+      }
+
+      reporteProgreso.completado = true;
+      reporteProgreso.fechaCompletado = new Date();
+
+      this.logger.log(`[marcarSCORMCompletado] Antes de guardar ReporteProgreso: modulo.id en reporteProgreso es ${reporteProgreso.modulo?.id}`);
+
+      const reporteGuardado = await this.reporteProgresoRepository.save(reporteProgreso);
+      this.logger.log(`[marcarSCORMCompletado] ReporteProgreso para Modulo SCORM virtual (ID: ${scormVirtualModuloId}) GUARDADO exitosamente en la tabla 'reportes_progreso'.`);
+      
+      const reporteVerificado = await this.reporteProgresoRepository.findOne({
+        where: { id: reporteGuardado.id }, 
+        relations: ['modulo']
+      });
+      this.logger.log(`[marcarSCORMCompletado] VERIFICACIÓN INMEDIATA (ReporteProgreso SCORM): ID:${reporteGuardado.id} Encontrado en DB: ${reporteVerificado ? 'SÍ' : 'NO'}. Módulo asociado: ${reporteVerificado?.modulo?.id}`);
+
+
+      await this.verificarYMarcarCursoCompleto(usuarioId, cursoId, scormModuloEnBD);
+
+      return reporteGuardado;
+
+    } catch (error) {
+      this.logger.error(`[marcarSCORMCompletado] ERROR CRÍTICO al guardar ReporteProgreso para Modulo SCORM virtual (ID: ${scormVirtualModuloId}): ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Error al guardar el progreso del módulo SCORM.');
+    }
+  }
+
   async marcarModuloCompletado(
     usuarioId: number,
     dto: MarcarModuloCompletadoDto,
   ): Promise<ReporteProgresoEntity> {
     const { cursoId, moduloId } = dto;
 
-    this.logger.log(`Intentando marcar módulo ${moduloId} del curso ${cursoId} como completado para usuario ${usuarioId}`);
+    this.logger.log(`[marcarModuloCompletado] Intentando marcar módulo ${moduloId} del curso ${cursoId} como completado para usuario ${usuarioId}`);
 
     const usuario = await this.usuarioRepository.findOne({ where: { id: usuarioId } });
     if (!usuario) {
-      this.logger.warn(`Usuario ${usuarioId} no encontrado.`);
+      this.logger.warn(`[marcarModuloCompletado] Usuario ${usuarioId} no encontrado.`);
       throw new NotFoundException('Usuario no encontrado');
     }
 
     const curso = await this.cursoRepository.findOne({ where: { id: cursoId } });
     if (!curso) {
-      this.logger.warn(`Curso ${cursoId} no encontrado.`);
+      this.logger.warn(`[marcarModuloCompletado] Curso ${cursoId} no encontrado.`);
       throw new NotFoundException('Curso no encontrado');
+    }
+
+    if (moduloId >= SCORM_VIRTUAL_MODULE_ID_OFFSET) {
+        throw new BadRequestException('Intento de marcar un módulo virtual SCORM con el método incorrecto. Por favor, asegúrese de que el ID del módulo sea válido para un módulo no SCORM.');
     }
 
     const modulo = await this.moduloRepository.findOne({ where: { id: moduloId, curso: { id: cursoId } } });
     if (!modulo) {
-      this.logger.warn(`Módulo ${moduloId} no encontrado en el curso ${cursoId}.`);
+      this.logger.warn(`[marcarModuloCompletado] Módulo ${moduloId} no encontrado en el curso ${cursoId}.`);
       throw new NotFoundException('Módulo no encontrado en este curso');
     }
 
@@ -58,70 +152,113 @@ export class ReporteProgresoService {
     });
 
     if (reporteProgreso && reporteProgreso.completado) {
-      this.logger.log(`Módulo ${moduloId} del curso ${cursoId} ya estaba completado para usuario ${usuarioId}.`);
+      this.logger.log(`[marcarModuloCompletado] Módulo ${moduloId} del curso ${cursoId} ya estaba completado para usuario ${usuarioId}.`);
       return reporteProgreso;
     }
 
     if (!reporteProgreso) {
+      this.logger.log(`[marcarModuloCompletado] Creando nuevo reporte de progreso para módulo ${moduloId}.`);
       reporteProgreso = this.reporteProgresoRepository.create({
         usuario,
         curso,
         modulo,
       });
-      this.logger.log(`Creando nuevo reporte de progreso para módulo ${moduloId}.`);
     }
 
     reporteProgreso.completado = true;
     reporteProgreso.fechaCompletado = new Date();
 
     const reporteGuardado = await this.reporteProgresoRepository.save(reporteProgreso);
-    this.logger.log(`Módulo ${moduloId} del curso ${cursoId} marcado como completado para usuario ${usuarioId}.`);
+    this.logger.log(`[marcarModuloCompletado] Módulo ${moduloId} del curso ${cursoId} marcado como completado para usuario ${usuarioId}.`);
+
+    const reporteVerificado = await this.reporteProgresoRepository.findOne({
+      where: { id: reporteGuardado.id }, 
+      relations: ['modulo']
+    });
+    this.logger.log(`[marcarModuloCompletado] VERIFICACIÓN INMEDIATA (ReporteProgreso Regular): ID:${reporteGuardado.id} Encontrado en DB: ${reporteVerificado ? 'SÍ' : 'NO'}. Módulo asociado: ${reporteVerificado?.modulo?.id}`);
 
 
-    await this.verificarYMarcarCursoCompleto(usuarioId, cursoId);
+    await this.verificarYMarcarCursoCompleto(usuarioId, cursoId, modulo);
 
     return reporteGuardado;
   }
 
   async obtenerProgresoModulosUsuario(usuarioId: number, cursoId: number): Promise<ReporteProgresoEntity[]> {
-    this.logger.log(`Obteniendo progreso de módulos para usuario ${usuarioId} en curso ${cursoId}.`);
-    return this.reporteProgresoRepository.find({
-      where: { usuario: { id: usuarioId }, curso: { id: cursoId } },
+    this.logger.log(`[obtenerProgresoModulosUsuario] Obteniendo progreso de módulos para usuario ${usuarioId} en curso ${cursoId}.`);
+    const progreso = await this.reporteProgresoRepository.find({
+      where: [
+        { usuario: { id: usuarioId }, curso: { id: cursoId }, modulo: { id: Not(cursoId + SCORM_VIRTUAL_MODULE_ID_OFFSET) } },
+        { usuario: { id: usuarioId }, curso: { id: cursoId }, modulo: { id: cursoId + SCORM_VIRTUAL_MODULE_ID_OFFSET } }
+      ],
       relations: ['modulo'],
     });
+    this.logger.log(`[obtenerProgresoModulosUsuario] Progreso encontrado: ${progreso.map(p => `ModuloID:${p.modulo.id} Completado:${p.completado}`).join(', ')}`);
+    return progreso;
   }
 
-  private async verificarYMarcarCursoCompleto(usuarioId: number, cursoId: number): Promise<void> {
+  private async verificarYMarcarCursoCompleto(usuarioId: number, cursoId: number, moduloRecienCompletado?: ModuloEntity): Promise<void> {
+    this.logger.log(`[verificarYMarcarCursoCompleto] Iniciando para usuario ${usuarioId} y curso ${cursoId}.`);
+
     const curso = await this.cursoRepository.findOne({
       where: { id: cursoId },
       relations: ['modulos'],
     });
 
     if (!curso) {
-      this.logger.warn(`No se pudo verificar el curso ${cursoId} para marcar como completo.`);
+      this.logger.warn(`[verificarYMarcarCursoCompleto] No se pudo verificar el curso ${cursoId} para marcar como completo: curso no encontrado.`);
       return;
     }
 
-    const modulosCurso = curso.modulos;
-    if (modulosCurso.length === 0) {
-      this.logger.log(`Curso ${cursoId} no tiene módulos, no se puede marcar como completo.`);
+    let modulosDelCursoParaComprobacion: ModuloEntity[] = [];
+
+    if (curso.archivoScorm) {
+        const scormVirtualModuloId = cursoId + SCORM_VIRTUAL_MODULE_ID_OFFSET;
+        const scormModuloReal = await this.moduloRepository.findOne({ where: { id: scormVirtualModuloId } });
+
+        if (scormModuloReal) {
+            modulosDelCursoParaComprobacion.push(scormModuloReal);
+            this.logger.log(`[verificarYMarcarCursoCompleto] Agregado módulo SCORM virtual (ID: ${scormVirtualModuloId}) REAL de la BD a la lista de comprobación.`);
+        } else {
+            const scormModuloProxy = new ModuloEntity();
+            scormModuloProxy.id = scormVirtualModuloId;
+            scormModuloProxy.titulo = curso.titulo + ' (Módulo SCORM Principal)';
+            scormModuloProxy.tipo = TipoModulo.SCORM;
+            scormModuloProxy.orden = 0; 
+            modulosDelCursoParaComprobacion.push(scormModuloProxy);
+            this.logger.log(`[verificarYMarcarCursoCompleto] Agregado módulo SCORM virtual (ID: ${scormVirtualModuloId}) como PROXY a la lista de comprobación (no encontrado en BD).`);
+        }
+    }
+    
+    modulosDelCursoParaComprobacion = [
+        ...modulosDelCursoParaComprobacion,
+        ...curso.modulos.filter(m => m.tipo !== TipoModulo.SCORM)
+    ];
+    
+    this.logger.log(`[verificarYMarcarCursoCompletado] Módulos esperados FINALES para el curso ${cursoId}: ${modulosDelCursoParaComprobacion.map(m => `ID:${m.id} Tipo:${m.tipo}`).join(', ')}`);
+
+
+    if (modulosDelCursoParaComprobacion.length === 0) {
+      this.logger.log(`[verificarYMarcarCursoCompletado] Curso ${cursoId} no tiene módulos para verificar el progreso, no se puede marcar como completo.`);
       return;
     }
 
     const progresoUsuario = await this.reporteProgresoRepository.find({
       where: { usuario: { id: usuarioId }, curso: { id: cursoId }, completado: true },
       relations: ['modulo'],
+      cache: false,
     });
 
     const modulosCompletadosIds = new Set(progresoUsuario.map(rp => rp.modulo.id));
+    this.logger.log(`[verificarYMarcarCursoCompletado] Módulos completados registrados para usuario ${usuarioId} en curso ${cursoId}: [${Array.from(modulosCompletadosIds).join(', ')}]`);
 
-    const todosLosModulosCompletados = modulosCurso.every(modulo =>
+    const todosLosModulosCompletados = modulosDelCursoParaComprobacion.every(modulo =>
       modulosCompletadosIds.has(modulo.id)
     );
+    this.logger.log(`[verificarYMarcarCursoCompletado] Resultado de la comprobación 'todosLosModulosCompletados': ${todosLosModulosCompletados}`);
 
-   
+
     if (todosLosModulosCompletados) {
-      this.logger.log(`Todos los módulos del curso ${cursoId} completados por usuario ${usuarioId}. Marcando curso como completado.`);
+      this.logger.log(`[verificarYMarcarCursoCompletado] Todos los módulos del curso ${cursoId} completados por usuario ${usuarioId}. Marcando curso como completado.`);
 
       const inscripcion = await this.inscripcionRepository.findOne({
         where: { usuario: { id: usuarioId }, curso: { id: cursoId } },
@@ -132,20 +269,21 @@ export class ReporteProgresoService {
         inscripcion.estado = 'Completado';
         inscripcion.fechaFinalizacion = new Date();
         await this.inscripcionRepository.save(inscripcion);
-        this.logger.log(`Inscripción ${inscripcion.id} marcada como completada para usuario ${usuarioId} y curso ${cursoId}.`);
+        this.logger.log(`[verificarYMarcarCursoCompleto] Inscripción ${inscripcion.id} marcada como completada para usuario ${usuarioId} y curso ${cursoId}.`);
 
         try {
           await this.certificadosService.generarCertificado(usuarioId, cursoId);
-          this.logger.log(`Certificado generado automáticamente para usuario ${usuarioId} y curso ${cursoId}.`);
+          this.logger.log(`[verificarYMarcarCursoCompleto] Certificado generado automáticamente para usuario ${usuarioId} y curso ${cursoId}.`);
         } catch (error) {
-          this.logger.error(`Error al generar certificado automáticamente para usuario ${usuarioId} y curso ${cursoId}:`, error.message);
-          
+          this.logger.error(`[verificarYMarcarCursoCompleto] Error al generar certificado automáticamente para usuario ${usuarioId} y curso ${cursoId}: ${error.message}`);
         }
       } else if (inscripcion && inscripcion.cursoCompletado) {
-        this.logger.log(`Curso ${cursoId} ya estaba marcado como completado para usuario ${usuarioId}.`);
+        this.logger.log(`[verificarYMarcarCursoCompleto] Curso ${cursoId} ya estaba marcado como completado para usuario ${usuarioId}.`);
       } else {
-        this.logger.warn(`No se encontró inscripción para usuario ${usuarioId} y curso ${cursoId} al intentar marcar como completado.`);
+        this.logger.warn(`[verificarYMarcarCursoCompleto] No se encontró inscripción para usuario ${usuarioId} y curso ${cursoId} al intentar marcar como completado.`);
       }
+    } else {
+      this.logger.log(`[verificarYMarcarCursoCompleto] Curso ${cursoId} NO está completamente completado. Faltan módulos.`);
     }
   }
 }
