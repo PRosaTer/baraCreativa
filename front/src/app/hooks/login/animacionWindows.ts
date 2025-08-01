@@ -10,7 +10,7 @@ interface UseAnimacionWindowsProps {
 export const useAnimacionWindows = ({
   onSuccessRedirectPath,
   exitAnimationDuration = 800,
-  delayBeforeRedirect = 1500,
+  delayBeforeRedirect = 500,
 }: UseAnimacionWindowsProps) => {
   const router = useRouter();
   const [mostrarVentana, setMostrarVentana] = useState(true);

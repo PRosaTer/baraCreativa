@@ -1,6 +1,6 @@
 // components/EditarCursoAdmin.tsx
 import React from "react";
-import { useEditarCursoForm } from "@/subcomponent/EditarCursoAdmin/useEditarCursoForm";
+import { useEditarCursoForm } from "@/app/hooks/EditarCursoAdmin/useEditarCursoForm";
 import { InputField } from "@/subcomponent/EditarCursoAdmin/InputField";
 import { SelectField } from "@/subcomponent/EditarCursoAdmin/SelectField";
 import { CheckboxField } from "@/subcomponent/EditarCursoAdmin/CheckboxField";

@@ -1,4 +1,3 @@
-// hooks/useEditarCursoForm.ts
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { CursoForm, Curso, ClaseItem } from '@/app/types/curso';
 

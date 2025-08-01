@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { ImagenFoto } from '../../app/hooks/tipos';
+import { ImagenFoto } from '../../app/types/tipos';
 
 interface Props {
   imagen: ImagenFoto;

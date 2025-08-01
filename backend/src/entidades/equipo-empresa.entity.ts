@@ -9,7 +9,7 @@ import {
 import { Usuario } from './usuario.entity';
 import { Curso } from './curso.entity';
 
-@Entity('equipos_empresa')
+@Entity('equipo_empresa')
 export class EquipoEmpresaMiembro {
   @PrimaryGeneratedColumn()
   id: number;

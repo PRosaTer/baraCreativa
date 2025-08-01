@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { testimoniosDeUsuarios } from "../../app/datos/testimoniosDeUsuarios";
+import { testimoniosDeUsuarios } from "../../app/testimonios/testimoniosDeUsuarios";
 import { motion, AnimatePresence } from "framer-motion";
 
 const ContenedorDeTestimonios = () => {

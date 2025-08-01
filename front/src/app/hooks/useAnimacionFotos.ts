@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ListaImagenes } from './tipos';
+import { ListaImagenes } from '../types/tipos';
 
 export const useAnimacionFotos = (imagenes: ListaImagenes) => {
   const [indiceVisible, setIndiceVisible] = useState(0);

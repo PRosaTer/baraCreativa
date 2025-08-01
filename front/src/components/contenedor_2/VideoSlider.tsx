@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usarNavegacionDeVideo } from "../../app/hooks/usarNavegacionDeVideo";
-import { videosDeTestimonios } from "../../app/datos/videosDeTestimonios";
+import { videosDeTestimonios } from "../../app/testimonios/videosDeTestimonios";
 import { VideoActivo } from "./VideoActivo";
 import { BotonNavegacion } from "./BotonNavegacion";
 

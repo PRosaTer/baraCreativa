@@ -1,4 +1,4 @@
-import { ListaImagenes } from '../app/hooks/tipos';
+import { ListaImagenes } from '../app/types/tipos';
 
 export const imagenesComunidad: ListaImagenes = [
   {
