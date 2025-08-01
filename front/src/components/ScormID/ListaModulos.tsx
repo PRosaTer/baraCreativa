@@ -29,7 +29,7 @@ export function ListaModulos({ modulos }: ListaModulosProps) {
             </div>
           ))
         ) : (
-          <p className="text-text-muted text-center py-6 animate-glitch-subtle">No hay estructuras modulares disponibles.</p>
+          <p className="text-text-muted text-center py-6 animate-glitch-subtle">No hay módulos disponibles.</p>
         )}
       </div>
     </PanelTarjeta>

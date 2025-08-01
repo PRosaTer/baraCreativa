@@ -139,7 +139,7 @@ export function useDatosCurso(): UseDatosCursoResult {
         throw new Error(errData.message || 'Error al capturar el pago.');
       }
 
-      toast.success('¡Pago completado con éxito! Redirigiendo al programa.');
+      toast.success('¡Pago completado con éxito! Aguarda que vas a ser redirigido.');
       router.push(`/cursos/${cursoId}/scorm`);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Error desconocido al finalizar el pago.');

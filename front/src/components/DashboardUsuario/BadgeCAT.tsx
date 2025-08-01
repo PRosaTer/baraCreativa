@@ -18,7 +18,7 @@ interface BadgeCATProps {
 
 const shareUrl = "https://www.baracreativahn.com";
 const shareText =
-    "Logro desbloqueado! Gracias a mi esfuerzo les comparto el logro desbloqueado y la pagina de www.baracreativahn.com";
+    "Logro desbloqueado! Gracias a mi esfuerzo. Les comparto el logro desbloqueado en Bara Creativa: ";
 
 export default function BadgeCAT({ estaDesbloqueado, mensaje }: BadgeCATProps) {
     return (
@@ -67,6 +67,9 @@ export default function BadgeCAT({ estaDesbloqueado, mensaje }: BadgeCATProps) {
                             <LinkedinIcon size={40} round />
                         </LinkedinShareButton>
                     </div>
+                    <p className="mt-4 text-xs text-gray-500">
+                        Si el botón no abre la aplicación de escritorio, asegúrate de que tu navegador tenga permisos para abrir enlaces de WhatsApp.
+                    </p>
                 </div>
             )}
         </div>
