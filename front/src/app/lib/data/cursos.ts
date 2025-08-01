@@ -1,4 +1,4 @@
-import { Curso } from '@/app/lib/types/cursos';
+import { Curso } from '@/app/types/curso';
 
 export async function getCursoById(id: string): Promise<Curso | null> {
   try {

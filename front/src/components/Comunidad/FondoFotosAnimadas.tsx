@@ -2,7 +2,7 @@
 
 import { useAnimacionCompleta } from "../../app/hooks/useAnimacionCompleta";
 import { ImagenFotos } from "./ImagenFotos";
-import { ListaImagenes } from "../../app/hooks/tipos";
+import { ListaImagenes } from "../../app/types/tipos";
 
 interface Props {
   imagenes: ListaImagenes;

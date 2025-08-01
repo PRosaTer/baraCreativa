@@ -80,7 +80,7 @@ export const useChatBot = (): UseChatBotReturn => {
         widget: {
           buttonText: "Unirme a la Comunidad",
           buttonColor: "#0ea5e9",
-          buttonUrl: "https://t.me/TuGrupoDeTelegram",
+          buttonUrl: "https://t.me/+CjxZK-U297s4YjA5",
         },
       };
     }

@@ -11,6 +11,7 @@ import { PagosModule } from './modules/pagos/pagos.module';
 import { InscripcionesModule } from './modules/inscripciones/inscripciones.module';
 import { ReporteProgresoModule } from './modules/reporte-progreso/reporte-progreso.module';
 import { CertificadosModule } from './modules/certificados/certificados.module'; 
+import { BadgesModule } from './modules/badges/badges.module';
 
 import configuration, { AppConfig } from './config/configuration';
 
@@ -41,6 +42,7 @@ import configuration, { AppConfig } from './config/configuration';
     InscripcionesModule,
     ReporteProgresoModule,
     CertificadosModule,
+    BadgesModule, 
   ],
 })
 export class AppModule {}
