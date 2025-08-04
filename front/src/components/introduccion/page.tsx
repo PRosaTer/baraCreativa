@@ -11,7 +11,7 @@ const Introduction = () => {
 
       <div className="relative z-10 grid items-center h-full p-6 py-20 md:py-0 md:grid-cols-2">
         <Image
-          src="/home-4.png"
+          src="/Victor-animado-transparente.png"
           priority
           width={800}
           height={800}
