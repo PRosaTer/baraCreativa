@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Curso, ClaseItem, Modulo } from '@/app/types/curso';
+import { Curso, ClaseItem, Modulo, RawCursoApiResponse } from '@/app/types/curso';
 
 export default function CursosPage() {
   const [items, setItems] = useState<Curso[]>([]);
@@ -15,24 +15,7 @@ export default function CursosPage() {
         setCargando(true);
         const res = await fetch('http://localhost:3001/api/cursos');
         if (!res.ok) throw new Error('Error al cargar items');
-        const dataFromApi: Array<{
-          id: number;
-          titulo: string;
-          descripcion: string;
-          duracionHoras: number;
-          tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
-          categoria: string;
-          subcategoria: string;
-          precio: string | number;
-          modalidad: 'en vivo' | 'grabado' | 'mixto';
-          imagenCurso: string | null;
-          archivoScorm: string | null;
-          fechaInicio: string | null;
-          claseItem: ClaseItem;
-          modulos: Modulo[];
-          certificadoDisponible: boolean;
-          badgeDisponible: boolean;
-        }> = await res.json();
+        const dataFromApi: RawCursoApiResponse[] = await res.json();
 
         const processedData: Curso[] = dataFromApi.map((item) => ({
           ...item,

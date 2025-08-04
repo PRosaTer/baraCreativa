@@ -4,9 +4,9 @@ export enum ClaseItem {
 }
 
 export enum TipoCurso {
-  DOCENTES = 'Docentes',
-  ESTUDIANTES = 'Estudiantes',
-  EMPRESAS = 'Empresas',
+  DOCENTES = 'Docentes',
+  ESTUDIANTES = 'Estudiantes',
+  EMPRESAS = 'Empresas',
 }
 
 export interface Modulo {
@@ -53,22 +53,22 @@ export interface Curso {
 }
 
 export interface RawCursoApiResponse {
-  id: number;
-  titulo: string;
-  descripcion: string;
-  fechaInicio: string | null;
-  duracionHoras: number;
-  tipo: 'Docentes' | 'Estudiantes' | 'Empresas';
-  categoria: string;
-  subcategoria?: string;
-  precio: string | number;
-  modalidad: 'en vivo' | 'grabado' | 'mixto';
-  imagenCurso: string | null;
-  archivoScorm: string | null;
-  claseItem: ClaseItem;
-  modulos: Modulo[];
-  certificadoDisponible: boolean;
-  badgeDisponible: boolean;
+  id: number;
+  titulo: string;
+  descripcion: string;
+  fechaInicio: string | null;
+  duracionHoras: number;
+  tipo: TipoCurso; 
+  categoria: string;
+  subcategoria?: string;
+  precio: string | number;
+  modalidad: 'en vivo' | 'grabado' | 'mixto';
+  imagenCurso: string | null;
+  archivoScorm: string | null;
+  claseItem: ClaseItem;
+  modulos: Modulo[];
+  certificadoDisponible: boolean;
+  badgeDisponible: boolean;
 }
 
 export interface CursoForm {
