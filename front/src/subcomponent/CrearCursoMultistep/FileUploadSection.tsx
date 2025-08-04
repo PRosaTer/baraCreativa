@@ -9,16 +9,21 @@ import {
 
 interface FileUploadSectionProps {
   form: CursoForm;
+  handleChange: (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => void;
   handleFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
   handleDateChange: (date: Date | null) => void;
 }
 
 const FileUploadSection: React.FC<FileUploadSectionProps> = ({
   form,
+  handleChange,
   handleFileChange,
   handleDateChange,
 }) => (
   <>
+
     {form.claseItem === ClaseItem.CURSO && (
       <>
         <label style={labelStyle}>Duración (horas)</label>
@@ -26,7 +31,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           type="number"
           name="duracionHoras"
           value={form.duracionHoras}
-          onChange={handleFileChange}
+          onChange={handleChange}
           min={0}
           step={1}
           style={inputStyle}
@@ -37,7 +42,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
         <select
           name="modalidad"
           value={form.modalidad}
-          onChange={handleFileChange}
+          onChange={handleChange}
           required
           style={inputStyle}
         >
@@ -48,7 +53,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
 
         <label style={labelStyle}>Fecha de Inicio (opcional)</label>
         <DatePicker
-          selected={form.fechaInicio}
+          selected={form.fechaInicio instanceof Date ? form.fechaInicio : null}
           onChange={handleDateChange}
           dateFormat="dd/MM/yyyy"
           className="w-full"
@@ -86,7 +91,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
         <label style={labelStyle}>Archivo SCORM (.zip)</label>
         <input
           type="file"
-          name="newScormFile"
+          name="archivoScorm"
           accept=".zip"
           onChange={handleFileChange}
           style={{ marginBottom: 20 }}

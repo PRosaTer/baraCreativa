@@ -1,82 +1,79 @@
 import React from 'react';
 
 export const formStyle: React.CSSProperties = {
-  maxWidth: 700,
-  margin: '2rem auto',
-  padding: 24,
-  borderRadius: 15,
-  background: 'linear-gradient(135deg, #ff6a00, #fddb92)',
-  boxShadow: '0 10px 25px rgba(255, 105, 0, 0.3)',
-  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-  color: '#5a1a01',
-};
-
-export const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '0.6rem',
-  borderRadius: 8,
-  border: 'none',
-  marginBottom: 16,
-  fontSize: 16,
-  boxShadow: 'inset 0 0 5px rgba(0,0,0,0.1)',
+  display: 'flex',
+  flexDirection: 'column',
+  maxWidth: 600,
+  margin: 'auto',
+  padding: '20px',
+  border: '1px solid #d1d5db',
+  borderRadius: '8px',
+  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+  backgroundColor: '#f9fafb',
 };
 
 export const labelStyle: React.CSSProperties = {
-  fontWeight: 600,
-  marginBottom: 6,
-  display: 'block',
+  marginBottom: '8px',
+  fontWeight: '600',
+  color: '#4b5563',
+};
+
+export const inputStyle: React.CSSProperties = {
+  padding: '10px',
+  marginBottom: '16px',
+  border: '1px solid #d1d5db',
+  borderRadius: '4px',
+  width: '100%',
+  boxSizing: 'border-box',
 };
 
 export const checkboxLabelStyle: React.CSSProperties = {
+  marginBottom: '8px',
+  fontWeight: '400',
+  color: '#4b5563',
   display: 'flex',
   alignItems: 'center',
-  marginBottom: 12,
 };
 
 export const buttonStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '0.8rem',
-  borderRadius: 10,
+  padding: '12px 24px',
+  borderRadius: '9999px',
   border: 'none',
-  backgroundColor: '#b91c1c',
-  color: 'white',
-  fontWeight: 700,
-  fontSize: '1.1rem',
   cursor: 'pointer',
-  boxShadow: '0 5px 15px rgba(185, 28, 28, 0.5)',
+  fontWeight: '700',
+  color: 'white',
+  backgroundColor: '#b91c1c',
+  transition: 'background-color 0.3s ease',
+  textAlign: 'center',
+};
+
+export const addModuloButtonStyle: React.CSSProperties = {
+  padding: '10px',
+  border: '1px dashed #d1d5db',
+  borderRadius: '4px',
+  backgroundColor: '#e5e7eb',
+  cursor: 'pointer',
+  textAlign: 'center',
+  marginTop: '10px',
+  marginBottom: '20px',
+};
+
+export const removeModuloButtonStyle: React.CSSProperties = {
+  padding: '8px 16px',
+  borderRadius: '9999px',
+  border: 'none',
+  cursor: 'pointer',
+  fontWeight: '600',
+  color: 'white',
+  backgroundColor: '#ef4444',
+  marginTop: '10px',
   transition: 'background-color 0.3s ease',
 };
 
 export const moduloItemStyle: React.CSSProperties = {
-  background: 'rgba(255, 255, 255, 0.7)',
-  padding: 15,
-  borderRadius: 10,
-  marginBottom: 15,
-  boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-};
-
-export const removeModuloButtonStyle: React.CSSProperties = {
-  backgroundColor: '#dc2626',
-  color: 'white',
-  padding: '0.5rem 1rem',
-  borderRadius: 8,
-  border: 'none',
-  cursor: 'pointer',
-  marginTop: 10,
-  fontSize: '0.9rem',
-  fontWeight: 600,
-  transition: 'background-color 0.3s ease',
-};
-
-export const addModuloButtonStyle: React.CSSProperties = {
-  backgroundColor: '#10b981',
-  color: 'white',
-  padding: '0.8rem 1.5rem',
-  borderRadius: 10,
-  border: 'none',
-  cursor: 'pointer',
-  marginTop: 20,
-  fontSize: '1rem',
-  fontWeight: 700,
-  transition: 'background-color 0.3s ease',
+  padding: '15px',
+  border: '1px solid #e5e7eb',
+  borderRadius: '8px',
+  backgroundColor: '#f3f4f6',
+  marginBottom: '15px',
 };

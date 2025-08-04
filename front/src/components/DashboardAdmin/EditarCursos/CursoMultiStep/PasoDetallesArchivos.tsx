@@ -30,12 +30,17 @@ const PasoDetallesArchivos: React.FC<PasoDetallesArchivosProps> = ({
       <select name="tipo" value={form.tipo} onChange={handleChange} required style={inputStyle}>
         <option value="">Seleccione tipo</option>
         <option value={TipoCurso.DOCENTES}>Docentes</option>
-        <option value={TipoCurso.ESTUDIANTES}>Estudiantes</option>
+         <option value={TipoCurso.ESTUDIANTES}>Estudiantes</option>
         <option value={TipoCurso.EMPRESAS}>Empresas</option>
       </select>
 
-      <label style={labelStyle}>Categoría</label>
-      <input type="text" name="categoria" value={form.categoria} onChange={handleChange} required style={inputStyle} />
+
+      <label style={labelStyle}>Academia</label>
+      <select name="categoria" value={form.categoria} onChange={handleChange} required style={inputStyle}>
+        <option value="">Escoja una academia</option>
+        <option value="CAT">CAT</option>
+        <option value="Dynamis">Dynamis</option>
+      </select>
 
       <label style={labelStyle}>Modalidad</label>
       <select name="modalidad" value={form.modalidad} onChange={handleChange} required style={inputStyle}>

@@ -38,7 +38,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
     <input
       type="text"
       name="titulo"
-      value={form.titulo}
+      value={form.titulo ?? ""}
       onChange={handleChange}
       required
       style={inputStyle}
@@ -47,7 +47,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
     <label style={labelStyle}>Descripción</label>
     <textarea
       name="descripcion"
-      value={form.descripcion || ""}
+     value={form.descripcion ?? ""}
       onChange={handleChange}
       rows={4}
       required
@@ -58,7 +58,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
     <input
       type="number"
       name="precio"
-      value={form.precio}
+      value={form.precio.toString()}
       onChange={handleChange}
       min={0}
       step={0.01}
@@ -82,7 +82,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
     <input
       type="text"
       name="categoria"
-      value={form.categoria}
+      value={form.categoria ?? ""}
       onChange={handleChange}
       required
       style={inputStyle}
@@ -92,9 +92,8 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
     <input
       type="text"
       name="subcategoria"
-      value={form.subcategoria}
+      value={form.subcategoria ?? ""}
       onChange={handleChange}
-      required
       style={inputStyle}
     />
 
