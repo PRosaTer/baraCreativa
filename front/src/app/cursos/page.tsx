@@ -72,7 +72,6 @@ export default function CursosPage() {
           Cursos Disponibles
         </h1>
 
- 
         <div className="flex gap-3 mt-6">
           {['Todos', 'CAT', 'Dynamis'].map((opcion) => {
             const valor = opcion === 'Todos' ? '' : opcion;
@@ -152,54 +151,58 @@ export default function CursosPage() {
         </ul>
       )}
 
-      <h1 className="text-3xl font-bold mb-8 text-purple-800 border-b-2 border-purple-200 pb-3 mt-12">Nuestros Servicios</h1>
-      {serviciosDisponibles.length === 0 ? (
-        <p className="text-gray-600 mb-8 p-4 bg-purple-50 rounded-lg shadow-sm">
-          No hay servicios disponibles en este momento. ¡Consulta nuestras soluciones a medida!
-        </p>
-      ) : (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {serviciosDisponibles.map((servicio) => (
-            <li key={servicio.id}>
-              <Link
-                href={`/servicios/${servicio.id}`}
-                className="flex flex-col border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg bg-white transition-all transform hover:-translate-y-1 relative h-full"
-              >
-                {servicio.imagenCurso ? (
-                  <img
-                    src={`http://localhost:3001${servicio.imagenCurso}`}
-                    alt={servicio.titulo}
-                    className="w-full h-48 object-cover flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-full h-48 bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center text-gray-500 text-sm font-medium flex-shrink-0">
-                    <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 4v12m-4-2v4m-4-6v6m1.5-1.5a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm9 0a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-                    </svg>
-                    <span className="ml-2">Sin imagen de servicio</span>
-                  </div>
-                )}
-                <div className="p-4 flex flex-col justify-between flex-grow">
-                  <div className="flex-grow">
-                    <h2 className="text-lg font-semibold text-purple-700 mb-2 line-clamp-2">
-                      {servicio.titulo}
-                    </h2>
-                    <p className="text-sm text-gray-600 line-clamp-3 mb-2">
-                      {servicio.descripcion}
-                    </p>
-                  </div>
-                  <div className="flex-shrink-0 mt-auto">
-                    {servicio.precio > 0 && (
-                      <p className="text-md font-bold text-green-600">
-                        ${servicio.precio.toFixed(2)}
-                      </p>
+      {filtroAcademia === '' && (
+        <>
+          <h1 className="text-3xl font-bold mb-8 text-purple-800 border-b-2 border-purple-200 pb-3 mt-12">Nuestros Servicios</h1>
+          {serviciosDisponibles.length === 0 ? (
+            <p className="text-gray-600 mb-8 p-4 bg-purple-50 rounded-lg shadow-sm">
+              No hay servicios disponibles en este momento. ¡Consulta nuestras soluciones a medida!
+            </p>
+          ) : (
+            <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {serviciosDisponibles.map((servicio) => (
+                <li key={servicio.id}>
+                  <Link
+                    href={`/servicios/${servicio.id}`}
+                    className="flex flex-col border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg bg-white transition-all transform hover:-translate-y-1 relative h-full"
+                  >
+                    {servicio.imagenCurso ? (
+                      <img
+                        src={`http://localhost:3001${servicio.imagenCurso}`}
+                        alt={servicio.titulo}
+                        className="w-full h-48 object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center text-gray-500 text-sm font-medium flex-shrink-0">
+                        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 4v12m-4-2v4m-4-6v6m1.5-1.5a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm9 0a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+                        </svg>
+                        <span className="ml-2">Sin imagen de servicio</span>
+                      </div>
                     )}
-                  </div>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                    <div className="p-4 flex flex-col justify-between flex-grow">
+                      <div className="flex-grow">
+                        <h2 className="text-lg font-semibold text-purple-700 mb-2 line-clamp-2">
+                          {servicio.titulo}
+                        </h2>
+                        <p className="text-sm text-gray-600 line-clamp-3 mb-2">
+                          {servicio.descripcion}
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0 mt-auto">
+                        {servicio.precio > 0 && (
+                          <p className="text-md font-bold text-green-600">
+                            ${servicio.precio.toFixed(2)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </div>
   );
