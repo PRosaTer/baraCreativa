@@ -1,32 +1,50 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Curso, ClaseItem, Modulo, RawCursoApiResponse } from '@/app/types/curso';
+
+
+import {
+  ClaseItem,
+  TipoCurso,
+  RawCursoApiResponse,
+  Curso,
+  ModuloResumen, 
+} from '@/app/types/curso';
+
 
 export default function CursosPage() {
   const [items, setItems] = useState<Curso[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
+  const [filtroAcademia, setFiltroAcademia] = useState<string>('');
 
   useEffect(() => {
     async function fetchItems() {
       try {
         setCargando(true);
-        const res = await fetch('http://localhost:3001/api/cursos');
-        if (!res.ok) throw new Error('Error al cargar items');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const res = await fetch(`${apiUrl}/api/cursos`);
+
+        if (!res.ok) {
+          throw new Error(`Error al cargar items: ${res.statusText}`);
+        }
+
+
         const dataFromApi: RawCursoApiResponse[] = await res.json();
+
 
         const processedData: Curso[] = dataFromApi.map((item) => ({
           ...item,
-          precio: item.precio != null ? parseFloat(item.precio.toString()) : 0,
+          precio: typeof item.precio === 'string' ? parseFloat(item.precio) : item.precio,
           fechaInicio: item.fechaInicio ? new Date(item.fechaInicio) : null,
         }));
 
         setItems(processedData);
         setError('');
       } catch (err: unknown) {
-        setError('No se pudieron cargar los items');
+        const errorMessage = err instanceof Error ? err.message : 'Error desconocido al cargar los items.';
+        setError(errorMessage);
         console.error('Error fetching items:', err);
       } finally {
         setCargando(false);
@@ -35,22 +53,46 @@ export default function CursosPage() {
     fetchItems();
   }, []);
 
-  const cursosDisponibles = items.filter(item => item.claseItem === ClaseItem.CURSO);
-  const serviciosDisponibles = items.filter(item => item.claseItem === ClaseItem.SERVICIO);
+
+  const { cursosDisponibles, serviciosDisponibles } = useMemo(() => {
+    const cursos = items.filter(item => item.claseItem === ClaseItem.CURSO);
+    const servicios = items.filter(item => item.claseItem === ClaseItem.SERVICIO);
+    return { cursosDisponibles: cursos, serviciosDisponibles: servicios };
+  }, [items]);
+
+
+  const cursosFiltrados = useMemo(() => {
+    if (filtroAcademia === '') {
+      return cursosDisponibles;
+    }
+    return cursosDisponibles.filter(curso => curso.categoria === filtroAcademia);
+  }, [cursosDisponibles, filtroAcademia]);
 
   if (cargando) return <p className="text-center text-lg mt-8 text-gray-700">Cargando contenido...</p>;
   if (error) return <p className="text-red-600 text-center mt-8">{error}</p>;
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8 text-blue-800 border-b-2 border-blue-200 pb-3">Cursos Disponibles</h1>
-      {cursosDisponibles.length === 0 ? (
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-3xl font-bold text-blue-800 border-b-2 border-blue-200 pb-3">Cursos Disponibles</h1>
+        <select
+          value={filtroAcademia}
+          onChange={(e) => setFiltroAcademia(e.target.value)}
+          className="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Todos</option>
+          <option value="CAT">CAT</option>
+          <option value="Dynamis">Dynamis</option>
+        </select>
+      </div>
+
+      {cursosFiltrados.length === 0 ? (
         <p className="text-gray-600 mb-12 p-4 bg-blue-50 rounded-lg shadow-sm">
-          No hay cursos disponibles en este momento. ¡Pronto tendremos nuevas opciones!
+          No hay cursos disponibles para la academia seleccionada.
         </p>
       ) : (
         <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
-          {cursosDisponibles.map((curso) => (
+          {cursosFiltrados.map((curso) => (
             <li key={curso.id}>
               <Link
                 href={`/cursos/${curso.id}`}
