@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export default function useAgregarUsuarioForm(onUsuarioCreado: () => void) {
   const [form, setForm] = useState({
@@ -46,7 +47,7 @@ export default function useAgregarUsuarioForm(onUsuarioCreado: () => void) {
         formData.append('fotoPerfil', foto);
       }
 
-      const res = await fetch('http://localhost:3001/usuarios', {
+      const res = await fetch(`${API_URL}/api/usuarios`, {
         method: 'POST',
         body: formData,
       });
