@@ -2,17 +2,36 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 
-interface ScormPlayerProps {
-  scormPath: string; 
-  courseId: number; 
+interface ScormAPI {
+  LMSInitialize: (param: string) => string;
+  LMSFinish: (param: string) => string;
+  LMSGetValue: (param: string) => string;
+  LMSSetValue: (param: string, value: string) => string;
+  LMSCommit: (param: string) => string;
+  LMSGetLastError: () => string;
+  LMSGetErrorString: (errorCode: string) => string;
+  LMSGetDiagnostic: (errorCode: string) => string;
 }
 
-const createScorm12API = (courseId: number) => {
+
+declare global {
+  interface Window {
+    API?: ScormAPI;
+    API_1484_11?: ScormAPI;
+  }
+}
+
+interface ScormPlayerProps {
+  scormPath: string;
+  courseId: number;
+}
+
+const createScorm12API = (courseId: number): ScormAPI => {
   let lessonStatus = "not attempted";
   let score = 0;
   let dataModel: Record<string, string> = {};
 
-  const api = {
+  const api: ScormAPI = {
     LMSInitialize: (param: string) => {
       console.log(`[SCORM API] LMSInitialize(${param}) called for Course ID: ${courseId}`);
       lessonStatus = "incomplete";
@@ -107,12 +126,12 @@ const ScormPlayer: React.FC<ScormPlayerProps> = ({ scormPath, courseId }) => {
       console.log('[ScormPlayer] Iframe src:', iframe.src);
 
       try {
-        (window as any).API = createScorm12API(courseId);
-        (window as any).API_1484_11 = createScorm12API(courseId);
+        window.API = createScorm12API(courseId);
+        window.API_1484_11 = createScorm12API(courseId);
 
         console.log('[ScormPlayer] SCORM API injected into parent window.');
-        console.log('[ScormPlayer] window.API is:', (window as any).API);
-        console.log('[ScormPlayer] window.API_1484_11 is:', (window as any).API_1484_11);
+        console.log('[ScormPlayer] window.API is:', window.API);
+        console.log('[ScormPlayer] window.API_1484_11 is:', window.API_1484_11);
 
       } catch (e) {
         console.error('[ScormPlayer] Error al inyectar SCORM API:', e);
@@ -124,8 +143,8 @@ const ScormPlayer: React.FC<ScormPlayerProps> = ({ scormPath, courseId }) => {
 
     return () => {
       iframe.removeEventListener('load', handleLoad);
-      if ((window as any).API) delete (window as any).API;
-      if ((window as any).API_1484_11) delete (window as any).API_1484_11;
+      if (window.API) delete window.API;
+      if (window.API_1484_11) delete window.API_1484_11;
       console.log('[ScormPlayer] SCORM API cleaned up.');
     };
   }, [scormPath, courseId]);
@@ -137,7 +156,7 @@ const ScormPlayer: React.FC<ScormPlayerProps> = ({ scormPath, courseId }) => {
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       <iframe
         ref={iframeRef}
-        src={scormPath} 
+        src={scormPath}
         title={`SCORM Course ${courseId}`}
         style={{ width: '100%', height: '100%', border: 'none' }}
         allowFullScreen
