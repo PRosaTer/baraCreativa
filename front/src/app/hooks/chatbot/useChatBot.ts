@@ -1,15 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-
-export type Mensaje = {
-  message: string;
-  sender: "bot" | "user";
-  widget?: {
-    buttonText: string;
-    buttonColor: string;
-    buttonUrl: string;
-  };
-};
-
+import { Mensaje } from "@/app/types/chatTypes"; // Importa Mensaje desde chatTypes.ts
 
 import { hasKeyword, findFaqAnswer } from "@/app/utils/chatbotUtils";
 
