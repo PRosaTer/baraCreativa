@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, ChangeEvent, FormEvent } from 'react';
-import { Curso, CursoForm, EditableModuloForm, ClaseItem } from '@/app/types/curso';
+import { Curso, CursoForm, ClaseItem } from '@/app/types/curso';
 import { ModuloDto, TipoCurso, ModalidadCurso } from '@/app/types/shared-backend-types';
 
 interface UseCursoFormProps {
@@ -25,16 +25,16 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
     archivoScorm: curso?.archivoScorm || null,
     modulos: curso?.modulos
       ? curso.modulos.map((m) => ({
-          id: m.id,
-          titulo: m.titulo,
-          descripcion: m.descripcion,
-          videoUrl: m.videoUrl,
-          pdfUrl: m.pdfUrl,
-          imageUrl: m.imageUrl,
-          videoFile: null,
-          pdfFile: null,
-          imageFile: null,
-        }))
+        id: m.id,
+        titulo: m.titulo,
+        descripcion: m.descripcion,
+        videoUrl: m.videoUrl,
+        pdfUrl: m.pdfUrl,
+        imageUrl: m.imageUrl,
+        videoFile: null,
+        pdfFile: null,
+        imageFile: null,
+      }))
       : [],
     newScormFile: null,
     claseItem: curso?.claseItem || ClaseItem.CURSO,
