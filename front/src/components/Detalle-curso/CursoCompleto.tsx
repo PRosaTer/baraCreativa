@@ -22,27 +22,6 @@ export default function CursoCompleto({ curso }: Props) {
           />
         )}
 
-
-        {curso.videoCurso && (
-          <video
-            controls
-            src={`http://localhost:3001/uploads/cursos/${curso.videoCurso}`}
-            className="w-full rounded"
-          />
-        )}
-
-
-        {curso.pdfCurso && (
-          <iframe
-            src={`http://localhost:3001/uploads/cursos/${curso.pdfCurso}`}
-            title="PDF del curso"
-            width="100%"
-            height="600"
-            className="border rounded"
-          />
-        )}
-
-
         {curso.archivoScorm && (
           <div>
             <a
@@ -57,7 +36,6 @@ export default function CursoCompleto({ curso }: Props) {
         )}
       </div>
 
-
       <section>
         <h2 className="text-3xl font-semibold mb-4">Módulos</h2>
         {curso.modulos && curso.modulos.length > 0 ? (
@@ -67,22 +45,21 @@ export default function CursoCompleto({ curso }: Props) {
               <p className="mb-4">{modulo.descripcion}</p>
 
   
-              {modulo.videoUrl && (
+              {modulo.videoUrl && modulo.videoUrl.length > 0 && (
                 <video
                   controls
-                  src={modulo.videoUrl.startsWith('http')
-                    ? modulo.videoUrl
-                    : `http://localhost:3001/uploads/cursos/${modulo.videoUrl}`}
+                  src={modulo.videoUrl[0].startsWith('http')
+                    ? modulo.videoUrl[0]
+                    : `http://localhost:3001/uploads/cursos/${modulo.videoUrl[0]}`}
                   className="w-full rounded mb-4"
                 />
               )}
 
-    
-              {modulo.pdfUrl && modulo.pdfUrl.endsWith('.pdf') && (
+              {modulo.pdfUrl && modulo.pdfUrl.length > 0 && modulo.pdfUrl[0].endsWith('.pdf') && (
                 <iframe
-                  src={modulo.pdfUrl.startsWith('http')
-                    ? modulo.pdfUrl
-                    : `http://localhost:3001/uploads/cursos/${modulo.pdfUrl}`}
+                  src={modulo.pdfUrl[0].startsWith('http')
+                    ? modulo.pdfUrl[0]
+                    : `http://localhost:3001/uploads/cursos/${modulo.pdfUrl[0]}`}
                   title={`PDF del módulo ${modulo.titulo}`}
                   width="100%"
                   height="500"
@@ -90,12 +67,11 @@ export default function CursoCompleto({ curso }: Props) {
                 />
               )}
 
-
-              {modulo.pdfUrl && (modulo.pdfUrl.endsWith('.jpg') || modulo.pdfUrl.endsWith('.png') || modulo.pdfUrl.endsWith('.jpeg')) && (
+              {modulo.pdfUrl && modulo.pdfUrl.length > 0 && (modulo.pdfUrl[0].endsWith('.jpg') || modulo.pdfUrl[0].endsWith('.png') || modulo.pdfUrl[0].endsWith('.jpeg')) && (
                 <img
-                  src={modulo.pdfUrl.startsWith('http')
-                    ? modulo.pdfUrl
-                    : `http://localhost:3001/uploads/cursos/${modulo.pdfUrl}`}
+                  src={modulo.pdfUrl[0].startsWith('http')
+                    ? modulo.pdfUrl[0]
+                    : `http://localhost:3001/uploads/cursos/${modulo.pdfUrl[0]}`}
                   alt={`Imagen módulo ${modulo.titulo}`}
                   className="rounded mb-4 max-w-full"
                 />

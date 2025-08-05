@@ -1,5 +1,5 @@
 import React from 'react';
-import { Curso, ClaseItem } from '@/app/types/curso';
+import { Curso, ClaseItem } from  '@/app/types/curso';
 
 interface Props {
   cursos: Curso[];
@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function TablaCursosAdmin({ cursos, onEditar, onEliminar }: Props) {
-  const handleLaunchScorm = (scormPath: string) => {
+  const handleLaunchScorm = (scormPath: string | null | undefined) => {
     if (scormPath) {
       window.open(`http://localhost:3001${scormPath}`, '_blank');
     } else {
@@ -70,14 +70,14 @@ export default function TablaCursosAdmin({ cursos, onEditar, onEliminar }: Props
                 >
                   Eliminar
                 </button>
-                {/* {curso.archivoScorm && (
+                {curso.archivoScorm && (
                   <button
-                    onClick={() => handleLaunchScorm(curso.archivoScorm as string)}
+                    onClick={() => handleLaunchScorm(curso.archivoScorm)}
                     className="text-blue-600 hover:text-blue-900"
                   >
                     Lanzar SCORM
                   </button>
-                )} */}
+                )}
               </td>
             </tr>
           ))}
