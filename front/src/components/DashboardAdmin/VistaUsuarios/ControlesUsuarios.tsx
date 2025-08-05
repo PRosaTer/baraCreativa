@@ -2,6 +2,22 @@
 
 import React from "react";
 
+
+interface FiltrosUsuariosProps {
+  filtro: "todos" | "conectados" | "desconectados";
+  setFiltro: React.Dispatch<React.SetStateAction<"todos" | "conectados" | "desconectados">>;
+  cantidadTotal: number;
+  cantidadConectados: number;
+  cantidadDesconectados: number;
+}
+
+
+interface BarraBusquedaUsuariosProps {
+  valor: string;
+  onCambio: React.Dispatch<React.SetStateAction<string>>;
+}
+
+
 interface Props {
   filtro: "todos" | "conectados" | "desconectados";
   setFiltro: React.Dispatch<React.SetStateAction<"todos" | "conectados" | "desconectados">>;
@@ -10,8 +26,8 @@ interface Props {
   cantidadTotal: number;
   cantidadConectados: number;
   cantidadDesconectados: number;
-  FiltrosUsuarios: React.FC<any>;
-  BarraBusquedaUsuarios: React.FC<any>;
+  FiltrosUsuarios: React.FC<FiltrosUsuariosProps>;
+  BarraBusquedaUsuarios: React.FC<BarraBusquedaUsuariosProps>;
 }
 
 export default function ControlesUsuarios({
