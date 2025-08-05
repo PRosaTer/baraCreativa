@@ -29,8 +29,6 @@ const brands = [
   { src: "/empresa-20.png" },
   { src: "/empresa-21.png" },
   { src: "/empresa-22.png" },
-
-  // Agrega más imágenes para un mejor efecto
 ];
 
 const LogoSlider = () => {
@@ -42,9 +40,9 @@ const LogoSlider = () => {
       <Swiper
         slidesPerView={2}
         breakpoints={{
-          640: { slidesPerView: 3 }, // sm
-          768: { slidesPerView: 4 }, // md
-          1024: { slidesPerView: 5 }, // lg
+          640: { slidesPerView: 3 },
+          768: { slidesPerView: 4 },
+          1024: { slidesPerView: 5 },
         }}
         spaceBetween={16}
         loop={brands.length > 1}
@@ -59,12 +57,11 @@ const LogoSlider = () => {
       >
         {brands.map((brand, index) => (
           <SwiperSlide key={index} className="flex justify-center">
-            <div className="min-w-[150px] mx-4">
+            <div className="w-full max-w-[180px] aspect-[5/3]">
               <Image
                 src={brand.src}
-                alt="Logo"
-                width={150}
-                height={80}
+                alt={`Logo ${index + 1}`}
+                fill
                 className="object-contain"
               />
             </div>
