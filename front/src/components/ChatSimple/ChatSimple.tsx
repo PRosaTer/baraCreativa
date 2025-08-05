@@ -12,7 +12,7 @@ import {
 
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 
-import { useChatBot, Mensaje } from "@/app/hooks/chatbot/useChatBot";
+import { useChatBot } from "@/app/hooks/chatbot/useChatBot";
 
 const getButtonStyles = (bgColor: string): React.CSSProperties => ({
   backgroundColor: bgColor,
@@ -44,14 +44,23 @@ const handleButtonClick = (url: string) => {
 };
 
 export const ChatSimple = () => {
-  const { messages, isTyping, handleSend, containerStyle, audioRef } = useChatBot();
+  const { messages, isTyping, handleSend, containerStyle, audioRef } =
+    useChatBot();
 
   return (
     <MainContainer style={containerStyle}>
-      <audio ref={audioRef} src="/sonidos/NotificacionChatbot.mp4" preload="auto" />
+      <audio
+        ref={audioRef}
+        src="/sonidos/NotificacionChatbot.mp4"
+        preload="auto"
+      />
       <ChatContainer>
         <MessageList
-          typingIndicator={isTyping ? <TypingIndicator content="Pepito está escribiendo..." /> : null}
+          typingIndicator={
+            isTyping ? (
+              <TypingIndicator content="Pepito está escribiendo..." />
+            ) : null
+          }
         >
           {messages.map((msg, i) => (
             <div key={i}>
@@ -64,22 +73,23 @@ export const ChatSimple = () => {
                   position: "single",
                 }}
               />
-             {msg.sender === "bot" && msg.widget && (() => {
-  const widget = msg.widget;
-  return (
-    <div style={{ margin: "8px 16px 0" }}>
-      <button
-        onClick={() => handleButtonClick(widget.buttonUrl)}
-        style={getButtonStyles(widget.buttonColor)}
-        onMouseEnter={handleButtonMouseEnter}
-        onMouseLeave={handleButtonMouseLeave}
-      >
-        {widget.buttonText}
-      </button>
-    </div>
-  );
-})()}
-
+              {msg.sender === "bot" &&
+                msg.widget &&
+                (() => {
+                  const widget = msg.widget;
+                  return (
+                    <div style={{ margin: "8px 16px 0" }}>
+                      <button
+                        onClick={() => handleButtonClick(widget.buttonUrl)}
+                        style={getButtonStyles(widget.buttonColor)}
+                        onMouseEnter={handleButtonMouseEnter}
+                        onMouseLeave={handleButtonMouseLeave}
+                      >
+                        {widget.buttonText}
+                      </button>
+                    </div>
+                  );
+                })()}
             </div>
           ))}
         </MessageList>

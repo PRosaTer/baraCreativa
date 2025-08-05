@@ -10,9 +10,6 @@ import "swiper/css/pagination";
 const PhotoCarousel = () => {
   const images = [
     "/foto-carrusel-1.JPG",
-    "/foto-carrusel-2.jpg",
-    "/foto-carrusel-3.jpg",
-    "/foto-carrusel-4.png",
     "/foto-carrusel-5.JPG",
     "/foto-carrusel-6.JPG",
   ];
