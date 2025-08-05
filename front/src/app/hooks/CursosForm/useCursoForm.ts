@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import { Curso, ModuloForm, CursoForm } from '@/app/types/curso';
+import { Curso, EditableModuloForm, CursoForm, TipoCurso, ClaseItem } from '@/app/types/curso';
 
 export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curso: Curso) => void) {
   const [datos, setDatos] = useState<CursoForm>({
     titulo: '',
     descripcion: '',
-    tipo: 'Docentes',
+    tipo: TipoCurso.DOCENTES,
     categoria: '',
     duracionHoras: 1,
     precio: 0,
@@ -16,6 +16,7 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
     badgeDisponible: false,
     imagenCurso: null,
     modulos: [],
+    claseItem: ClaseItem.CURSO,
   });
 
   const [guardando, setGuardando] = useState(false);
@@ -34,16 +35,18 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
         certificadoDisponible: cursoInicial.certificadoDisponible,
         badgeDisponible: cursoInicial.badgeDisponible,
         imagenCurso: null,
+        claseItem: cursoInicial.claseItem,
         modulos: cursoInicial.modulos
           ? cursoInicial.modulos.map((m) => ({
-              titulo: m.titulo,
-              descripcion: m.descripcion,
-              videos: [],
-              pdfs: [],
-              imagenes: [],
-              videoUrl: m.videoUrl ?? null,
-              pdfUrl: m.pdfUrl ?? null,
-            }))
+            titulo: m.titulo,
+            descripcion: m.descripcion,
+            videoFile: null,
+            pdfFile: null,
+            imageFile: null,
+            videoUrl: m.videoUrl,
+            pdfUrl: m.pdfUrl,
+            imageUrl: m.imageUrl,
+          }))
           : [],
       });
 
@@ -83,18 +86,28 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
         ...prev.modulos,
         {
           titulo: '',
-          descripcion: '',
-          videos: [],
-          pdfs: [],
-          imagenes: [],
+          descripcion: null,
+          videoFile: null,
+          pdfFile: null,
+          imageFile: null,
           videoUrl: null,
           pdfUrl: null,
+          imageUrl: null,
         },
       ],
     }));
   };
 
-  const handleModuloChange = (index: number, field: keyof ModuloForm, value: string | File[] | null) => {
+  /**
+   * @param index
+   * @param field 
+   * @param value 
+   */
+  const handleModuloChange = <K extends keyof EditableModuloForm>(
+    index: number,
+    field: K,
+    value: EditableModuloForm[K]
+  ) => {
     const nuevosModulos = [...datos.modulos];
     nuevosModulos[index] = { ...nuevosModulos[index], [field]: value };
     setDatos((prev) => ({ ...prev, modulos: nuevosModulos }));
@@ -120,11 +133,13 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
         modalidad: datos.modalidad,
         certificadoDisponible: datos.certificadoDisponible,
         badgeDisponible: datos.badgeDisponible,
+        claseItem: datos.claseItem,
         modulos: datos.modulos.map((m) => ({
           titulo: m.titulo,
           descripcion: m.descripcion,
-          videoUrl: m.videoUrl ?? null,
-          pdfUrl: m.pdfUrl ?? null,
+          videoUrl: m.videoUrl,
+          pdfUrl: m.pdfUrl,
+          imageUrl: m.imageUrl,
         })),
       };
 
@@ -147,7 +162,7 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
 
       const cursoGuardado: Curso = await res.json();
 
-      if (datos.imagenCurso) {
+      if (datos.imagenCurso && typeof datos.imagenCurso !== 'string') {
         const formData = new FormData();
         formData.append('imagen', datos.imagenCurso);
 
