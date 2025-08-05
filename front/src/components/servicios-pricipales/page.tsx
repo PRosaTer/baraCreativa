@@ -1,7 +1,6 @@
 import React from "react";
 import Card from "@/components/tarjetas/page";
 
-// Datos de ejemplo para los tres servicios (reemplaza con los servicios reales de Bara Creativa)
 const services = [
   {
     title: "PROYECTOS DE CAPACITACION EMPRESARIAL",
@@ -25,8 +24,8 @@ const services = [
 
 const ThreeServicesSection: React.FC = () => {
   return (
-    <section className="container mx-auto py-12 bg-[var(--background)]">
-      <h2 className="text-3xl font-bold text-center text-[var(--foreground)] mb-8">
+    <section className="container mx-auto py-12 bg-[var(--background)] text-white">
+      <h2 className="text-3xl font-bold text-center mb-8">
         Servicios que Brindamos
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 sm:px-6 lg:px-8">

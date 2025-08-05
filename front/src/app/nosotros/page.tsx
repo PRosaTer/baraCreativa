@@ -1,6 +1,5 @@
 "use client";
 
-import SeccionEquipo from "@/components/acerca/seccionEquipo";
 import AvataresFlotantes from "@/components/acerca/avataresFlotantes";
 import Encabezado from "@/components/acerca/ecabezados";
 import VisionMision from "@/components/acerca/VisionMision";
@@ -11,7 +10,6 @@ import { equipo, vision, mision, valores, historia } from "@/data/acerca";
 export default function Nosotros() {
   return (
     <div className="bg-gray-100 font-sans">
-      <SeccionEquipo equipo={equipo} />
       <AvataresFlotantes equipo={equipo} />
       <Encabezado />
       <VisionMision vision={vision} mision={mision} />
