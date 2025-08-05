@@ -7,22 +7,36 @@ import { Autoplay } from "swiper/modules";
 import "swiper/css";
 
 const brands = [
-  { src: "/facebook.logo.png", alt: "Facebook" },
-  { src: "/facebook.logo.png", alt: "Facebook" },
-  { src: "/facebook.logo.png", alt: "Facebook" },
-  { src: "/facebook.logo.png", alt: "Facebook" },
-  { src: "/facebook.logo.png", alt: "Facebook" },
-  { src: "/facebook.logo.png", alt: "Facebook" },
-  { src: "/facebook.logo.png", alt: "Facebook" },
-  { src: "/facebook.logo.png", alt: "Facebook" },
+  { src: "/empresa-1.jpg" },
+  { src: "/empresa-2.jpg" },
+  { src: "/empresa-3.jpg" },
+  { src: "/empresa-4.jpg" },
+  { src: "/empresa-5.jpg" },
+  { src: "/empresa-6.jpg" },
+  { src: "/empresa-7.jpg" },
+  { src: "/empresa-8.jpg" },
+  { src: "/empresa-9.jpeg" },
+  { src: "/empresa-10.jpg" },
+  { src: "/empresa-11.jpg" },
+  { src: "/empresa-12.jpg" },
+  { src: "/empresa-13.jpg" },
+  { src: "/empresa-14.jpg" },
+  { src: "/empresa-15.jpg" },
+  { src: "/empresa-16.jpg" },
+  { src: "/empresa-17.jpg" },
+  { src: "/empresa-18.jpg" },
+  { src: "/empresa-19.png" },
+  { src: "/empresa-20.png" },
+  { src: "/empresa-21.png" },
+  { src: "/empresa-22.png" },
 
   // Agrega más imágenes para un mejor efecto
 ];
 
 const LogoSlider = () => {
   return (
-    <section className="container mx-auto py-8 bg-[var(--background)]">
-      <h2 className="text-2xl font-bold text-center text-[var(--foreground)] mb-6">
+    <section className="container mx-auto py-8 bg-[var(--background)] text-white">
+      <h2 className="text-2xl font-bold text-center mb-6">
         Clientes con las que hemos trabajado
       </h2>
       <Swiper
@@ -33,13 +47,13 @@ const LogoSlider = () => {
           1024: { slidesPerView: 5 }, // lg
         }}
         spaceBetween={16}
-        loop={brands.length > 1} // Solo activa el loop si hay más de una imagen
+        loop={brands.length > 1}
         autoplay={{
-          delay: 0, // Desplazamiento continuo
-          disableOnInteraction: false, // No se detiene al interactuar
-          pauseOnMouseEnter: false, // No pausa al pasar el mouse
+          delay: 0,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: false,
         }}
-        speed={5000} // Ajusta la velocidad (menor = más rápido)
+        speed={5000}
         modules={[Autoplay]}
         className="w-full"
       >
@@ -48,7 +62,7 @@ const LogoSlider = () => {
             <div className="min-w-[150px] mx-4">
               <Image
                 src={brand.src}
-                alt={brand.alt}
+                alt="Logo"
                 width={150}
                 height={80}
                 className="object-contain"

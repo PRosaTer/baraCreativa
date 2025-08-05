@@ -10,6 +10,7 @@ import Contactenos from "../Botones/contactenos";
 import { useAuth } from "@/app/context/AuthContext";
 import BotonConEfecto from "../Botones/BotonConEfecto";
 import { useRouter } from "next/navigation";
+import Academias from "../Botones/academias";
 
 export default function Navbar() {
   const router = useRouter();
@@ -92,6 +93,7 @@ export default function Navbar() {
         >
           <SobreComunidadButton />
           <ComunidadButton />
+          <Academias />
           <BarraBusqueda className="flex-grow min-w-[200px] max-w-[656px] lg:max-w-[400px] xl:max-w-[656px]" />
           <Cursos />
           <Contactenos />

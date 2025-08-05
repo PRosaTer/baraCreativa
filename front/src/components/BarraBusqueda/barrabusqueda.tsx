@@ -24,7 +24,6 @@ export default function BarraBusqueda({ className }: BarraBusquedaProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Reemplazá esta URL por la de tu API real
     fetch("/api/cursos")
       .then((res) => res.json())
       .then((data) => setData(data));
@@ -36,7 +35,7 @@ export default function BarraBusqueda({ className }: BarraBusquedaProps) {
       (item) =>
         item.titulo.toLowerCase().includes(texto) ||
         item.claseItem.toLowerCase().includes(texto) ||
-        item.id.toString().includes(texto) ||
+        // item.id.toString().includes(texto) ||
         item.duracionHoras.toString().includes(texto)
     );
     setResultados(texto ? filtrados : []);
