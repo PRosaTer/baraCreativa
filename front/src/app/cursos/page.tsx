@@ -5,10 +5,8 @@ import Link from 'next/link';
 
 import {
   ClaseItem,
-  TipoCurso,
   RawCursoApiResponse,
   Curso,
-  ModuloResumen,
 } from '@/app/types/curso';
 
 export default function CursosPage() {

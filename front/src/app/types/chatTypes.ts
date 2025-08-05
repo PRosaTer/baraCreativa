@@ -1,5 +1,9 @@
 export type Mensaje = {
   message: string;
   sender: "bot" | "user";
-  widget?: React.ReactNode;
+  widget?: { 
+    buttonText: string;
+    buttonColor: string;
+    buttonUrl: string;
+  };
 };

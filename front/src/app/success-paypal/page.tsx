@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react'; 
 import { useSearchParams, useRouter } from 'next/navigation';
 
-export default function SuccessPaypalPage() {
+
+const SuccessPaypalContent: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const orderId = searchParams.get('orderId');
@@ -33,7 +34,7 @@ export default function SuccessPaypalPage() {
         }
 
         const data = await res.json();
-        const cursoId = data.pagoLocal.curso.id;
+        const cursoId = data.pagoLocal.curso.id; 
         router.replace(`/scorm/${cursoId}`);
 
       } catch (err) {
@@ -44,10 +45,21 @@ export default function SuccessPaypalPage() {
     };
 
     capturarPago();
-  }, [orderId, router]);
+  }, [orderId, router]); 
 
   if (loading) return <p style={{ textAlign: 'center', marginTop: 50 }}>Procesando pago...</p>;
   if (error) return <p style={{ textAlign: 'center', marginTop: 50, color: 'red' }}>{error}</p>;
 
   return null;
-}
+};
+
+
+const SuccessPaypalPage: React.FC = () => {
+  return (
+    <Suspense fallback={<p style={{ textAlign: 'center', marginTop: 50 }}>Iniciando proceso de pago...</p>}>
+      <SuccessPaypalContent />
+    </Suspense>
+  );
+};
+
+export default SuccessPaypalPage;

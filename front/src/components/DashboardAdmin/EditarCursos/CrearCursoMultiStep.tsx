@@ -61,6 +61,7 @@ const CrearCursoMultiStep: React.FC<Props> = ({
         form={form}
         handleFileChange={handleFileChange}
         handleDateChange={handleDateChange}
+        handleChange={handleChange} 
       />
       <ModuloForm
         form={form}

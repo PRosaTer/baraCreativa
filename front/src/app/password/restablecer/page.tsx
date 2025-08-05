@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react"; 
 import { useSearchParams, useRouter } from "next/navigation";
 import { confirmarRestablecimientoPassword } from '@/app/lib/service/auth';
 
-const RestablecerPasswordPage: React.FC = () => {
+
+const RestablecerPasswordContent: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -30,14 +31,13 @@ const RestablecerPasswordPage: React.FC = () => {
 
     try {
       const data = await confirmarRestablecimientoPassword(token, password);
-      
+
       if (data.error) {
-        setError(data.error ?? "Error desconocido al restablecer la contraseña."); 
+        setError(data.error ?? "Error desconocido al restablecer la contraseña.");
         return;
       }
 
-      
-      setMensaje(data.mensaje ?? "Contraseña restablecida correctamente."); 
+      setMensaje(data.mensaje ?? "Contraseña restablecida correctamente.");
       setPassword("");
       setTimeout(() => router.push("/login"), 2500);
     } catch (err) {
@@ -73,6 +73,15 @@ const RestablecerPasswordPage: React.FC = () => {
         </form>
       )}
     </div>
+  );
+};
+
+
+const RestablecerPasswordPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <RestablecerPasswordContent />
+    </Suspense>
   );
 };
 
