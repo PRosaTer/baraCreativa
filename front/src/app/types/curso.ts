@@ -1,3 +1,5 @@
+// app/types/curso.ts
+
 export enum ClaseItem {
   CURSO = 'curso',
   SERVICIO = 'servicio',
@@ -58,7 +60,7 @@ export interface RawCursoApiResponse {
   descripcion: string;
   fechaInicio: string | null;
   duracionHoras: number;
-  tipo: TipoCurso; 
+  tipo: TipoCurso;
   categoria: string;
   subcategoria?: string;
   precio: string | number;
