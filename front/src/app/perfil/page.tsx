@@ -7,7 +7,7 @@ import VistaAdmin from "@/components/DashboardAdmin/VistaAdmin";
 import DashboardUsuario from "@/components/DashboardUsuario/DashboardUsuario";
 
 export default function PerfilPage() {
-  const { usuario, setUsuario, mensajeError } = usePerfilUsuario();
+  const { usuario, mensajeError } = usePerfilUsuario();
 
   if (mensajeError) {
     return <ErrorNoAutorizado mensaje={mensajeError} />;

@@ -1,18 +1,24 @@
 "use client";
 
-import React from 'react';
-import InputField from './InputField';
-import SelectField from './SelectField';
-import SelectorFotoPerfil from '@/components/ui/SelectorFotoPerfil';
+import React from "react";
+import InputField from "./InputField";
+import SelectField from "./SelectField";
+import SelectorFotoPerfil from "@/components/ui/SelectorFotoPerfil";
 
 interface Props {
   form: any;
   foto: File | null;
   setFoto: (file: File | null) => void;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  handleChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => void;
 }
 
-export default function CamposFormularioUsuario({ form, foto, setFoto, handleChange }: Props) {
+export default function CamposFormularioUsuario({
+  form,
+  setFoto,
+  handleChange,
+}: Props) {
   return (
     <>
       <SelectorFotoPerfil onFotoChange={setFoto} />
@@ -45,10 +51,10 @@ export default function CamposFormularioUsuario({ form, foto, setFoto, handleCha
         name="tipoUsuario"
         value={form.tipoUsuario}
         onChange={handleChange}
-        options={['Alumno', 'Instructor', 'Empresa', 'Admin']}
+        options={["Alumno", "Instructor", "Empresa", "Admin"]}
       />
 
-      {form.tipoUsuario === 'Empresa' && (
+      {form.tipoUsuario === "Empresa" && (
         <InputField
           name="nombreEmpresa"
           placeholder="Nombre de la Empresa"
