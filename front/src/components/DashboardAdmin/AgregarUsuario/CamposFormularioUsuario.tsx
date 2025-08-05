@@ -1,12 +1,23 @@
-"use client";
+'use client';
 
 import React from "react";
 import InputField from "./InputField";
 import SelectField from "./SelectField";
 import SelectorFotoPerfil from "@/components/ui/SelectorFotoPerfil";
 
+
+interface UsuarioFormulario {
+  nombreCompleto: string;
+  correoElectronico: string;
+  telefono: string;
+  tipoUsuario: "Alumno" | "Instructor" | "Empresa" | "Admin" | string;
+  nombreEmpresa?: string;
+  password?: string;
+  confirmPassword?: string; 
+}
+
 interface Props {
-  form: any;
+  form: UsuarioFormulario;
   foto: File | null;
   setFoto: (file: File | null) => void;
   handleChange: (
@@ -58,7 +69,7 @@ export default function CamposFormularioUsuario({
         <InputField
           name="nombreEmpresa"
           placeholder="Nombre de la Empresa"
-          value={form.nombreEmpresa}
+          value={form.nombreEmpresa || ''} 
           onChange={handleChange}
           required
         />
@@ -68,7 +79,7 @@ export default function CamposFormularioUsuario({
         name="password"
         type="password"
         placeholder="Contraseña"
-        value={form.password}
+        value={form.password || ''} 
         onChange={handleChange}
         required
       />
@@ -77,7 +88,7 @@ export default function CamposFormularioUsuario({
         name="confirmPassword"
         type="password"
         placeholder="Confirmar Contraseña"
-        value={form.confirmPassword}
+        value={form.confirmPassword || ''}
         onChange={handleChange}
         required
       />
