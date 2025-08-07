@@ -23,5 +23,5 @@ export const registerUser = async (userData: RegisterApiData): Promise<ApiRespon
   } catch (error) {
     console.error("Network or unexpected error (registerUser):", error);
     throw new Error("No se pudo conectar con el servidor. Verifica tu conexión o intenta más tarde.");
-}
+  }
 };
