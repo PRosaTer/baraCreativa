@@ -178,7 +178,7 @@ export class CursosController {
 
   @Post('modulos/:id/files')
   @UseInterceptors(
-    FilesInterceptor('files', 100, { 
+    FilesInterceptor('files', 100, {
       storage: diskStorage({
         destination: (req, file, cb) => {
           const moduloUploadPath = join(process.cwd(), 'uploads', 'modulos');
@@ -211,9 +211,9 @@ export class CursosController {
     }
 
     const updatedPaths: {
-      videoUrls: string[]; 
-      pdfUrls: string[]; 
-      imageUrls: string[]; 
+      videoUrls: string[];
+      pdfUrls: string[];
+      imageUrls: string[];
     } = {
       videoUrls: [],
       pdfUrls: [],
@@ -228,8 +228,6 @@ export class CursosController {
         updatedPaths.pdfUrls.push(filePath);
       } else if (file.mimetype.startsWith('image/')) {
         updatedPaths.imageUrls.push(filePath);
-      } else {
-        console.warn(`Tipo de archivo no reconocido o no esperado: ${file.mimetype}`);
       }
     });
 
@@ -265,4 +263,11 @@ export class CursosController {
       throw new InternalServerErrorException('Error al obtener el siguiente módulo.');
     }
   }
+
+@UseGuards(JwtAuthGuard)
+@Get('usuario/mis-cursos')
+async obtenerCursosUsuario(@Req() req: UserRequest) {
+  return this.cursosService.obtenerCursosDeUsuario(req.user.id);
+}
+
 }

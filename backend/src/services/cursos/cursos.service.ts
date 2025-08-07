@@ -13,6 +13,7 @@ import { join } from 'path';
 import * as fs from 'fs';
 import * as AdmZip from 'adm-zip';
 import { v4 as uuidv4 } from 'uuid';
+import { Inscripcion } from '../../entidades/inscripcion.entity';
 
 @Injectable()
 export class CursosService {
@@ -21,10 +22,20 @@ export class CursosService {
     private readonly cursosRepository: Repository<Curso>,
     @InjectRepository(ModuloEntity)
     private readonly modulosRepository: Repository<ModuloEntity>,
+    @InjectRepository(Inscripcion)
+    private readonly inscripcionesRepository: Repository<Inscripcion>,
   ) {}
 
   obtenerCursos(): Promise<Curso[]> {
     return this.cursosRepository.find({ relations: ['modulos'] });
+  }
+
+  obtenerCursosDisponibles(): Promise<Curso[]> {
+    return this.cursosRepository
+      .createQueryBuilder('curso')
+      .leftJoinAndSelect('curso.modulos', 'modulos')
+      .where('curso.fechaInicio <= NOW()')
+      .getMany();
   }
 
   async obtenerCursoPorId(id: number): Promise<Curso> {
@@ -211,5 +222,19 @@ export class CursosService {
 
     const savedModulo = await this.modulosRepository.save(modulo);
     return savedModulo;
+  }
+
+  async obtenerCursosDeUsuario(userId: number): Promise<Curso[]> {
+    const inscripciones = await this.inscripcionesRepository
+      .createQueryBuilder("inscripcion")
+      .leftJoinAndSelect("inscripcion.curso", "curso")
+      .where("inscripcion.usuario.id = :userId", { userId })
+      .getMany();
+
+    if (!inscripciones || inscripciones.length === 0) {
+        return [];
+    }
+
+    return inscripciones.map(inscripcion => inscripcion.curso);
   }
 }
