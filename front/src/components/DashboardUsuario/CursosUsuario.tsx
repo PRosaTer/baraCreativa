@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Curso } from "@/app/types/curso";
+import CursosBloqueados from "./CursosBloqueados";
 
 export default function CursosUsuario() {
   const [cursos, setCursos] = useState<Curso[]>([]);
@@ -37,51 +38,131 @@ export default function CursosUsuario() {
     return <p className="text-center">No tienes cursos aún 😢</p>;
   }
 
+
   const cursosOrdenados = [...cursos].sort((a, b) => {
     const fechaA = a.fechaInicio ? new Date(a.fechaInicio).getTime() : Infinity;
     const fechaB = b.fechaInicio ? new Date(b.fechaInicio).getTime() : Infinity;
     return fechaA - fechaB;
   });
 
+  const ahora = new Date();
+
+  const cursosDesbloqueados = cursosOrdenados.filter((curso) => {
+    const fechaDeInicio = curso.fechaInicio ? new Date(curso.fechaInicio) : null;
+    return !fechaDeInicio || fechaDeInicio <= ahora;
+  });
+
+  const cursosBloqueados = cursosOrdenados.filter((curso) => {
+    const fechaDeInicio = curso.fechaInicio ? new Date(curso.fechaInicio) : null;
+    return fechaDeInicio && fechaDeInicio > ahora;
+  });
+
+
+  const cursosDisponibles = cursosDesbloqueados.filter(
+    (curso) => curso.claseItem === "curso"
+  );
+  const serviciosDisponibles = cursosDesbloqueados.filter(
+    (curso) => curso.claseItem === "servicio"
+  );
+
+  const tituloCursos = "Cursos disponibles";
+  const palabrasCursos = tituloCursos.split(" ");
+  const tituloServicios = "Servicios disponibles";
+  const palabrasServicios = tituloServicios.split(" ");
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-      {cursosOrdenados.map((curso) => {
-        const fechaDeInicio = curso.fechaInicio ? new Date(curso.fechaInicio) : null;
-        const ahora = new Date();
-        const estaBloqueado = fechaDeInicio && fechaDeInicio > ahora;
+    <>
+      <style>{`
+        @keyframes color-fade {
+          0%, 100% { color: #ef4444; } /* Rojo */
+          50% { color: #eab308; } /* Amarillo */
+        }
+        .animated-word {
+          animation: color-fade 5s ease-in-out infinite;
+        }
+      `}</style>
 
-        const CourseCard = estaBloqueado ? "div" : "a";
 
-        return (
-          <CourseCard
-            key={curso.id}
-            href={!estaBloqueado ? `/cursos/${curso.id}/scorm` : undefined}
-            className={`bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-shadow ${
-              estaBloqueado
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:shadow-yellow-500/30 cursor-pointer"
-            }`}
-          >
-            {curso.imagenCurso && (
-              <img
-                src={`http://localhost:3001${curso.imagenCurso}`}
-                alt={curso.titulo}
-                className="w-full h-40 object-cover"
-              />
-            )}
-            <div className="p-4">
-              <h3 className="text-lg font-bold text-yellow-400 mb-2">
-                {curso.titulo}
-              </h3>
-              {estaBloqueado ? (
-                <p className="inline-block mt-2 text-sm text-gray-400">
-                  Se activa el: {fechaDeInicio?.toLocaleDateString()}
-                </p>
-              ) : null}
-            </div>
-          </CourseCard>
-        );
-      })}
-    </div>
+      {cursosDisponibles.length > 0 && (
+        <>
+          <h2 className="text-2xl font-bold mt-10 mb-4 text-center">
+            {palabrasCursos.map((palabra, index) => (
+              <span
+                key={index}
+                className="animated-word"
+                style={{ animationDelay: `${index * 0.3}s` }}
+              >
+                {palabra}{" "}
+              </span>
+            ))}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+            {cursosDisponibles.map((curso) => (
+              <a
+                key={curso.id}
+                href={`/cursos/${curso.id}/scorm`}
+                className="bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-all hover:shadow-yellow-500/30 transform hover:scale-105 duration-300 cursor-pointer"
+              >
+
+                {curso.imagenCurso && (
+                  <img
+                    src={`http://localhost:3001${curso.imagenCurso}`}
+                    alt={curso.titulo}
+                    className="w-full h-40 object-cover"
+                  />
+                )}
+                <div className="p-4">
+                  <h3 className="text-lg font-bold text-yellow-400 mb-2">
+                    {curso.titulo}
+                  </h3>
+                </div>
+              </a>
+            ))}
+          </div>
+        </>
+      )}
+
+
+      {serviciosDisponibles.length > 0 && (
+        <>
+          <h2 className="text-2xl font-bold mt-10 mb-4 text-center">
+            {palabrasServicios.map((palabra, index) => (
+              <span
+                key={index}
+                className="animated-word"
+                style={{ animationDelay: `${index * 0.3}s` }}
+              >
+                {palabra}{" "}
+              </span>
+            ))}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+            {serviciosDisponibles.map((curso) => (
+              <a
+                key={curso.id}
+                href={`/servicios/${curso.id}`}
+                className="bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-all hover:shadow-yellow-500/30 transform hover:scale-105 duration-300 cursor-pointer"
+              >
+
+                {curso.imagenCurso && (
+                  <img
+                    src={`http://localhost:3001${curso.imagenCurso}`}
+                    alt={curso.titulo}
+                    className="w-full h-40 object-cover"
+                  />
+                )}
+                <div className="p-4">
+                  <h3 className="text-lg font-bold text-yellow-400 mb-2">
+                    {curso.titulo}
+                  </h3>
+                </div>
+              </a>
+            ))}
+          </div>
+        </>
+      )}
+
+      <CursosBloqueados cursos={cursosBloqueados} />
+    </>
   );
 }

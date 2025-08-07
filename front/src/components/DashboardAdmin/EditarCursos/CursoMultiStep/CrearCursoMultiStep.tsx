@@ -76,7 +76,6 @@ const CrearCursoMultiStep: React.FC<Props> = ({ onGuardar, onCancelar }) => {
 
   return (
     <form onSubmit={handleSubmit} style={formStyle}>
-      <h2 style={{ textAlign: 'center', marginBottom: 20 }}>Crear Nuevo Curso</h2>
 
       {error && <p style={{ color: '#8b0000', fontWeight: '700', marginBottom: 20 }}>{error}</p>}
       {exito && <p style={{ color: '#065f46', fontWeight: '700', marginBottom: 20 }}>{exito}</p>}
