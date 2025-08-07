@@ -25,6 +25,14 @@ const reconocimientos = [
       "Ganadores del primer lugar en Smart Cities a nivel de Centroamérica y México en el Innovate Entrepreneurship Summit.",
     imagenes: ["/innovate1.jpg", "/innovate2.jpg"],
   },
+  {
+    titulo:
+      "Premio a mentor destacado programa Incubacion 504 Camara de Comercio e industrias de Comayagua",
+    fecha: "diciembre 2024",
+    descripcion:
+      "Se otorgo a Victor Padilla, un reconocimiento como mentor del proyecto ganador a nivel nacional del programa Conecta de Bridge for Billions",
+    imagenes: ["/comayagua1.jpg", "/comayagua2.jpg"],
+  },
 ];
 
 export default function Reconocimientos() {

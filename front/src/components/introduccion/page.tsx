@@ -34,7 +34,7 @@ const Introduction = () => {
               wrapper="span"
               speed={50}
               repeat={Infinity}
-              className="font-bold text-secondary"
+              className="font-bold text-yellow-400"
             />
           </h1>
 
@@ -51,14 +51,23 @@ const Introduction = () => {
 
           <div className="flex items-center justify-center gap-3 md:justify-start md:gap-10">
             <a
-              href="/nosotros"
-              className="px-3 py-2 my-2 transition-all border-2 cursor-pointer text-md w-fit rounded-xl hover:shadow-xl hover:shadow-white/50"
+              href="https://www.linkedin.com/in/victorpadillarodriguez/"
+              className="px-4 py-2 my-2 w-fit rounded-xl text-yellow-400 border-2 border-yellow-400 text-md font-semibold
+               transition-all duration-300 ease-in-out
+               hover:bg-yellow-400 hover:text-black
+               hover:scale-110 hover:shadow-yellow-400 hover:shadow-[0_0_20px_5px_rgba(253,224,71,0.6)]
+               hover:rotate-1 active:scale-95"
             >
-              Nosotros
+              Más sobre mí
             </a>
+
             <a
               href="/contacto"
-              className="px-3 py-2 my-5 transition-all border-2 cursor-pointer text-md w-fit text-secondary border-secondary rounded-xl hover:shadow-xl hover:shadow-secondary"
+              className="px-4 py-2 my-5 w-fit rounded-xl text-yellow-400 border-2 border-yellow-400 text-md font-semibold
+               transition-all duration-300 ease-in-out
+               hover:bg-yellow-400 hover:text-black
+               hover:scale-110 hover:shadow-yellow-400 hover:shadow-[0_0_20px_5px_rgba(253,224,71,0.6)]
+               hover:-rotate-1 active:scale-95"
             >
               Contacta con nosotros
             </a>
