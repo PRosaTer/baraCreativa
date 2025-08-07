@@ -5,8 +5,8 @@ interface CardProps {
   title: string;
   image: string;
   description: string;
-  buttonText?: string; // Opcional, para agregar un botón en el futuro
-  onButtonClick?: () => void; // Opcional, para manejar el click del botón
+  buttonText?: string;
+  onButtonClick?: () => void;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -17,22 +17,16 @@ const Card: React.FC<CardProps> = ({
   onButtonClick,
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-xl">
-      <Image
-        src={image}
-        alt={title}
-        width={300}
-        height={200}
-        className="w-full h-48 object-cover"
-      />
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-[var(--foreground)] mb-2">
-          {title}
-        </h3>
-        <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
+    <div className="w-full overflow-hidden">
+      <div className="w-full h-64 relative">
+        <Image src={image} alt={title} fill className="object-cover" />
+      </div>
+      <div className="mt-0 px-4 py-3 bg-black bg-opacity-40 backdrop-blur-sm">
+        <h3 className="text-white text-xl font-semibold mb-1">{title}</h3>
+        <p className="text-white text-sm">{description}</p>
         {buttonText && onButtonClick && (
           <button
-            className="mt-4 w-full bg-black text-white py-2 rounded-lg hover:bg-red-600 transition duration-300"
+            className="mt-4 w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition duration-300"
             onClick={onButtonClick}
           >
             {buttonText}
