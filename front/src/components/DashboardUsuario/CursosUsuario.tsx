@@ -140,7 +140,7 @@ export default function CursosUsuario() {
             {serviciosDisponibles.map((curso) => (
               <a
                 key={curso.id}
-                href={`/servicios/${curso.id}`}
+                href={`/cursos/${curso.id}/scorm`}
                 className="bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-all hover:shadow-yellow-500/30 transform hover:scale-105 duration-300 cursor-pointer"
               >
 
