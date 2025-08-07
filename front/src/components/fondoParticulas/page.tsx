@@ -35,7 +35,7 @@ const FondoParticulas = () => {
             particles: {
               color: { value: "#000000" },
               links: {
-                color: "#1f1934",
+                color: "#f5f5f5",
                 distance: 150,
                 enable: true,
                 opacity: 0.5,
