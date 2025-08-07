@@ -10,7 +10,8 @@ interface Props {
 
 export default function MenuUsuario({ seleccionarVista, vistaActual, nombreUsuario }: Props) {
   return (
-    <nav className="w-48 bg-gray-100 p-4 flex flex-col space-y-4 select-none">
+    <nav className="w-48 bg-gray-100 p-4 flex flex-col space-y-4 select-none sticky top-4 self-start h-fit">
+
       <input
         value={nombreUsuario}
         disabled

@@ -109,7 +109,7 @@ export default function VistaCursos() {
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
-      <h2 className="text-3xl font-bold mb-6 text-center text-[var(--primary)]">Gestión de Cursos</h2>
+      <h2 className="text-3xl font-bold mb-6 text-center text-[var(--primary)]">Gestión de Cursos y Servicios</h2>
       {mensajeExito && <p className="text-green-600 mb-4">{mensajeExito}</p>}
       {mensajeError && <p className="text-red-600 mb-4">{mensajeError}</p>}
       {!mostrarFormularioCreacion && !cursoEditando && (
