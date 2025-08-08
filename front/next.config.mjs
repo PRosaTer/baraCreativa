@@ -1,24 +1,30 @@
-    const nextConfig = {
-      async rewrites() {
-        return [
-          {
-            source: '/api/:path*',
-            destination: 'http://localhost:3001/api/:path*',
-          },
-          {
-            source: '/uploads/:path*',
-            destination: 'http://localhost:3001/uploads/:path*',
-          },
-          {
-            source: '/scorm_courses/:path*',
-            destination: 'http://localhost:3001/scorm_courses/:path*',
-          },
-        ];
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  swcMinify: true,
+  images: {
+    domains: [
+      'localhost',
+      new URL(process.env.NEXT_PUBLIC_API_URL).hostname
+    ],
+  },
+ 
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`,
       },
-      images: {
-        domains: ['localhost'], // Permite que Next.js optimice imágenes de localhost
+      {
+        source: '/uploads/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_URL}/uploads/:path*`,
       },
-    };
+      {
+        source: '/scorm_courses/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_URL}/scorm_courses/:path*`,
+      },
+    ];
+  },
+};
 
-    export default nextConfig;
-    
+module.exports = nextConfig;
