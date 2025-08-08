@@ -8,7 +8,7 @@ const nextConfig = {
       new URL(process.env.NEXT_PUBLIC_API_URL).hostname
     ],
   },
- 
+
   async rewrites() {
     return [
       {
@@ -27,4 +27,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
