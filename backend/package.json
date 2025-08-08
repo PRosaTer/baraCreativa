@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build && npm run copy-templates",
+    "build": "npx nest build && npx cpx \"src/mail/templates/**/*\" dist/templates",
     "copy-templates": "cpx \"src/mail/templates/**/*\" dist/templates",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
