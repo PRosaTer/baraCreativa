@@ -27,6 +27,7 @@ import configuration, { AppConfig } from './config/configuration';
         type: 'postgres',
         url: process.env.DATABASE_URL,
         entities: [join(__dirname, '**', '*.entity.{ts,js}')],
+        synchronize: process.env.NODE_ENV === 'development',
         ssl: {
           rejectUnauthorized: false,
         },
