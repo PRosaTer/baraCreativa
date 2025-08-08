@@ -10,7 +10,7 @@ import { CursosModule } from './modules/cursos/cursos.module';
 import { PagosModule } from './modules/pagos/pagos.module';
 import { InscripcionesModule } from './modules/inscripciones/inscripciones.module';
 import { ReporteProgresoModule } from './modules/reporte-progreso/reporte-progreso.module';
-import { CertificadosModule } from './modules/certificados/certificados.module'; 
+import { CertificadosModule } from './modules/certificados/certificados.module';
 import { BadgesModule } from './modules/badges/badges.module';
 
 import configuration, { AppConfig } from './config/configuration';
@@ -25,13 +25,11 @@ import configuration, { AppConfig } from './config/configuration';
       inject: [ConfigService],
       useFactory: (config: ConfigService<AppConfig>): TypeOrmModuleOptions => ({
         type: 'postgres',
-        host: config.get('database.host', { infer: true }),
-        port: config.get('database.port', { infer: true }),
-        username: config.get('database.user', { infer: true }),
-        password: config.get('database.password', { infer: true }),
-        database: config.get('database.name', { infer: true }),
+        url: process.env.DATABASE_URL,
         entities: [join(__dirname, '**', '*.entity.{ts,js}')],
-        synchronize: true, 
+        ssl: {
+          rejectUnauthorized: false,
+        },
       }),
     }),
     UsuariosModule,
@@ -42,7 +40,7 @@ import configuration, { AppConfig } from './config/configuration';
     InscripcionesModule,
     ReporteProgresoModule,
     CertificadosModule,
-    BadgesModule, 
+    BadgesModule,
   ],
 })
 export class AppModule {}
