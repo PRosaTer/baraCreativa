@@ -4,126 +4,129 @@ import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 interface UsuarioAutenticado {
-  id: number;
-  nombreCompleto: string;
-  correoElectronico: string;
-  telefono?: string;
-  tipoUsuario?: string;
-  nombreEmpresa?: string;
-  fotoPerfil?: string;
-  estadoCuenta?: string;
-  esAdmin: boolean;
-  creadoEn: string;
-  actualizadoEn: string;
-  ultimaSesion?: string;
+  id: number;
+  nombreCompleto: string;
+  correoElectronico: string;
+  telefono?: string;
+  tipoUsuario?: string;
+  nombreEmpresa?: string;
+  fotoPerfil?: string;
+  estadoCuenta?: string;
+  esAdmin: boolean;
+  creadoEn: string;
+  actualizadoEn: string;
+  ultimaSesion?: string;
 }
 
 export const useAutenticacion = () => {
-  const [usuario, setUsuario] = useState<UsuarioAutenticado | null>(null);
-  const [cargandoUsuario, setCargandoUsuario] = useState(true);
-  const [mensajeExito, setMensajeExito] = useState(false);
-  const router = useRouter();
+  const [usuario, setUsuario] = useState<UsuarioAutenticado | null>(null);
+  const [cargandoUsuario, setCargandoUsuario] = useState(true);
+  const [mensajeExito, setMensajeExito] = useState(false);
+  const router = useRouter();
 
-  const obtenerDatosUsuario = useCallback(async (): Promise<UsuarioAutenticado | null> => {
-    try {
-      const respuesta = await fetch("http://localhost:3001/auth/profile", {
-        method: "GET",
-        credentials: "include",
-      });
 
-      if (!respuesta.ok) {
-        if (respuesta.status === 401) {
-          setUsuario(null);
-        }
-        return null;
-      }
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-      const userData: UsuarioAutenticado = await respuesta.json();
-      return userData;
+  const obtenerDatosUsuario = useCallback(async (): Promise<UsuarioAutenticado | null> => {
+    try {
+      const respuesta = await fetch(`${API_URL}/auth/profile`, {
+        method: "GET",
+        credentials: "include",
+      });
 
-    } catch (error) {
-      setUsuario(null);
-      return null;
-    }
-  }, []);
+      if (!respuesta.ok) {
+        if (respuesta.status === 401) {
+          setUsuario(null);
+        }
+        return null;
+      }
 
-  const manejarInicioSesion = async (
-    e: React.FormEvent,
-    correo: string,
-    contrasena: string
-  ): Promise<boolean> => {
-    e.preventDefault();
+      const userData: UsuarioAutenticado = await respuesta.json();
+      return userData;
 
-    try {
-      const respuesta = await fetch("http://localhost:3001/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          correoElectronico: correo,
-          password: contrasena,
-        }),
-      });
+    } catch (error) {
+      setUsuario(null);
+      return null;
+    }
+  }, [API_URL]); 
 
-      if (!respuesta.ok) {
-        const errorData = await respuesta.json();
-        alert(errorData.message || "Error al iniciar sesión");
-        return false;
-      }
+  const manejarInicioSesion = async (
+    e: React.FormEvent,
+    correo: string,
+    contrasena: string
+  ): Promise<boolean> => {
+    e.preventDefault();
 
-      const usuarioLogeado = await obtenerDatosUsuario();
+    try {
+      const respuesta = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          correoElectronico: correo,
+          password: contrasena,
+        }),
+      });
 
-      if (usuarioLogeado) {
-        setUsuario(usuarioLogeado);
-        setMensajeExito(true);
-        router.push("/");
-        return true;
-      } else {
-        alert("Inicio de sesión exitoso, pero no se pudo obtener el perfil.");
-        return false;
-      }
+      if (!respuesta.ok) {
+        const errorData = await respuesta.json();
+        console.error(errorData.message || "Error al iniciar sesión");
+        return false;
+      }
 
-    } catch (error) {
-      alert("Error al conectar con el servidor o iniciar sesión.");
-      return false;
-    }
-  };
+      const usuarioLogeado = await obtenerDatosUsuario();
 
-  const cerrarSesion = useCallback(async () => {
-    try {
-      await fetch("http://localhost:3001/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-    }
+      if (usuarioLogeado) {
+        setUsuario(usuarioLogeado);
+        setMensajeExito(true);
+        router.push("/");
+        return true;
+      } else {
+        console.error("Inicio de sesión exitoso, pero no se pudo obtener el perfil.");
+        return false;
+      }
 
-    setUsuario(null);
-    setMensajeExito(false);
-    router.push("/login");
-    router.refresh();
-  }, [router]);
+    } catch (error) {
+      console.error("Error al conectar con el servidor o iniciar sesión.", error);
+      return false;
+    }
+  };
 
-  useEffect(() => {
-    const loadUser = async () => {
-      setCargandoUsuario(true);
-      const user = await obtenerDatosUsuario();
-      setUsuario(user);
-      setCargandoUsuario(false);
-    };
+  const cerrarSesion = useCallback(async () => {
+    try {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
 
-    loadUser();
-  }, [obtenerDatosUsuario]);
+    setUsuario(null);
+    setMensajeExito(false);
+    router.push("/login");
+    router.refresh();
+  }, [router, API_URL]);
 
-  return {
-    usuario,
-    cargandoUsuario,
-    mensajeExito,
-    setMensajeExito,
-    manejarInicioSesion,
-    cerrarSesion,
-  };
+  useEffect(() => {
+    const loadUser = async () => {
+      setCargandoUsuario(true);
+      const user = await obtenerDatosUsuario();
+      setUsuario(user);
+      setCargandoUsuario(false);
+    };
+
+    loadUser();
+  }, [obtenerDatosUsuario]);
+
+  return {
+    usuario,
+    cargandoUsuario,
+    mensajeExito,
+    setMensajeExito,
+    manejarInicioSesion,
+    cerrarSesion,
+  };
 };
