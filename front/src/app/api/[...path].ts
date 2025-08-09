@@ -5,9 +5,10 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { path } = req.query;
   const targetPath = Array.isArray(path) ? path.join('/') : path || '';
-
-
   const targetUrl = `${BACKEND_URL}/${targetPath}`;
+
+
+  console.log('Proxying request to:', targetUrl);
 
   const headers = new Headers();
   for (const key in req.headers) {
@@ -27,24 +28,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     headers.set('Content-Type', 'application/json');
   }
 
+  let body = null;
+  if (req.method !== 'GET' && req.method !== 'HEAD' && req.body) {
+    body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+  }
+
   try {
     const response = await fetch(targetUrl, {
       method: req.method,
       headers: headers,
-      body: req.method === 'GET' || req.method === 'HEAD' ? null : JSON.stringify(req.body),
+      body: body,
     });
-
 
     const responseBody = await response.text();
 
- 
     res.status(response.status);
     response.headers.forEach((value, key) => {
       if (key.toLowerCase() !== 'content-length' && key.toLowerCase() !== 'set-cookie') {
         res.setHeader(key, value);
       }
     });
-
 
     res.send(responseBody);
   } catch (error) {
