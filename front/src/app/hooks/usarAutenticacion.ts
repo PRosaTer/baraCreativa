@@ -46,6 +46,13 @@ export const useAutenticacion = () => {
         setUsuario(null);
         return null;
       }
+      
+      const contentType = respuesta.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("Error: La respuesta no es JSON. Se recibió:", await respuesta.text());
+        setUsuario(null);
+        return null;
+      }
 
       const userData: UsuarioAutenticado = await respuesta.json();
       return userData;
@@ -78,8 +85,14 @@ export const useAutenticacion = () => {
       });
 
       if (!respuesta.ok) {
-        const errorData = await respuesta.json();
-        console.error(errorData.message || "Error al iniciar sesión");
+        const contentType = respuesta.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await respuesta.json();
+          console.error(errorData.message || "Error al iniciar sesión");
+        } else {
+          console.error("Error al iniciar sesión. La respuesta no es JSON.");
+          console.log("Respuesta del servidor:", await respuesta.text());
+        }
         return false;
       }
 
