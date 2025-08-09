@@ -5,23 +5,25 @@ const nextConfig = {
   images: {
     domains: [
       'localhost',
-      new URL(process.env.NEXT_PUBLIC_API_URL).hostname
+      new URL(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').hostname,
     ],
   },
 
   async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`,
+        destination: `${apiUrl}/api/:path*`,
       },
       {
         source: '/uploads/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/uploads/:path*`,
+        destination: `${apiUrl}/uploads/:path*`,
       },
       {
         source: '/scorm_courses/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/scorm_courses/:path*`,
+        destination: `${apiUrl}/scorm_courses/:path*`,
       },
     ];
   },
