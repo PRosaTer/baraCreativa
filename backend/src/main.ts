@@ -18,7 +18,7 @@ async function createFolderIfNotExist(path) {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.setGlobalPrefix('api');
 
@@ -29,9 +29,7 @@ async function bootstrap() {
     credentials: true,
     allowedHeaders: 'Content-Type, Authorization',
   });
- 
   
-
   app.use(cookieParser());
 
   app.useGlobalPipes(
