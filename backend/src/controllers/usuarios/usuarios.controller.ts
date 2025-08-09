@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Patch,
   Param,
   Body,
@@ -18,7 +17,6 @@ import { extname } from 'path';
 import type { Express } from 'express';
 
 import { UsuariosService } from '../../services/usuarios/usuarios.service';
-import { CreateUsuarioDto } from '../../dto/crear-editar-usuarios/create-usuario.dto';
 import { UpdateUsuarioDto } from '../../dto/crear-editar-usuarios/update-usuario.dto';
 import { Usuario } from '../../entidades/usuario.entity';
 import { UsuarioAutenticado } from '../../auth/decoradores/usuario-autenticado.decorator';
@@ -29,29 +27,6 @@ export class UsuariosController {
   private readonly logger = new Logger(UsuariosController.name);
 
   constructor(private readonly usuariosService: UsuariosService) {}
-
-  @Post()
-  @UseInterceptors(
-    FileInterceptor('fotoPerfil', {
-      storage: diskStorage({
-        destination: './uploads/perfiles',
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `${uniqueSuffix}${ext}`);
-        },
-      }),
-    }),
-  )
-  create(
-    @UploadedFile() foto: Express.Multer.File,
-    @Body() datos: CreateUsuarioDto,
-  ): Promise<Usuario> {
-    if (foto) {
-      datos.fotoPerfil = foto.filename;
-    }
-    return this.usuariosService.create(datos);
-  }
 
   @Get('profile')
   @UseGuards(JwtAuthGuard)
