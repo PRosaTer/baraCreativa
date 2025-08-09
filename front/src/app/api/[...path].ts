@@ -13,9 +13,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   for (const key in req.headers) {
     const value = req.headers[key];
     if (typeof value === 'string') {
-      headers.set(key, value);
+      if (key.toLowerCase() !== 'host') {
+        headers.set(key, value);
+      }
     }
   }
+
+
+  const cookieHeader = req.headers.cookie;
+  if (cookieHeader) {
+    headers.set('cookie', cookieHeader);
+  }
+
 
   if (!headers.has('Content-Type') && req.method !== 'GET' && req.method !== 'HEAD') {
     headers.set('Content-Type', 'application/json');
