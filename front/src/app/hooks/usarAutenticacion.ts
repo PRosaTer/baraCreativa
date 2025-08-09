@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+
 interface UsuarioAutenticado {
   id: number;
   nombreCompleto: string;
@@ -27,6 +28,7 @@ export const useAutenticacion = () => {
 
   const API_URL = 'https://bara-creativa-backend.onrender.com/api';
 
+
   const obtenerDatosUsuario = useCallback(async (): Promise<UsuarioAutenticado | null> => {
     try {
       const respuesta = await fetch(`${API_URL}/auth/profile`, {
@@ -34,17 +36,25 @@ export const useAutenticacion = () => {
         credentials: "include",
       });
 
+
       if (!respuesta.ok) {
         if (respuesta.status === 401) {
-          setUsuario(null);
+          console.log("No hay una sesión activa o el token no es válido. Redirigiendo a login.");
+        } else if (respuesta.status === 404) {
+          console.error("Error 404: La ruta del perfil no se encontró. Revisa tu backend.");
+        } else {
+          console.error(`Error inesperado al obtener perfil: ${respuesta.status}`);
         }
+        setUsuario(null);
         return null;
       }
+
 
       const userData: UsuarioAutenticado = await respuesta.json();
       return userData;
 
     } catch (error) {
+      console.error("Error de conexión al intentar obtener el perfil:", error);
       setUsuario(null);
       return null;
     }
@@ -110,6 +120,7 @@ export const useAutenticacion = () => {
     router.refresh();
   }, [router, API_URL]);
 
+
   useEffect(() => {
     const loadUser = async () => {
       setCargandoUsuario(true);
@@ -119,7 +130,7 @@ export const useAutenticacion = () => {
     };
 
     loadUser();
-  }, [obtenerDatosUsuario]);
+  }, [obtenerDatosUsuario]); 
 
   return {
     usuario,
