@@ -22,7 +22,6 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
-
   app.enableCors({
     origin: ['https://bara-creativa-front.onrender.com', 'https://bara-creativa-backend.onrender.com'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
