@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 interface Props {
   fotoPerfil?: string | null;
@@ -11,8 +11,8 @@ export default function FotoPerfil({ fotoPerfil, nombre }: Props) {
   return (
     <div className="mb-4 flex justify-center">
       <img
-        src={`${process.env.NEXT_PUBLIC_API_URL}/uploads/perfiles/${fotoPerfil}`}
-        alt={`Foto de perfil de ${nombre ?? "usuario"}`}
+        src={`/api/uploads/perfiles/${fotoPerfil}`}
+        alt={`Foto de perfil de ${nombre ?? 'usuario'}`}
         className="w-24 h-24 rounded-full object-cover border border-gray-300"
       />
     </div>

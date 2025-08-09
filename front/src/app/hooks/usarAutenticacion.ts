@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface UsuarioAutenticado {
   id: number;
@@ -25,13 +25,12 @@ export const useAutenticacion = () => {
   const router = useRouter();
 
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const obtenerDatosUsuario = useCallback(async (): Promise<UsuarioAutenticado | null> => {
     try {
-      const respuesta = await fetch(`${API_URL}/auth/profile`, {
-        method: "GET",
-        credentials: "include",
+      const respuesta = await fetch(`/api/auth/profile`, {
+        method: 'GET',
+        credentials: 'include',
       });
 
       if (!respuesta.ok) {
@@ -43,12 +42,11 @@ export const useAutenticacion = () => {
 
       const userData: UsuarioAutenticado = await respuesta.json();
       return userData;
-
     } catch (error) {
       setUsuario(null);
       return null;
     }
-  }, [API_URL]); 
+  }, []);
 
   const manejarInicioSesion = async (
     e: React.FormEvent,
@@ -58,12 +56,12 @@ export const useAutenticacion = () => {
     e.preventDefault();
 
     try {
-      const respuesta = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
+      const respuesta = await fetch(`/api/auth/login`, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        credentials: "include",
+        credentials: 'include',
         body: JSON.stringify({
           correoElectronico: correo,
           password: contrasena,
@@ -72,7 +70,7 @@ export const useAutenticacion = () => {
 
       if (!respuesta.ok) {
         const errorData = await respuesta.json();
-        console.error(errorData.message || "Error al iniciar sesión");
+        console.error(errorData.message || 'Error al iniciar sesión');
         return false;
       }
 
@@ -81,34 +79,33 @@ export const useAutenticacion = () => {
       if (usuarioLogeado) {
         setUsuario(usuarioLogeado);
         setMensajeExito(true);
-        router.push("/");
+        router.push('/');
         return true;
       } else {
-        console.error("Inicio de sesión exitoso, pero no se pudo obtener el perfil.");
+        console.error('Inicio de sesión exitoso, pero no se pudo obtener el perfil.');
         return false;
       }
-
     } catch (error) {
-      console.error("Error al conectar con el servidor o iniciar sesión.", error);
+      console.error('Error al conectar con el servidor o iniciar sesión.', error);
       return false;
     }
   };
 
   const cerrarSesion = useCallback(async () => {
     try {
-      await fetch(`${API_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
+      await fetch(`/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
       });
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
+      console.error('Error al cerrar sesión:', error);
     }
 
     setUsuario(null);
     setMensajeExito(false);
-    router.push("/login");
+    router.push('/login');
     router.refresh();
-  }, [router, API_URL]);
+  }, [router]);
 
   useEffect(() => {
     const loadUser = async () => {
