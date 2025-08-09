@@ -8,6 +8,7 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { promises as fsPromises } from 'fs';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { HttpExceptionFilter } from './common/http-exception.filter'; // Importamos el filtro
 
 async function createFolderIfNotExist(path) {
   try {
@@ -23,7 +24,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   app.enableCors({
-    origin: ['https://bara-creativa-front.onrender.com', 'https://bara-creativa-backend.onrender.com'],
+    origin: ['https://bara-creativa-front.onrender.com', 'https://baracreativa.onrender.com/'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: 'Content-Type, Authorization',
@@ -38,6 +39,9 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+ 
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   const uploadPath = join(process.cwd(), 'uploads', 'imagenes-cursos');
   const scormUploadPath = join(process.cwd(), 'uploads', 'scorm');
