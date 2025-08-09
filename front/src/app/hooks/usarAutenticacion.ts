@@ -26,8 +26,7 @@ export const useAutenticacion = () => {
   const router = useRouter();
 
 
-  const API_URL = 'https://bara-creativa-backend.onrender.com/api';
-
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
   const obtenerDatosUsuario = useCallback(async (): Promise<UsuarioAutenticado | null> => {
     try {
@@ -35,7 +34,6 @@ export const useAutenticacion = () => {
         method: "GET",
         credentials: "include",
       });
-
 
       if (!respuesta.ok) {
         if (respuesta.status === 401) {
@@ -48,7 +46,6 @@ export const useAutenticacion = () => {
         setUsuario(null);
         return null;
       }
-
 
       const userData: UsuarioAutenticado = await respuesta.json();
       return userData;
