@@ -15,7 +15,7 @@ export default function VistaCursos() {
 
   const fetchCursos = async () => {
     try {
-      const res = await fetch('http://localhost:3001/api/cursos');
+      const res = await fetch('http://localhost:3001/cursos');
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Error al cargar cursos');
@@ -38,7 +38,7 @@ export default function VistaCursos() {
 
   const fetchCursoById = async (id: number): Promise<Curso | null> => {
     try {
-      const res = await fetch(`http://localhost:3001/api/cursos/${id}`, {
+      const res = await fetch(`http://localhost:3001/cursos/${id}`, {
         credentials: 'include',
       });
       if (!res.ok) {
@@ -84,7 +84,7 @@ export default function VistaCursos() {
     setMensajeError('');
 
     try {
-      const res = await fetch(`http://localhost:3001/api/cursos/${id}`, { method: 'DELETE' });
+      const res = await fetch(`http://localhost:3001/cursos/${id}`, { method: 'DELETE' });
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Error eliminando curso');

@@ -4,7 +4,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export const registerUser = async (userData: RegisterApiData): Promise<ApiResponse> => {
   try {
-    const response = await fetch(`${API_URL}/api/usuarios`, {
+    const response = await fetch(`${API_URL}/usuarios`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

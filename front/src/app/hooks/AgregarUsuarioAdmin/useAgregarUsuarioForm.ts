@@ -46,7 +46,7 @@ export default function useAgregarUsuarioForm(onUsuarioCreado: () => void) {
         formData.append('fotoPerfil', foto);
       }
 
-      const res = await fetch('http://localhost:3001/api/usuarios', {
+      const res = await fetch('http://localhost:3001/usuarios', {
         method: 'POST',
         body: formData,
       });

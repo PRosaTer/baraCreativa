@@ -32,7 +32,7 @@ interface UserRequest extends Request {
   user: { id: number };
 }
 
-@Controller('api/cursos')
+@Controller('cursos')
 export class CursosController {
   constructor(
     private readonly cursosService: CursosService,

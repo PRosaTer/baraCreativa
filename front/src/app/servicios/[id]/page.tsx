@@ -20,7 +20,7 @@ export default function ServicioDetalle() {
     async function fetchDatos() {
       try {
       
-        const resServicio = await fetch(`http://localhost:3001/api/cursos/${servicioId}`, {
+        const resServicio = await fetch(`http://localhost:3001/cursos/${servicioId}`, {
           credentials: 'include',
         });
         if (!resServicio.ok) throw new Error('No se pudo cargar el servicio');
@@ -36,7 +36,7 @@ export default function ServicioDetalle() {
         setServicio(dataServicio);
 
         
-        const resUsuario = await fetch('http://localhost:3001/api/usuarios/me', {
+        const resUsuario = await fetch('http://localhost:3001/usuarios/me', {
           credentials: 'include',
         });
         if (!resUsuario.ok) throw new Error('No se pudo obtener el usuario');

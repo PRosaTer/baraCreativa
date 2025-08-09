@@ -170,7 +170,7 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
     setLoading(true);
 
     try {
-      const baseUrl = 'http://localhost:3001/api/cursos';
+      const baseUrl = 'http://localhost:3001/cursos';
 
       const baseData = {
         titulo: form.titulo,

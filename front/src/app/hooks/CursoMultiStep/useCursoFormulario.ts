@@ -165,7 +165,7 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
         modulos: form.modulos.map(m => ({ titulo: m.titulo, descripcion: m.descripcion || null })),
       };
 
-      const resCurso = await fetch('http://localhost:3001/api/cursos', {
+      const resCurso = await fetch('http://localhost:3001/cursos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(cursoDataToCreate),
@@ -182,7 +182,7 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
       if (form.imagenCurso instanceof File) {
         const formDataImagen = new FormData();
         formDataImagen.append('imagen', form.imagenCurso);
-        const resImg = await fetch(`http://localhost:3001/api/cursos/${cursoId}/imagen`, {
+        const resImg = await fetch(`http://localhost:3001/cursos/${cursoId}/imagen`, {
           method: 'POST',
           body: formDataImagen,
           credentials: 'include',
@@ -198,7 +198,7 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
         const formDataScorm = new FormData();
         formDataScorm.append('scormFile', form.archivoScorm);
         formDataScorm.append('cursoId', cursoId.toString());
-        const resScorm = await fetch(`http://localhost:3001/api/cursos/scorm_unzipped_courses`, {
+        const resScorm = await fetch(`http://localhost:3001/cursos/scorm_unzipped_courses`, {
           method: 'POST',
           body: formDataScorm,
           credentials: 'include',
@@ -210,7 +210,7 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
         }
       }
 
-      const updatedCursoWithModulos = await fetch(`http://localhost:3001/api/cursos/${cursoId}`, { credentials: 'include' }).then(res => res.json());
+      const updatedCursoWithModulos = await fetch(`http://localhost:3001/cursos/${cursoId}`, { credentials: 'include' }).then(res => res.json());
 
       for (let i = 0; i < updatedCursoWithModulos.modulos.length; i++) {
         const moduloBackend = updatedCursoWithModulos.modulos[i];
@@ -235,7 +235,7 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
         }
 
         if (filesAttached) {
-          const resModuleFiles = await fetch(`http://localhost:3001/api/cursos/modulos/${moduloId}/files`, {
+          const resModuleFiles = await fetch(`http://localhost:3001/cursos/modulos/${moduloId}/files`, {
             method: 'POST',
             body: formDataModuleFiles,
             credentials: 'include',

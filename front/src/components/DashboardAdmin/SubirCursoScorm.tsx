@@ -43,7 +43,7 @@ export default function SubirCursoScorm({ onCursoCreado }: Props) {
         badgeDisponible,
       };
 
-      const res = await fetch('http://localhost:3001/api/cursos', {
+      const res = await fetch('http://localhost:3001/cursos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(crearCursoDto),
@@ -56,7 +56,7 @@ export default function SubirCursoScorm({ onCursoCreado }: Props) {
       if (imagen) {
         const formDataImg = new FormData();
         formDataImg.append('imagen', imagen);
-        await fetch(`http://localhost:3001/api/cursos/${cursoId}/imagen`, {
+        await fetch(`http://localhost:3001/cursos/${cursoId}/imagen`, {
           method: 'POST',
           body: formDataImg,
         });
@@ -64,7 +64,7 @@ export default function SubirCursoScorm({ onCursoCreado }: Props) {
 
       const formDataScorm = new FormData();
       formDataScorm.append('scormFile', scormFile);
-      await fetch(`http://localhost:3001/api/cursos/${cursoId}/scorm`, {
+      await fetch(`http://localhost:3001/cursos/${cursoId}/scorm`, {
         method: 'POST',
         body: formDataScorm,
       });
