@@ -53,10 +53,9 @@ export class UsuariosController {
     return this.usuariosService.create(datos);
   }
 
-  @Get('me')
+  @Get('profile')
   @UseGuards(JwtAuthGuard)
   getMe(@UsuarioAutenticado() usuario: Usuario): Partial<Usuario> {
-    this.logger.log('Usuario autenticado recibido en /usuarios/me:', usuario);
     const { password, ...usuarioSinPassword } = usuario;
     return usuarioSinPassword;
   }
@@ -68,17 +67,13 @@ export class UsuariosController {
 
   @Get(':id')
   async getOne(@Param('id') id: string): Promise<Usuario> {
-    this.logger.log(`ID recibido en GET usuarios/:id -> ${id}`);
-
     const idNum = Number(id);
     if (isNaN(idNum)) {
-      this.logger.error(`ID inválido recibido: ${id}`);
       throw new BadRequestException(`ID inválido: ${id}`);
     }
 
     const usuario = await this.usuariosService.findOne(idNum);
     if (!usuario) {
-      this.logger.warn(`Usuario no encontrado con ID: ${idNum}`);
       throw new BadRequestException(`Usuario con ID ${idNum} no encontrado`);
     }
     return usuario;
@@ -106,7 +101,6 @@ export class UsuariosController {
   ): Promise<Usuario> {
     const idNum = Number(id);
     if (isNaN(idNum)) {
-      this.logger.error(`ID inválido recibido para actualización: ${id}`);
       throw new BadRequestException(`ID inválido: ${id}`);
     }
 
@@ -116,11 +110,9 @@ export class UsuariosController {
 
     if (!usuarioAutenticado.esAdmin) {
       if ('esAdmin' in usuarioData && usuarioData.esAdmin !== usuarioAutenticado.esAdmin) {
-        this.logger.warn(`Intento no autorizado de modificar permisos por usuario ${usuarioAutenticado.id}`);
         throw new ForbiddenException('No puedes cambiar el permiso de administrador');
       }
       if ('tipoUsuario' in usuarioData && usuarioData.tipoUsuario === 'Admin') {
-        this.logger.warn(`Intento no autorizado de asignarse rol Admin por usuario ${usuarioAutenticado.id}`);
         throw new ForbiddenException('No puedes asignarte el rol Admin');
       }
     }
