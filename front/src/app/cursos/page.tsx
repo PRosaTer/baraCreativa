@@ -20,7 +20,7 @@ export default function CursosPage() {
       try {
         setCargando(true);
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const res = await fetch(`${apiUrl}/api/cursos`);
+        const res = await fetch(`${apiUrl}/cursos`);
 
         if (!res.ok) {
           throw new Error(`Error al cargar items: ${res.statusText}`);

@@ -24,7 +24,7 @@ export default function BarraBusqueda({ className }: BarraBusquedaProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch("/api/cursos")
+    fetch("/cursos")
       .then((res) => res.json())
       .then((data) => setData(data));
   }, []);

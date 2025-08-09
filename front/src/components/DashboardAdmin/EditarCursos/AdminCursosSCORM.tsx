@@ -12,7 +12,7 @@ export default function AdminCursosSCORM() {
   useEffect(() => {
     async function fetchCursos() {
       try {
-        const res = await fetch('http://localhost:3001/api/cursos');
+        const res = await fetch('http://localhost:3001/cursos');
         if (!res.ok) throw new Error('Error cargando cursos');
         const data: Curso[] = await res.json();
         setCursos(data);
@@ -39,7 +39,7 @@ export default function AdminCursosSCORM() {
 
   const actualizarCursoEnLista = async (cursoActualizado: Curso) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/cursos/${cursoActualizado.id}`, {
+      const res = await fetch(`http://localhost:3001/cursos/${cursoActualizado.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cursoActualizado),
@@ -60,7 +60,7 @@ export default function AdminCursosSCORM() {
     if (!confirm('¿Seguro que querés eliminar este curso?')) return;
 
     try {
-      const res = await fetch(`http://localhost:3001/api/cursos/${id}`, {
+      const res = await fetch(`http://localhost:3001/cursos/${id}`, {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('Error al eliminar curso');

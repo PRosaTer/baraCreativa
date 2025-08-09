@@ -47,7 +47,7 @@ export default function EditarCursoScorm({ curso, onGuardado, onCancelar }: Prop
         badgeDisponible,
       };
 
-      await fetch(`http://localhost:3001/api/cursos/${curso.id}`, {
+      await fetch(`http://localhost:3001/cursos/${curso.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(datosActualizados),

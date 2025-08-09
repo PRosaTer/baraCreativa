@@ -11,7 +11,7 @@ export default function CursosUsuario() {
   useEffect(() => {
     const fetchCursos = async () => {
       try {
-        const res = await fetch("http://localhost:3001/api/cursos", {
+        const res = await fetch("http://localhost:3001/cursos", {
           credentials: "include",
         });
 

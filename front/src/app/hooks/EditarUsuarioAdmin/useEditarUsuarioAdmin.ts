@@ -18,7 +18,7 @@ export default function useEditarUsuarioAdmin(
   const handleGuardar = async () => {
     setGuardando(true);
     try {
-      const res = await fetch(`http://localhost:3001/api/usuarios/${usuario.id}`, {
+      const res = await fetch(`http://localhost:3001/usuarios/${usuario.id}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {

@@ -145,13 +145,13 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
 
       let res;
       if (cursoInicial && cursoInicial.id) {
-        res = await fetch(`http://localhost:3001/api/cursos/${cursoInicial.id}`, {
+        res = await fetch(`http://localhost:3001/cursos/${cursoInicial.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(cursoData),
         });
       } else {
-        res = await fetch('http://localhost:3001/api/cursos', {
+        res = await fetch('http://localhost:3001/cursos', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(cursoData),
@@ -166,7 +166,7 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
         const formData = new FormData();
         formData.append('imagen', datos.imagenCurso);
 
-        const resImg = await fetch(`http://localhost:3001/api/cursos/${cursoGuardado.id}/imagen`, {
+        const resImg = await fetch(`http://localhost:3001/cursos/${cursoGuardado.id}/imagen`, {
           method: 'POST',
           body: formData,
         });

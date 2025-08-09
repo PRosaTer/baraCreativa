@@ -9,7 +9,7 @@ export default function ListaCursos() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/cursos')
+    fetch('http://localhost:3001/cursos')
       .then(async (res) => {
         if (!res.ok) {
           const errorData = await res.json();

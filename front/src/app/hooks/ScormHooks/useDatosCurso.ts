@@ -7,7 +7,7 @@ import type { OnApproveData } from '@paypal/paypal-js/types/components/buttons';
 import { Curso } from '@/app/types/curso';
 
 
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = 'http://localhost:3001';
 const PAYPAL_API_BASE_URL = 'http://localhost:3001/pagos/paypal';
 
 interface UseDatosCursoResult {
