@@ -10,62 +10,63 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function createFolderIfNotExist(path: string) {
-  try {
-    await fsPromises.mkdir(path, { recursive: true });
-  } catch (err) {
-    console.error(`Error creando carpeta ${path}:`, err);
-  }
+  try {
+    await fsPromises.mkdir(path, { recursive: true });
+  } catch (err) {
+    console.error(`Error creando carpeta ${path}:`, err);
+  }
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api');
 
-  const frontendUrl = process.env.FRONTEND_URL || 'https://bara-creativa-front.onrender.com';
-  app.enableCors({
-    origin: frontendUrl,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
-    allowedHeaders: 'Content-Type, Authorization',
-  });
 
-  app.use(cookieParser());
+  app.enableCors({
+    origin: /https:\/\/(.*\.)?onrender\.com$/,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+    allowedHeaders: 'Content-Type, Authorization',
+  });
+ 
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      forbidNonWhitelisted: true,
-    }),
-  );
+  app.use(cookieParser());
 
-  const uploadPath = join(process.cwd(), 'uploads', 'imagenes-cursos');
-  const scormUploadPath = join(process.cwd(), 'uploads', 'scorm');
-  const scormUnzippedPath = join(process.cwd(), 'uploads', 'scorm_unzipped_courses');
-  const scormTempPath = join(process.cwd(), 'uploads', 'scorm_temp');
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
-  await Promise.all([
-    createFolderIfNotExist(uploadPath),
-    createFolderIfNotExist(scormUploadPath),
-    createFolderIfNotExist(scormUnzippedPath),
-    createFolderIfNotExist(scormTempPath),
-  ]);
+  const uploadPath = join(process.cwd(), 'uploads', 'imagenes-cursos');
+  const scormUploadPath = join(process.cwd(), 'uploads', 'scorm');
+  const scormUnzippedPath = join(process.cwd(), 'uploads', 'scorm_unzipped_courses');
+  const scormTempPath = join(process.cwd(), 'uploads', 'scorm_temp');
 
-  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
-  app.use('/scorm_courses', express.static(scormUnzippedPath)); 
+  await Promise.all([
+    createFolderIfNotExist(uploadPath),
+    createFolderIfNotExist(scormUploadPath),
+    createFolderIfNotExist(scormUnzippedPath),
+    createFolderIfNotExist(scormTempPath),
+  ]);
 
-  const config = new DocumentBuilder()
-    .setTitle('API Bara Creativa')
-    .setDescription('Documentación de la API para pagos, cursos y usuarios')
-    .setVersion('1.0')
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
+  app.use('/scorm_courses', express.static(scormUnzippedPath)); 
 
-  app.useWebSocketAdapter(new IoAdapter(app));
+  const config = new DocumentBuilder()
+    .setTitle('API Bara Creativa')
+    .setDescription('Documentación de la API para pagos, cursos y usuarios')
+    .setVersion('1.0')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
-  await app.listen(process.env.PORT || 3001);
+  app.useWebSocketAdapter(new IoAdapter(app));
+
+  await app.listen(process.env.PORT || 3001);
 }
 
 bootstrap();
