@@ -7,13 +7,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsuariosModule } from '../../modules/usuarios/usuarios.module';
 import { AuthService } from '../../services/auth/auth.service';
 import { SocketModule } from '../socket/socket.module';
-
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Usuario } from '../../entidades/usuario.entity';
-
-
 import { MailModule } from '../../mail/mail.module';
-
 
 @Module({
   imports: [
@@ -24,7 +20,7 @@ import { MailModule } from '../../mail/mail.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET'),
+        secret: config.get('JWT_SECRET'),
         signOptions: { expiresIn: '1h' },
       }),
     }),
