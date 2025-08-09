@@ -5,6 +5,7 @@ import { UsuariosService } from '../../services/usuarios/usuarios.service';
 import { UsuariosController } from '../../controllers/usuarios/usuarios.controller';
 import { UsuariosGateway } from '../../usuarios/usuarios.gateway';
 import { SocketGateway } from 'src/socket/socket.gateway';
+
 @Module({
   imports: [TypeOrmModule.forFeature([Usuario])],
   controllers: [UsuariosController],
