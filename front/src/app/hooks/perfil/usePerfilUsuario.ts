@@ -9,10 +9,12 @@ export const usePerfilUsuario = () => {
   const [mensajeError, setMensajeError] = useState<string | null>(null);
   const router = useRouter();
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
   useEffect(() => {
     const obtenerPerfil = async () => {
       try {
-        const res = await fetch("http://localhost:3001/auth/profile", {
+        const res = await fetch(`${API_URL}/auth/profile`, {
           method: "GET",
           credentials: "include",
         });
