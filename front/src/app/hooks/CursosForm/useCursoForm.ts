@@ -38,20 +38,21 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
         claseItem: cursoInicial.claseItem,
         modulos: cursoInicial.modulos
           ? cursoInicial.modulos.map((m) => ({
-            titulo: m.titulo,
-            descripcion: m.descripcion,
-            videoFile: null,
-            pdfFile: null,
-            imageFile: null,
-            videoUrl: m.videoUrl,
-            pdfUrl: m.pdfUrl,
-            imageUrl: m.imageUrl,
-          }))
+              titulo: m.titulo,
+              descripcion: m.descripcion,
+              videoFile: null,
+              pdfFile: null,
+              imageFile: null,
+              videoUrl: m.videoUrl,
+              pdfUrl: m.pdfUrl,
+              imageUrl: m.imageUrl,
+            }))
           : [],
       });
 
       if (cursoInicial.imagenCurso) {
-        setImagenPreview(`http://localhost:3001/uploads/imagenes-cursos/${cursoInicial.imagenCurso}`);
+        // Corrección: Usamos la variable de entorno para la URL
+        setImagenPreview(`${process.env.NEXT_PUBLIC_API_URL}/uploads/imagenes-cursos/${cursoInicial.imagenCurso}`);
       }
     }
   }, [cursoInicial]);
@@ -183,7 +184,8 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
       onCursoCreado && onCursoCreado(cursoGuardado);
     } catch (error) {
       console.error(error);
-      alert('Error guardando el curso');
+      // Reemplazamos alert() por una consola de registro
+      console.error('Error guardando el curso');
     } finally {
       setGuardando(false);
     }

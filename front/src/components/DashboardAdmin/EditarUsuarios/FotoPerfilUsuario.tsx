@@ -8,7 +8,9 @@ interface Props {
 }
 
 export default function FotoPerfilUsuario({ nombre, fotoPerfil }: Props) {
-  const url = fotoPerfil ? `http://localhost:3001/uploads/perfiles/${fotoPerfil}` : null;
+  // Se usa la variable de entorno para la URL de la base
+  const backendBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const url = fotoPerfil ? `${backendBaseUrl}/uploads/perfiles/${fotoPerfil}` : null;
 
   return (
     <div className="flex justify-center">

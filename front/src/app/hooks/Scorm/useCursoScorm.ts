@@ -4,8 +4,8 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { EstadoModuloUsuario } from '@/app/types/reporte-progreso.interface';
 import { toast } from 'react-toastify';
 
-const IS_DEVELOPMENT_MODE = process.env.NODE_ENV === 'development';
-const BACKEND_BASE_URL = 'http://localhost:3001';
+// Usamos la variable de entorno para la URL de la API.
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 const BACKEND_ORIGIN = new URL(BACKEND_BASE_URL).origin;
 
 const SCORM_VIRTUAL_MODULE_ID_OFFSET = 1000000;
@@ -36,8 +36,8 @@ export function useCursoScorm(cursoId: string) {
         (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
       }
 
-      console.log(`[markCourseAsCompletedGeneral] Realizando fetch POST a ${process.env.NEXT_PUBLIC_API_URL}/api/inscripciones/mark-completed/${cursoId}`);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/inscripciones/mark-completed/${cursoId}`, {
+      console.log(`[markCourseAsCompletedGeneral] Realizando fetch POST a ${BACKEND_BASE_URL}/api/inscripciones/mark-completed/${cursoId}`);
+      const res = await fetch(`${BACKEND_BASE_URL}/api/inscripciones/mark-completed/${cursoId}`, {
         method: 'POST',
         credentials: 'include',
         headers: headers,
@@ -78,7 +78,7 @@ export function useCursoScorm(cursoId: string) {
         }
 
         console.log(`[marcarModuloCompletadoBackend] Realizando fetch POST para moduloId: ${moduloId}, cursoId: ${cursoId}`);
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reportes-progreso/marcar-completado`, {
+        const res = await fetch(`${BACKEND_BASE_URL}/api/reportes-progreso/marcar-completado`, {
           method: 'POST',
           credentials: 'include',
           headers: headers,
@@ -123,7 +123,7 @@ export function useCursoScorm(cursoId: string) {
           (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
         }
 
-        const resInscripcion = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/inscripciones/estado/${cursoId}`, {
+        const resInscripcion = await fetch(`${BACKEND_BASE_URL}/api/inscripciones/estado/${cursoId}`, {
           credentials: 'include',
           headers: headers,
         });
@@ -143,7 +143,7 @@ export function useCursoScorm(cursoId: string) {
           console.log('[useCursoScorm] Curso ya marcado como completado en la inscripción inicial.');
         }
 
-        const resModulos = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reportes-progreso/estado/${cursoId}`, {
+        const resModulos = await fetch(`${BACKEND_BASE_URL}/api/reportes-progreso/estado/${cursoId}`, {
           credentials: 'include',
           headers: headers,
         });
@@ -187,7 +187,8 @@ export function useCursoScorm(cursoId: string) {
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
       console.log('[useCursoScorm] Mensaje recibido del iframe:', event.data);
-      if (!IS_DEVELOPMENT_MODE && event.origin !== BACKEND_ORIGIN) {
+      // Corrección: Ahora usamos la URL de origen de la variable de entorno
+      if (event.origin !== BACKEND_ORIGIN) {
         console.warn(`Mensaje SCORM ignorado: Origen no permitido (${event.origin}). Esperado: ${BACKEND_ORIGIN}`);
         return;
       }

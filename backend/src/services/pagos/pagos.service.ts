@@ -36,7 +36,7 @@ export class PagosService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     private readonly inscripcionesService: InscripcionesService,
-    private readonly mailService: PurchaseMailService, 
+    private readonly mailService: PurchaseMailService,
   ) {
     this.paypalClientId = this.configService.get<string>('PAYPAL_CLIENT_ID')!;
     this.paypalClientSecret = this.configService.get<string>('PAYPAL_CLIENT_SECRET')!;
@@ -79,6 +79,9 @@ export class PagosService {
 
     const accessToken = await this.getPaypalAccessToken();
 
+    // Obtener la URL del frontend de la configuración
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+
     const orderData = {
       intent: 'CAPTURE',
       purchase_units: [
@@ -94,8 +97,9 @@ export class PagosService {
         brand_name: 'BaraCreativa',
         landing_page: 'NO_PREFERENCE',
         user_action: 'PAY_NOW',
-        return_url: 'http://localhost:3000/success-paypal',
-        cancel_url: 'http://localhost:3000/cancel-paypal',
+        // Usar la variable de entorno para las URLs de retorno y cancelación
+        return_url: `${frontendUrl}/success-paypal`,
+        cancel_url: `${frontendUrl}/cancel-paypal`,
         shipping_preference: 'NO_SHIPPING',
       },
     };
@@ -228,7 +232,6 @@ export class PagosService {
             ? pagoExistente.curso.fechaInicio
             : new Date(pagoExistente.curso.fechaInicio);
 
-   
         if (!isNaN(dateObj.getTime())) {
             fechaInicioISO = dateObj.toISOString();
         } else {

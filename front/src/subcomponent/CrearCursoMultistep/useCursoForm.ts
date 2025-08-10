@@ -25,16 +25,16 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
     archivoScorm: curso?.archivoScorm || null,
     modulos: curso?.modulos
       ? curso.modulos.map((m) => ({
-        id: m.id,
-        titulo: m.titulo,
-        descripcion: m.descripcion,
-        videoUrl: m.videoUrl,
-        pdfUrl: m.pdfUrl,
-        imageUrl: m.imageUrl,
-        videoFile: null,
-        pdfFile: null,
-        imageFile: null,
-      }))
+          id: m.id,
+          titulo: m.titulo,
+          descripcion: m.descripcion,
+          videoUrl: m.videoUrl,
+          pdfUrl: m.pdfUrl,
+          imageUrl: m.imageUrl,
+          videoFile: null,
+          pdfFile: null,
+          imageFile: null,
+        }))
       : [],
     newScormFile: null,
     claseItem: curso?.claseItem || ClaseItem.CURSO,
@@ -170,7 +170,7 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
     setLoading(true);
 
     try {
-      const baseUrl = 'http://localhost:3001/cursos';
+      // Se ha eliminado la variable 'baseUrl' ya que no se estaba utilizando.
 
       const baseData = {
         titulo: form.titulo,

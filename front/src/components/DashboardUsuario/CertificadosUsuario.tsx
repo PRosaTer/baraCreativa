@@ -20,11 +20,15 @@ export default function CertificadosUsuario() {
   const [certificados, setCertificados] = useState<Certificado[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Se usa la variable de entorno para la URL de la base
+  const backendBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+
   const fetchCertificados = async () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/certificados/mis-certificados`, {
+      const res = await fetch(`${backendBaseUrl}/api/certificados/mis-certificados`, {
         credentials: 'include',
       });
 
@@ -82,7 +86,8 @@ export default function CertificadosUsuario() {
                 Emitido el: {format(new Date(certificado.fechaEmision), 'dd MMMM yyyy', { locale: es })}
               </p>
               <Link
-                href={`http://localhost:3001/certificados/${certificado.id}`}
+                // Usamos la variable de entorno para construir la URL del certificado
+                href={`${backendBaseUrl}/certificados/${certificado.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
