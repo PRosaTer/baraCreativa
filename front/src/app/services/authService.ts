@@ -2,7 +2,7 @@ import { RegisterApiData, ApiResponse } from "../types/auth";
 
 export const registerUser = async (userData: RegisterApiData): Promise<ApiResponse> => {
   try {
-    const response = await fetch(`/api/usuarios`, {
+    const response = await fetch(`/api/auth/registro`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
