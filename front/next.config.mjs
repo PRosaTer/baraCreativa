@@ -17,15 +17,15 @@ const nextConfig = {
   async rewrites() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-    return [
-      { source: '/api/:path*', destination: `${apiUrl}/api/:path*` },
-      { source: '/uploads/:path*', destination: `${apiUrl}/uploads/:path*` },
-      { source: '/scorm_courses/:path*', destination: `${apiUrl}/scorm_courses/:path*` },
-    ];
+ return [
+  { source: '/api/:path*', destination: `${apiUrl}/api/:path*` },
+  { source: '/uploads/:path*', destination: `${apiUrl}/uploads/:path*` },
+  { source: '/scorm_courses/:path*', destination: `${apiUrl}/scorm_courses/:path*` },
+];
   },
 
   webpack(config) {
-    config.resolve.alias['@'] = path.resolve(__dirname, 'src');
+    config.resolve.alias['@'] = path.join(__dirname, 'src');
     return config;
   },
 };
