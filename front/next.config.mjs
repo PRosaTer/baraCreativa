@@ -25,9 +25,9 @@ const nextConfig = {
   },
 
   webpack(config) {
-    config.resolve.alias['@'] = path.join(__dirname, 'src');
-    return config;
-  },
+  config.resolve.alias['@'] = path.join(process.cwd(), 'src');
+  return config;
+},
 };
 
-export default nextConfig;
+export default nextConfig; 
