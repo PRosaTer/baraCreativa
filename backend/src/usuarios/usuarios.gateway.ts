@@ -9,7 +9,11 @@ import { UsuariosService } from '../services/usuarios/usuarios.service';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3000',
+    origin: [
+      'http://localhost:3000',
+      'https://bara-creativa-front.onrender.com',
+      'https://baracreativa.onrender.com/', // Añadimos la URL de producción para CORS
+    ],
     credentials: true,
   },
 })
