@@ -65,8 +65,8 @@ export default function Navbar() {
   const profileImageUrl = usuario ? getProfileImageUrl(usuario.fotoPerfil) : null;
 
   return (
-    <nav className="w-full bg-primary py-0 lg:py-1 relative z-30">
-      <div className="flex items-center justify-between w-full max-w-screen-xl mx-auto px-4 lg:px-8 h-10">
+    <nav className={`w-full bg-primary mt-[5px] h-[100px] relative z-30 ${isMenuOpen ? "bg-primary/95 backdrop-blur" : ""}`}>
+      <div className="flex items-center justify-between w-full max-w-screen-xl mx-auto px-4 lg:px-8 h-full">
         <div className="flex items-center justify-between w-full lg:w-auto">
           <Logo />
           {/* Botón de menú hamburguesa */}
