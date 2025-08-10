@@ -22,7 +22,7 @@ const nextConfig = {
     ];
   },
   webpack(config) {
-    config.resolve.alias['@'] = path.join(__dirname, 'front', 'src');
+    config.resolve.alias['@'] = path.join(__dirname, 'src');
     return config;
   },
 };
