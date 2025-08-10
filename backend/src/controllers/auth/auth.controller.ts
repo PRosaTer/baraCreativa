@@ -9,6 +9,7 @@ import {
   Res,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { AuthService } from '../../services/auth/auth.service';
@@ -18,6 +19,7 @@ import { SocketGateway } from '../../socket/socket.gateway';
 import { RequestPasswordResetDto } from '../../dto/password/request-password-reset.dto';
 import { ResetPasswordDto } from '../../dto/password/reset-password.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { CreateUsuarioDto } from '../../dto/crear-editar-usuarios/create-usuario.dto';
 
 interface UserRequest extends Request {
   user: Usuario;
@@ -30,6 +32,19 @@ export class AuthController {
     private readonly usuariosService: UsuariosService,
     private readonly socketGateway: SocketGateway,
   ) {}
+
+  @Post('registro')
+  async registro(@Body() datos: CreateUsuarioDto) {
+    const usuarioExistente = await this.usuariosService.encontrarPorCorreo(datos.correoElectronico);
+    if (usuarioExistente) {
+      throw new BadRequestException('El correo electrónico ya está en uso');
+    }
+    const nuevoUsuario = await this.usuariosService.create({
+      ...datos,
+      esAdmin: datos.tipoUsuario === 'Admin',
+    });
+    return { message: 'Usuario registrado correctamente', usuario: nuevoUsuario };
+  }
 
   @Post('login')
   async login(
@@ -48,7 +63,7 @@ export class AuthController {
     res.cookie('jwt', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none', 
+      sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000,
       path: '/',
     });
@@ -73,12 +88,9 @@ export class AuthController {
   @Post('logout')
   async logout(@Req() req: UserRequest, @Res({ passthrough: true }) res: Response) {
     await this.usuariosService.actualizarEstado(req.user.id, false);
-
     res.clearCookie('jwt', { path: '/' });
-
     const usuarios = await this.usuariosService.findAll();
     this.socketGateway.server.emit('usuariosActualizados', usuarios);
-
     return { message: 'Sesión cerrada correctamente' };
   }
 

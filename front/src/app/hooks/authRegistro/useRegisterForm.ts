@@ -3,7 +3,18 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { validatePassword, validateEmail } from "../../utils/validation";
 import { registerUser } from "../../services/authService";
-import { RegisterFormData, RegisterApiData } from "../../types/auth";
+import { TipoUsuario } from "../../types/auth";
+
+interface RegisterFormData {
+  nombreCompleto: string;
+  correoElectronico: string;
+  contrasena: string;
+  confirmContrasena: string;
+  numeroTelefono?: string;
+  tipoUsuario: TipoUsuario;
+  nombreEmpresa?: string;
+  fotoPerfil?: string;
+}
 
 interface ErrorConMensaje extends Error {
   message: string;
@@ -15,11 +26,11 @@ export const useRegisterForm = () => {
     nombreCompleto: "",
     correoElectronico: "",
     contrasena: "",
+    confirmContrasena: "",
     numeroTelefono: "",
-    tipoUsuario: "Alumno",
+    tipoUsuario: TipoUsuario.Alumno,
     nombreEmpresa: "",
     fotoPerfil: "",
-    confirmContrasena: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,33 +100,23 @@ export const useRegisterForm = () => {
       return;
     }
 
-    const dataToSend: RegisterApiData = {
-      nombreCompleto: nombreCompleto,
-      correoElectronico: correoElectronico,
+    const dataToSend = {
+      nombreCompleto,
+      correoElectronico,
       password: contrasena,
       telefono: numeroTelefono || undefined,
-      tipoUsuario: tipoUsuario,
-      nombreEmpresa: tipoUsuario === "Empresa" ? nombreEmpresa : undefined,
+      tipoUsuario,
+      nombreEmpresa: tipoUsuario === TipoUsuario.Empresa ? nombreEmpresa : undefined,
       fotoPerfil: fotoPerfil || undefined,
     };
 
-    console.log(
-      "Datos que se enviarán al backend (desde el frontend):",
-      dataToSend
-    );
-
     try {
       await registerUser(dataToSend);
-
       Swal.fire("Éxito", "Usuario registrado exitosamente", "success").then(() => {
         router.push("/login");
       });
     } catch (error) {
       const e = error as Partial<ErrorConMensaje>;
-      console.error(
-        "Error en la solicitud de registro (capturado en hook):",
-        e
-      );
       Swal.fire(
         "Error",
         e.message || "Ocurrió un error inesperado. Intenta de nuevo más tarde.",
