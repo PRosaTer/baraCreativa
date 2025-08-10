@@ -28,16 +28,18 @@ export class UsuariosController {
 
   constructor(private readonly usuariosService: UsuariosService) {}
 
-  @Get('profile')
-  @UseGuards(JwtAuthGuard)
-  getMe(@UsuarioAutenticado() usuario: Usuario): Partial<Usuario> {
-    const { password, ...usuarioSinPassword } = usuario;
-    return usuarioSinPassword;
-  }
-
   @Get()
-  getAll(): Promise<Usuario[]> {
-    return this.usuariosService.findAll();
+  @UseGuards(JwtAuthGuard) // Asegura que solo los usuarios autenticados puedan acceder
+  async getAll(@UsuarioAutenticado() usuario: Usuario): Promise<Usuario[] | Partial<Usuario>> {
+    // Verificamos si el usuario tiene el rol de administrador
+    if (usuario.esAdmin) {
+      this.logger.log(`Usuario administrador (${usuario.correoElectronico}) ha accedido a la lista completa de usuarios.`);
+      return this.usuariosService.findAll(); // Si es admin, devuelve todos los usuarios
+    } else {
+      this.logger.log(`Usuario regular (${usuario.correoElectronico}) ha accedido a su propio perfil.`);
+      const { password, ...usuarioSinPassword } = usuario;
+      return usuarioSinPassword; // Si no es admin, devuelve solo su propio perfil
+    }
   }
 
   @Get(':id')
