@@ -13,13 +13,15 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!usuario) return;
 
-    const socketInstance: Socket = io('http://localhost:3001', {
+    // Usamos una variable de entorno para la URL de WebSocket
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
+    const socketInstance: Socket = io(socketUrl, {
       query: { usuarioId: usuario.id },
       transports: ['websocket'],
       withCredentials: true,
     });
 
-    console.log('✅ WebSocket conectado como usuario', usuario.id);
+    console.log('✅ WebSocket conectado a', socketUrl, 'como usuario', usuario.id);
     setSocket(socketInstance);
 
     return () => {
