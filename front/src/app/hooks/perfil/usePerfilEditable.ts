@@ -6,7 +6,7 @@ export function usePerfilEditable(usuario: Usuario) {
   const [fotoPerfil, setFotoPerfil] = useState<File | null>(null);
   const [previewFoto, setPreviewFoto] = useState<string | undefined>(
     usuario.fotoPerfil
-      ? `http://localhost:3001/uploads/perfiles/${usuario.fotoPerfil}`
+      ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/perfiles/${usuario.fotoPerfil}`
       : undefined
   );
   const [guardando, setGuardando] = useState(false);
