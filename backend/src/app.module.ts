@@ -23,15 +23,35 @@ import configuration, { AppConfig } from './config/configuration';
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService<AppConfig>): TypeOrmModuleOptions => ({
-        type: 'postgres',
-        url: process.env.DATABASE_URL,
-        entities: [join(__dirname, '**', '*.entity.{ts,js}')],
-        synchronize: true, 
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      }),
+      useFactory: (config: ConfigService<AppConfig>): TypeOrmModuleOptions => {
+        const databaseUrl = process.env.DATABASE_URL;
+
+        if (databaseUrl) {
+          // Configuración para Render usando DATABASE_URL
+          return {
+            type: 'postgres',
+            url: databaseUrl,
+            entities: [join(__dirname, '**', '*.entity.{ts,js}')],
+            synchronize: true,
+            ssl: {
+              rejectUnauthorized: false, // Necesario en Render
+            },
+          };
+        }
+
+        // Configuración local
+        return {
+          type: 'postgres',
+          host: process.env.DB_HOST,
+          port: parseInt(process.env.DB_PORT ?? '5432', 10),
+          username: process.env.DB_USER,
+          password: process.env.DB_PASSWORD,
+          database: process.env.DB_NAME,
+          entities: [join(__dirname, '**', '*.entity.{ts,js}')],
+          synchronize: true,
+          ssl: false,
+        };
+      },
     }),
     UsuariosModule,
     PasswordModule,

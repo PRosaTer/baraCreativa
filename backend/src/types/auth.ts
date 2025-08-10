@@ -9,11 +9,11 @@ export interface RegisterFormData {
   nombreCompleto: string;
   correoElectronico: string;
   contrasena: string;
-  numeroTelefono: string;
-  tipoUsuario: TipoUsuario;
-  nombreEmpresa: string;
-  fotoPerfil: string;
   confirmContrasena: string;
+  numeroTelefono?: string;
+  tipoUsuario: TipoUsuario;
+  nombreEmpresa?: string;
+  fotoPerfil?: string;
 }
 
 export interface RegisterApiData {
@@ -45,7 +45,7 @@ export interface Usuario {
   nombreCompleto: string;
   correoElectronico: string;
   telefono?: string;
-  tipoUsuario: TipoUsuario;
+  tipoUsuario: TipoUsuario | 'Admin' | 'Instructor';
   estadoCuenta: 'activo' | 'inactivo' | 'bloqueado';
   esAdmin: boolean;
   fotoPerfil?: string | null;
