@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSocket } from '@/app/context/SocketProvider';
-import { Usuario } from '@/types/auth';
+import { Usuario } from '@/app/types/auth';
 
 export default function useUsuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { Usuario } from '@/types/auth';
+import { Usuario } from '@/app/types/auth';
 
 export default function useEditarUsuarioAdmin(
   usuario: Usuario,

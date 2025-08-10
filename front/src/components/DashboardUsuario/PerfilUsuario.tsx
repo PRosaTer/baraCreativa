@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Usuario } from "@/types/auth";
+import { Usuario } from "@/app/types/auth";
 import SelectorFotoPerfilEditable from "./SelectorFotoPerfilEditable";
 import InputFlotante from "./InputFlotante";
 import InfoCuenta from "./InfoCuenta";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Usuario } from "../../../types/auth";
+import { Usuario } from "../../types/auth";
 
 export default function useEditarUsuarioForm(usuario: Usuario | null) {
   const [form, setForm] = useState<Usuario | null>(usuario);

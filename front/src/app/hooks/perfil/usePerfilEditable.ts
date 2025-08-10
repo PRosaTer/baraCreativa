@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Usuario } from "@/types/auth";
+import { Usuario } from "@/app/types/auth";
 
 export function usePerfilEditable(usuario: Usuario) {
   const [telefono, setTelefono] = useState(usuario.telefono || "");

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Usuario } from '@/types/auth';
+import { Usuario } from '@/app/types/auth';
 
 interface Props {
   usuarios: Usuario[];

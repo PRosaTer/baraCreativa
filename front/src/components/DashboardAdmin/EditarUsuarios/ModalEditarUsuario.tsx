@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Usuario } from "../../../types/auth";
+import { Usuario } from "../../../app/types/auth";
 import useEditarUsuarioForm from "../../../app/hooks/EditarUsuarioAdmin/useEditarUsuarioForm";
 import FotoPerfil from "./FotoPerfil";
 import CampoInput from "./CampoInput";
