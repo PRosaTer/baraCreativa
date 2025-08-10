@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { validatePassword, validateEmail } from "../../utils/validation";
 import { registerUser } from "../../services/authService";
-import { TipoUsuario } from "../../types/auth";
+import { TipoUsuario } from '@/types/auth';
 
 interface RegisterFormData {
   nombreCompleto: string;

@@ -1,4 +1,4 @@
-import { RegisterApiData, ApiResponse } from "../types/auth";
+import { RegisterApiData, ApiResponse } from "../../types/auth";
 
 export const registerUser = async (userData: RegisterApiData): Promise<ApiResponse> => {
   try {

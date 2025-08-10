@@ -2,7 +2,7 @@
 
 import React from "react";
 import EditarUsuarioAdmin from "../EditarUsuarios/EditarUsuarioAdmin";
-import { Usuario } from "@/app/types/auth";
+import { Usuario } from "@/types/auth";
 
 interface Props {
   usuarioEditando: Usuario | null;

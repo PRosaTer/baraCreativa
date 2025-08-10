@@ -10,7 +10,7 @@ import ModalEditarUsuarioWrapper from "./ModalEditarUsuarioWrapper";
 import FiltrosUsuarios from "../FiltrosUsuarios";
 import BarraBusquedaUsuarios from "../BarraBusquedaUsuarios";
 import InlineToast from "@/components/DashboardUsuario/InlineToast";
-import { Usuario } from "@/app/types/auth";
+import { Usuario } from "@/types/auth";
 
 export default function VistaUsuarios() {
   const { usuarios, actualizarUsuarioEnLista } = useUsuarios();

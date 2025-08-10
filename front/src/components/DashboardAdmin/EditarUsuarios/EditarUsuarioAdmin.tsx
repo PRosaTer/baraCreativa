@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Usuario } from '@/app/types/auth';
+import { Usuario } from '@/types/auth';
 import useEditarUsuarioAdmin from '@/app/hooks/EditarUsuarioAdmin/useEditarUsuarioAdmin';
 import CamposEditarUsuarioAdmin from './CamposEditarUsuarioAdmin';
 import FotoPerfilUsuario from './FotoPerfilUsuario';

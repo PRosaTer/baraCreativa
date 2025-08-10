@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Usuario } from "@/app/types/auth";
+import { Usuario } from "@/types/auth";
 import MenuLateral from "./MenuLateral";
 import PerfilUsuarioEditable from "./PerfilUsuario";
 import CursosUsuario from "./CursosUsuario";
