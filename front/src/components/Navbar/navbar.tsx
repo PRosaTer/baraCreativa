@@ -46,7 +46,7 @@ export default function Navbar() {
 
   return (
     <nav className="w-full bg-primary py-0 lg:py-1 relative z-30">
-      <div className="flex items-center justify-between w-full max-w-screen-xl mx-auto px-4 lg:px-8">
+      <div className="flex items-center justify-between w-full max-w-screen-xl mx-auto px-4 lg:px-8 h-10">
         <div className="flex items-center justify-between w-full lg:w-auto">
           <Logo />
           {/* Botón de menú hamburguesa */}
