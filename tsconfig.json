@@ -19,9 +19,9 @@
         "name": "next"
       }
     ],
-    "baseUrl": "./front",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./front/src/*"]
     }
   },
   "include": [
