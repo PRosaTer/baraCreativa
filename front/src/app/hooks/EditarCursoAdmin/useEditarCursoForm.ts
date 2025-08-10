@@ -91,7 +91,7 @@ export const useEditarCursoForm = ({ curso, onGuardar }: Props) => {
                 claseItem: form.claseItem,
             };
 
-            const resInfo = await fetch(`http://localhost:3001/cursos/${curso.id}`, {
+            const resInfo = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${curso.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(patchData),
@@ -105,7 +105,7 @@ export const useEditarCursoForm = ({ curso, onGuardar }: Props) => {
             if (form.imagenCurso instanceof File) {
                 const formDataImagen = new FormData();
                 formDataImagen.append('imagen', form.imagenCurso);
-                const resImg = await fetch(`http://localhost:3001/cursos/${curso.id}/imagen`, {
+                const resImg = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${curso.id}/imagen`, {
                     method: 'POST',
                     body: formDataImagen,
                     credentials: 'include',
@@ -120,7 +120,7 @@ export const useEditarCursoForm = ({ curso, onGuardar }: Props) => {
                 const formDataScorm = new FormData();
                 formDataScorm.append('scormFile', form.newScormFile);
                 formDataScorm.append('cursoId', curso.id.toString());
-                const resScorm = await fetch(`http://localhost:3001/cursos/scorm_unzipped_courses`, {
+                const resScorm = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/scorm_unzipped_courses`, {
                     method: 'POST',
                     body: formDataScorm,
                     credentials: 'include',
@@ -132,7 +132,7 @@ export const useEditarCursoForm = ({ curso, onGuardar }: Props) => {
             }
 
             setExito('Curso actualizado correctamente');
-            const cursoActualizado = await fetch(`http://localhost:3001/cursos/${curso.id}`, {
+            const cursoActualizado = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${curso.id}`, {
                 credentials: 'include',
             }).then(res => res.json());
             await onGuardar(cursoActualizado);

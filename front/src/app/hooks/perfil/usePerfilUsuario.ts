@@ -14,7 +14,7 @@ export const usePerfilUsuario = () => {
   useEffect(() => {
     const obtenerPerfil = async () => {
       try {
-        const res = await fetch(`${API_URL}/auth/profile`, {
+        const res = await fetch(`${API_URL}/api/auth/profile`, {
           method: "GET",
           credentials: "include",
         });

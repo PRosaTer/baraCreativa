@@ -2,7 +2,7 @@ import { Curso } from '@/app/types/curso';
 
 export async function getCursoById(id: string): Promise<Curso | null> {
   try {
-    const res = await fetch(`http://localhost:3001/cursos/${id}`, { cache: 'no-store' });
+ const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${id}`, { cache: 'no-store' });
 
     if (!res.ok) {
       if (res.status === 404) {

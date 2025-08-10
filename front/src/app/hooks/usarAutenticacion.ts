@@ -30,7 +30,7 @@ export const useAutenticacion = () => {
 
   const obtenerDatosUsuario = useCallback(async (): Promise<UsuarioAutenticado | null> => {
     try {
-      const respuesta = await fetch(`${API_URL}/auth/profile`, {
+      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`, {
         method: "GET",
         credentials: "include",
       });
@@ -46,7 +46,7 @@ export const useAutenticacion = () => {
         setUsuario(null);
         return null;
       }
-      
+
       const contentType = respuesta.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         console.error("Error: La respuesta no es JSON. Se recibió:", await respuesta.text());
@@ -72,7 +72,7 @@ export const useAutenticacion = () => {
     e.preventDefault();
 
     try {
-      const respuesta = await fetch(`${API_URL}/auth/login`, {
+      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -116,7 +116,7 @@ export const useAutenticacion = () => {
 
   const cerrarSesion = useCallback(async () => {
     try {
-      await fetch(`${API_URL}/auth/logout`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -140,7 +140,7 @@ export const useAutenticacion = () => {
     };
 
     loadUser();
-  }, [obtenerDatosUsuario]); 
+  }, [obtenerDatosUsuario]);
 
   return {
     usuario,

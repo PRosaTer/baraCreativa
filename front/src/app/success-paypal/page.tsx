@@ -21,12 +21,12 @@ const SuccessPaypalContent: React.FC = () => {
 
     const capturarPago = async () => {
       try {
-        const res = await fetch('http://localhost:3001/pagos/paypal/capture-order', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId }),
-        });
+       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/pagos/paypal/capture-order`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ orderId }),
+});
 
         if (!res.ok) {
           const data = await res.json();

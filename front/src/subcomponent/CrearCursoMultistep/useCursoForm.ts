@@ -216,18 +216,20 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
       let nuevoCurso: Curso;
 
       if (curso) {
-        const resUpdate = await fetch(`${baseUrl}/${curso.id}`, {
+        const resUpdate = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${curso.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(courseDataForApi),
+          credentials: 'include',
         });
         if (!resUpdate.ok) throw new Error((await resUpdate.json()).message || 'Error al actualizar ítem');
         nuevoCurso = await resUpdate.json();
       } else {
-        const resCreate = await fetch(baseUrl, {
+        const resCreate = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(courseDataForApi),
+          credentials: 'include',
         });
         if (!resCreate.ok) throw new Error((await resCreate.json()).message || 'Error al crear ítem');
         nuevoCurso = await resCreate.json();
@@ -238,9 +240,10 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
         formDataScorm.append('scormFile', form.newScormFile);
         formDataScorm.append('cursoId', nuevoCurso.id.toString());
 
-        const resScorm = await fetch(`${baseUrl}/scorm_unzipped_courses`, {
+        const resScorm = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/scorm_unzipped_courses`, {
           method: 'POST',
           body: formDataScorm,
+          credentials: 'include',
         });
 
         if (!resScorm.ok) throw new Error((await resScorm.json()).message || 'Error al subir archivo SCORM');
@@ -249,9 +252,10 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
       if (form.imagenCurso instanceof File) {
         const formDataImagen = new FormData();
         formDataImagen.append('imagen', form.imagenCurso);
-        const resImg = await fetch(`${baseUrl}/${nuevoCurso.id}/imagen`, {
+        const resImg = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${nuevoCurso.id}/imagen`, {
           method: 'POST',
           body: formDataImagen,
+          credentials: 'include',
         });
         if (!resImg.ok) throw new Error((await resImg.json()).message || 'Error al subir imagen del ítem');
       }
@@ -281,9 +285,10 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
             }
 
             if (fileUploaded) {
-              const res = await fetch(`${baseUrl}/modulos/${currentModulo.id}/files`, {
+              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/modulos/${currentModulo.id}/files`, {
                 method: 'POST',
                 body: moduleFormData,
+                credentials: 'include',
               });
 
               if (!res.ok) {

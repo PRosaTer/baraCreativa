@@ -12,7 +12,7 @@ export default function AdminCursosSCORM() {
   useEffect(() => {
     async function fetchCursos() {
       try {
-        const res = await fetch('http://localhost:3001/cursos');
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos`);
         if (!res.ok) throw new Error('Error cargando cursos');
         const data: Curso[] = await res.json();
         setCursos(data);
@@ -39,10 +39,11 @@ export default function AdminCursosSCORM() {
 
   const actualizarCursoEnLista = async (cursoActualizado: Curso) => {
     try {
-      const res = await fetch(`http://localhost:3001/cursos/${cursoActualizado.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoActualizado.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cursoActualizado),
+        credentials: 'include',
       });
       if (!res.ok) throw new Error('Error al actualizar curso');
       setCursos(prev => prev.map(c => (c.id === cursoActualizado.id ? cursoActualizado : c)));
@@ -60,8 +61,9 @@ export default function AdminCursosSCORM() {
     if (!confirm('¿Seguro que querés eliminar este curso?')) return;
 
     try {
-      const res = await fetch(`http://localhost:3001/cursos/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${id}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
       if (!res.ok) throw new Error('Error al eliminar curso');
       setCursos(prev => prev.filter(c => c.id !== id));

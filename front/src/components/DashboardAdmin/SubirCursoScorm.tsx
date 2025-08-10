@@ -43,10 +43,11 @@ export default function SubirCursoScorm({ onCursoCreado }: Props) {
         badgeDisponible,
       };
 
-      const res = await fetch('http://localhost:3001/cursos', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(crearCursoDto),
+        credentials: 'include',
       });
 
       if (!res.ok) throw new Error('Error al crear curso');
@@ -56,19 +57,20 @@ export default function SubirCursoScorm({ onCursoCreado }: Props) {
       if (imagen) {
         const formDataImg = new FormData();
         formDataImg.append('imagen', imagen);
-        await fetch(`http://localhost:3001/cursos/${cursoId}/imagen`, {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoId}/imagen`, {
           method: 'POST',
           body: formDataImg,
+          credentials: 'include',
         });
       }
 
       const formDataScorm = new FormData();
       formDataScorm.append('scormFile', scormFile);
-      await fetch(`http://localhost:3001/cursos/${cursoId}/scorm`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoId}/scorm`, {
         method: 'POST',
         body: formDataScorm,
+        credentials: 'include',
       });
-
       onCursoCreado();
     } catch (e) {
       if (e instanceof Error) setError(e.message);

@@ -23,11 +23,11 @@ export default function BarraBusqueda({ className }: BarraBusquedaProps) {
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    fetch("/cursos")
-      .then((res) => res.json())
-      .then((data) => setData(data));
-  }, []);
+ useEffect(() => {
+  fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos`)
+    .then((res) => res.json())
+    .then((data) => setData(data));
+}, []);
 
   useEffect(() => {
     const texto = query.toLowerCase();

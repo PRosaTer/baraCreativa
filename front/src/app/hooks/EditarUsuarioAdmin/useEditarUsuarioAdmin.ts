@@ -18,12 +18,12 @@ export default function useEditarUsuarioAdmin(
   const handleGuardar = async () => {
     setGuardando(true);
     try {
-      const res = await fetch(`http://localhost:3001/usuarios/${usuario.id}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/${usuario.id}`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: {
+        'Content-Type': 'application/json',
+    },
         body: JSON.stringify({ telefono, tipoUsuario, nombreCompleto }),
       });
 

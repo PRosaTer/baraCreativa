@@ -145,16 +145,18 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
 
       let res;
       if (cursoInicial && cursoInicial.id) {
-        res = await fetch(`http://localhost:3001/cursos/${cursoInicial.id}`, {
+        res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoInicial.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(cursoData),
+          credentials: 'include',
         });
       } else {
-        res = await fetch('http://localhost:3001/cursos', {
+        res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(cursoData),
+          credentials: 'include',
         });
       }
 
@@ -166,11 +168,11 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
         const formData = new FormData();
         formData.append('imagen', datos.imagenCurso);
 
-        const resImg = await fetch(`http://localhost:3001/cursos/${cursoGuardado.id}/imagen`, {
+        const resImg = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoGuardado.id}/imagen`, {
           method: 'POST',
           body: formData,
+          credentials: 'include',
         });
-
         if (!resImg.ok) throw new Error('Error subiendo imagen');
 
         const jsonImg = await resImg.json();
