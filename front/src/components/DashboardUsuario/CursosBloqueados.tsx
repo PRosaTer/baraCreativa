@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react';
 import { Curso } from "@/app/types/curso";
 
 interface CursosBloqueadosProps {
@@ -16,7 +17,6 @@ export default function CursosBloqueados({ cursos }: CursosBloqueadosProps) {
 
   return (
     <>
-
       <style>{`
         @keyframes color-fade {
           0%, 100% { color: #ef4444; } /* Rojo */
@@ -45,11 +45,11 @@ export default function CursosBloqueados({ cursos }: CursosBloqueadosProps) {
             <div
               key={curso.id}
               className="bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-all transform hover:scale-105 opacity-50 cursor-not-allowed duration-300"
-
             >
               {curso.imagenCurso && (
                 <img
-                  src={`http://localhost:3001${curso.imagenCurso}`}
+                  // Usamos la variable de entorno para construir la URL de la imagen
+                  src={`${process.env.NEXT_PUBLIC_API_URL}${curso.imagenCurso}`}
                   alt={curso.titulo}
                   className="w-full h-40 object-cover"
                 />

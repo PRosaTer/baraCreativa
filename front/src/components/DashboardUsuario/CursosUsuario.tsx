@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from 'next/link'; // Importamos Link para una mejor navegación
 import { Curso } from "@/app/types/curso";
 import CursosBloqueados from "./CursosBloqueados";
 
@@ -8,10 +9,12 @@ export default function CursosUsuario() {
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [error, setError] = useState<string>("");
 
+  const backendBaseUrl = process.env.NEXT_PUBLIC_API_URL; // Variable de entorno para la URL base del backend
+
   useEffect(() => {
     const fetchCursos = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos`, {
+        const res = await fetch(`${backendBaseUrl}/api/cursos`, {
           credentials: "include",
         });
 
@@ -28,7 +31,7 @@ export default function CursosUsuario() {
     };
 
     fetchCursos();
-  }, []);
+  }, [backendBaseUrl]); // Se añade backendBaseUrl a las dependencias para evitar warnings
 
   if (error) {
     return <p className="text-red-500 text-center">{error}</p>;
@@ -37,7 +40,6 @@ export default function CursosUsuario() {
   if (cursos.length === 0) {
     return <p className="text-center">No tienes cursos aún 😢</p>;
   }
-
 
   const cursosOrdenados = [...cursos].sort((a, b) => {
     const fechaA = a.fechaInicio ? new Date(a.fechaInicio).getTime() : Infinity;
@@ -56,7 +58,6 @@ export default function CursosUsuario() {
     const fechaDeInicio = curso.fechaInicio ? new Date(curso.fechaInicio) : null;
     return fechaDeInicio && fechaDeInicio > ahora;
   });
-
 
   const cursosDisponibles = cursosDesbloqueados.filter(
     (curso) => curso.claseItem === "curso"
@@ -81,8 +82,7 @@ export default function CursosUsuario() {
           animation: color-fade 5s ease-in-out infinite;
         }
       `}</style>
-
-
+      
       {cursosDisponibles.length > 0 && (
         <>
           <h2 className="text-2xl font-bold mt-10 mb-4 text-center">
@@ -98,15 +98,15 @@ export default function CursosUsuario() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
             {cursosDisponibles.map((curso) => (
-              <a
+              <Link
                 key={curso.id}
                 href={`/cursos/${curso.id}/scorm`}
                 className="bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-all hover:shadow-yellow-500/30 transform hover:scale-105 duration-300 cursor-pointer"
               >
-
                 {curso.imagenCurso && (
                   <img
-                    src={`http://localhost:3001${curso.imagenCurso}`}
+                    // Usamos la variable de entorno para construir la URL de la imagen
+                    src={`${backendBaseUrl}${curso.imagenCurso}`}
                     alt={curso.titulo}
                     className="w-full h-40 object-cover"
                   />
@@ -116,12 +116,11 @@ export default function CursosUsuario() {
                     {curso.titulo}
                   </h3>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         </>
       )}
-
 
       {serviciosDisponibles.length > 0 && (
         <>
@@ -138,15 +137,15 @@ export default function CursosUsuario() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
             {serviciosDisponibles.map((curso) => (
-              <a
+              <Link
                 key={curso.id}
                 href={`/cursos/${curso.id}/scorm`}
                 className="bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-all hover:shadow-yellow-500/30 transform hover:scale-105 duration-300 cursor-pointer"
               >
-
                 {curso.imagenCurso && (
                   <img
-                    src={`http://localhost:3001${curso.imagenCurso}`}
+                    // Usamos la variable de entorno para construir la URL de la imagen
+                    src={`${backendBaseUrl}${curso.imagenCurso}`}
                     alt={curso.titulo}
                     className="w-full h-40 object-cover"
                   />
@@ -156,7 +155,7 @@ export default function CursosUsuario() {
                     {curso.titulo}
                   </h3>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         </>
