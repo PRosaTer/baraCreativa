@@ -7,9 +7,10 @@ import { UsuariosService } from '../../services/usuarios/usuarios.service';
 import { Usuario } from '../../entidades/usuario.entity';
 
 // Define la interfaz del payload para asegurar los tipos correctos.
-// 'sub' es el estándar para el ID del sujeto (usuario).
+// 'sub' es el estándar, pero 'id' es una alternativa común.
 interface JwtPayload {
-  sub: number;
+  sub?: number;
+  id?: number;
   correoElectronico: string;
 }
 
@@ -43,13 +44,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPayload): Promise<Usuario> {
     this.logger.log(`JwtStrategy: Validando payload: ${JSON.stringify(payload)}`);
     
-    // El ID del usuario se encuentra en 'sub' por convención JWT
-    if (typeof payload.sub !== 'number') {
+    // Intenta obtener el ID del usuario de 'sub' o de 'id'.
+    const userId = payload.sub || payload.id;
+
+    if (typeof userId !== 'number') {
       this.logger.error('JwtStrategy: Error de validación: ID de usuario no numérico.');
       throw new UnauthorizedException('Token inválido: ID de usuario no numérico.');
     }
 
-    const usuario = await this.usuariosService.encontrarPorId(payload.sub);
+    const usuario = await this.usuariosService.encontrarPorId(userId);
 
     if (!usuario) {
       this.logger.warn('JwtStrategy: Error de validación: Usuario no encontrado.');
