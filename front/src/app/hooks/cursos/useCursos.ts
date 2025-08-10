@@ -9,7 +9,7 @@ export function useCursos() {
 
   useEffect(() => {
     const fetchCursos = async () => {
-      const res = await fetch('http://localhost:3001/cursos');
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos`);
       const data = await res.json();
       setCursos(data);
       setCargando(false);

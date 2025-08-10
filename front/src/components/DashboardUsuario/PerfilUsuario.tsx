@@ -58,11 +58,11 @@ export default function PerfilUsuarioEditable({ usuario, onActualizar }: Props) 
     formData.append("telefono", telefono);
     if (fotoPerfil) formData.append("fotoPerfil", fotoPerfil);
 
-    const res = await fetch(`http://localhost:3001/usuarios/${usuario.id}`, {
-      method: "PATCH",
-      body: formData,
-      credentials: "include",
-    });
+   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/${usuario.id}`, {
+    method: "PATCH",
+    body: formData,
+    credentials: "include",
+});
 
     if (!res.ok) {
       const data = await res.json();

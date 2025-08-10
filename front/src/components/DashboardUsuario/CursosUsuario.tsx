@@ -11,7 +11,7 @@ export default function CursosUsuario() {
   useEffect(() => {
     const fetchCursos = async () => {
       try {
-        const res = await fetch("http://localhost:3001/cursos", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos`, {
           credentials: "include",
         });
 

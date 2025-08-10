@@ -31,7 +31,7 @@ export function useDatosCurso(): UseDatosCursoResult {
   useEffect(() => {
     const fetchDatos = async () => {
       try {
-        const resCurso = await fetch(`${API_BASE_URL}/cursos/${cursoId}`, {
+        const resCurso = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoId}`, {
           credentials: 'include',
         });
 
@@ -54,7 +54,7 @@ export function useDatosCurso(): UseDatosCursoResult {
         dataCurso.fechaInicio = dataCurso.fechaInicio ? new Date(dataCurso.fechaInicio) : null;
         setCurso(dataCurso);
 
-        const resUsuario = await fetch(`${API_BASE_URL}/usuarios/me`, {
+        const resUsuario = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/me`, {
           credentials: 'include',
         });
 
@@ -93,7 +93,7 @@ export function useDatosCurso(): UseDatosCursoResult {
     }
 
     try {
-      const res = await fetch(`${PAYPAL_API_BASE_URL}/create-order`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/pagos/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -124,13 +124,14 @@ export function useDatosCurso(): UseDatosCursoResult {
         toast.error('Usuario no autenticado para completar el pago.');
       }
 
-      const res = await fetch(`${PAYPAL_API_BASE_URL}/capture-order`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/pagos/capture-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           orderId: data.orderID,
         }),
+
       });
 
       if (!res.ok) {

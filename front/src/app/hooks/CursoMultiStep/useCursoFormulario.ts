@@ -15,7 +15,7 @@ interface UseCursoFormularioReturn {
   nextStep: () => void;
   prevStep: () => void;
   handleSubmit: (e: FormEvent) => Promise<void>;
-  setForm: React.Dispatch<React.SetStateAction<CursoForm>>; 
+  setForm: React.Dispatch<React.SetStateAction<CursoForm>>;
 }
 
 export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, routerPush: (path: string) => void): UseCursoFormularioReturn => {
@@ -94,16 +94,16 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
   const handleAddModulo = () => {
     setForm(prev => ({
       ...prev,
-      modulos: [...prev.modulos, { 
-        id: Date.now(), 
-        titulo: `Módulo ${prev.modulos.length + 1}`, 
-        descripcion: null, 
+      modulos: [...prev.modulos, {
+        id: Date.now(),
+        titulo: `Módulo ${prev.modulos.length + 1}`,
+        descripcion: null,
         videoUrl: null,
-        pdfUrl: null, 
-        imageUrl: null, 
+        pdfUrl: null,
+        imageUrl: null,
         videoFile: null,
-        pdfFile: null, 
-        imageFile: null 
+        pdfFile: null,
+        imageFile: null
       }],
     }));
   };
@@ -165,7 +165,7 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
         modulos: form.modulos.map(m => ({ titulo: m.titulo, descripcion: m.descripcion || null })),
       };
 
-      const resCurso = await fetch('http://localhost:3001/cursos', {
+      const resCurso = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(cursoDataToCreate),
@@ -182,7 +182,7 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
       if (form.imagenCurso instanceof File) {
         const formDataImagen = new FormData();
         formDataImagen.append('imagen', form.imagenCurso);
-        const resImg = await fetch(`http://localhost:3001/cursos/${cursoId}/imagen`, {
+        const resImg = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoId}/imagen`, {
           method: 'POST',
           body: formDataImagen,
           credentials: 'include',
@@ -198,7 +198,7 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
         const formDataScorm = new FormData();
         formDataScorm.append('scormFile', form.archivoScorm);
         formDataScorm.append('cursoId', cursoId.toString());
-        const resScorm = await fetch(`http://localhost:3001/cursos/scorm_unzipped_courses`, {
+        const resScorm = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/scorm_unzipped_courses`, {
           method: 'POST',
           body: formDataScorm,
           credentials: 'include',
@@ -210,7 +210,7 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
         }
       }
 
-      const updatedCursoWithModulos = await fetch(`http://localhost:3001/cursos/${cursoId}`, { credentials: 'include' }).then(res => res.json());
+      const updatedCursoWithModulos = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoId}`, { credentials: 'include' }).then(res => res.json());
 
       for (let i = 0; i < updatedCursoWithModulos.modulos.length; i++) {
         const moduloBackend = updatedCursoWithModulos.modulos[i];
@@ -220,7 +220,7 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
         const formDataModuleFiles = new FormData();
         let filesAttached = false;
 
-        
+
         if (moduloForm.videoFile && moduloForm.videoFile.length > 0) {
           moduloForm.videoFile.forEach(file => formDataModuleFiles.append('files', file));
           filesAttached = true;
@@ -233,9 +233,8 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
           moduloForm.imageFile.forEach(file => formDataModuleFiles.append('files', file));
           filesAttached = true;
         }
-
         if (filesAttached) {
-          const resModuleFiles = await fetch(`http://localhost:3001/cursos/modulos/${moduloId}/files`, {
+          const resModuleFiles = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/modulos/${moduloId}/files`, {
             method: 'POST',
             body: formDataModuleFiles,
             credentials: 'include',

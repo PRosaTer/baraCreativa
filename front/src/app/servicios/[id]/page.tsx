@@ -19,8 +19,8 @@ export default function ServicioDetalle() {
   useEffect(() => {
     async function fetchDatos() {
       try {
-      
-        const resServicio = await fetch(`http://localhost:3001/cursos/${servicioId}`, {
+
+        const resServicio = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${servicioId}`, {
           credentials: 'include',
         });
         if (!resServicio.ok) throw new Error('No se pudo cargar el servicio');
@@ -35,8 +35,8 @@ export default function ServicioDetalle() {
 
         setServicio(dataServicio);
 
-        
-        const resUsuario = await fetch('http://localhost:3001/usuarios/me', {
+
+        const resUsuario = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/me`, {
           credentials: 'include',
         });
         if (!resUsuario.ok) throw new Error('No se pudo obtener el usuario');
@@ -56,7 +56,7 @@ export default function ServicioDetalle() {
     if (!usuarioId) throw new Error('Usuario no autenticado');
     if (!servicio) throw new Error('Servicio no cargado');
 
-    const res = await fetch('http://localhost:3001/pagos/paypal/create-order', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/pagos/paypal/create-order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -81,7 +81,7 @@ export default function ServicioDetalle() {
     try {
       if (!usuarioId) throw new Error('Usuario no autenticado');
 
-      const res = await fetch('http://localhost:3001/pagos/paypal/capture-order', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/pagos/paypal/capture-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -96,7 +96,7 @@ export default function ServicioDetalle() {
       }
 
 
-      router.push(`/servicios/${servicioId}`); 
+      router.push(`/servicios/${servicioId}`);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Error desconocido');
     }
@@ -121,7 +121,7 @@ export default function ServicioDetalle() {
             <p className="font-bold text-base sm:text-lg text-green-400 mb-2">
               💲 Precio: ${servicio?.precio}
             </p>
-        
+
             <p className="text-sm sm:text-base mb-1">
               Certificado:{' '}
               {servicio?.certificadoDisponible ? (
@@ -138,7 +138,7 @@ export default function ServicioDetalle() {
                 <span className="text-red-400">❌ No disponible</span>
               )}
             </p>
-            
+
             {servicio?.claseItem === ClaseItem.CURSO && (
               <>
                 <p className="text-sm sm:text-base mb-4">
@@ -153,17 +153,17 @@ export default function ServicioDetalle() {
                 <p className="text-sm sm:text-base mb-4">Horas: <span className="font-bold">{servicio?.duracionHoras}</span></p>
               </>
             )}
-            
+
             <p className="text-sm sm:text-base mb-1">Tipo: <span className="font-bold">{servicio?.tipo}</span></p>
             <p className="text-sm sm:text-base mb-1">Categoría: <span className="font-bold">{servicio?.categoria ?? 'Sin categoría'}</span></p>
-            {servicio?.fechaInicio && ( 
-                <p className="text-sm sm:text-base mb-4">
-                    Fecha de Inicio: <span className="font-bold">{servicio.fechaInicio.toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                </p>
+            {servicio?.fechaInicio && (
+              <p className="text-sm sm:text-base mb-4">
+                Fecha de Inicio: <span className="font-bold">{servicio.fechaInicio.toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+              </p>
             )}
           </div>
 
-          <div className='mt-10'> 
+          <div className='mt-10'>
             <h3 className="text-xl sm:text-2xl font-bold text-purple-200 mb-3">Descripción:</h3>
             <div
               className="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg
@@ -185,9 +185,9 @@ export default function ServicioDetalle() {
             </div>
           )}
 
-    
+
           {servicio?.claseItem === ClaseItem.CURSO && (
-            <div> 
+            <div>
               <h3 className="text-xl sm:text-2xl font-bold text-purple-200 mb-3">Módulos:</h3>
               <div
                 className="grid grid-cols-1 gap-4 w-full"

@@ -5,13 +5,13 @@ import { EstadoModuloUsuario } from '@/app/types/reporte-progreso.interface';
 import { toast } from 'react-toastify';
 
 const IS_DEVELOPMENT_MODE = process.env.NODE_ENV === 'development';
-const BACKEND_BASE_URL = 'http://localhost:3001'; 
+const BACKEND_BASE_URL = 'http://localhost:3001';
 const BACKEND_ORIGIN = new URL(BACKEND_BASE_URL).origin;
 
-const SCORM_VIRTUAL_MODULE_ID_OFFSET = 1000000; 
+const SCORM_VIRTUAL_MODULE_ID_OFFSET = 1000000;
 
 export function useCursoScorm(cursoId: string) {
-  console.log('[useCursoScorm] Hook inicializado para cursoId:', cursoId); 
+  console.log('[useCursoScorm] Hook inicializado para cursoId:', cursoId);
 
   const [modulosDelCurso, setModulosDelCurso] = useState<EstadoModuloUsuario[]>([]);
   const [currentModuleIndex, setCurrentModuleIndex] = useState<number>(0);
@@ -28,16 +28,16 @@ export function useCursoScorm(cursoId: string) {
     }
 
     try {
-      const token = localStorage.getItem('accessToken'); 
-      const headers: HeadersInit = { 
+      const token = localStorage.getItem('accessToken');
+      const headers: HeadersInit = {
         'Content-Type': 'application/json'
       };
       if (token) {
         (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
       }
-      
-      console.log(`[markCourseAsCompletedGeneral] Realizando fetch POST a ${BACKEND_BASE_URL}/inscripciones/mark-completed/${cursoId}`);
-      const res = await fetch(`${BACKEND_BASE_URL}/inscripciones/mark-completed/${cursoId}`, {
+
+      console.log(`[markCourseAsCompletedGeneral] Realizando fetch POST a ${process.env.NEXT_PUBLIC_API_URL}/api/inscripciones/mark-completed/${cursoId}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/inscripciones/mark-completed/${cursoId}`, {
         method: 'POST',
         credentials: 'include',
         headers: headers,
@@ -69,8 +69,8 @@ export function useCursoScorm(cursoId: string) {
       }
 
       try {
-        const token = localStorage.getItem('accessToken'); 
-        const headers: HeadersInit = { 
+        const token = localStorage.getItem('accessToken');
+        const headers: HeadersInit = {
           'Content-Type': 'application/json'
         };
         if (token) {
@@ -78,7 +78,7 @@ export function useCursoScorm(cursoId: string) {
         }
 
         console.log(`[marcarModuloCompletadoBackend] Realizando fetch POST para moduloId: ${moduloId}, cursoId: ${cursoId}`);
-        const res = await fetch(`${BACKEND_BASE_URL}/reportes-progreso/marcar-completado`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reportes-progreso/marcar-completado`, {
           method: 'POST',
           credentials: 'include',
           headers: headers,
@@ -99,8 +99,8 @@ export function useCursoScorm(cursoId: string) {
           return updatedModulos;
         });
         toast.success(`✅ Módulo completado.`, {
-            position: 'top-center',
-            autoClose: 3000,
+          position: 'top-center',
+          autoClose: 3000,
         });
       } catch (e) {
         console.error('[marcarModuloCompletadoBackend] Error al marcar módulo en backend:', e);
@@ -115,15 +115,15 @@ export function useCursoScorm(cursoId: string) {
     const cargarDatos = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('accessToken'); 
-        const headers: HeadersInit = { 
+        const token = localStorage.getItem('accessToken');
+        const headers: HeadersInit = {
           'Content-Type': 'application/json'
         };
         if (token) {
           (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
         }
 
-        const resInscripcion = await fetch(`${BACKEND_BASE_URL}/inscripciones/estado/${cursoId}`, {
+        const resInscripcion = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/inscripciones/estado/${cursoId}`, {
           credentials: 'include',
           headers: headers,
         });
@@ -143,7 +143,7 @@ export function useCursoScorm(cursoId: string) {
           console.log('[useCursoScorm] Curso ya marcado como completado en la inscripción inicial.');
         }
 
-        const resModulos = await fetch(`${BACKEND_BASE_URL}/reportes-progreso/estado/${cursoId}`, {
+        const resModulos = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reportes-progreso/estado/${cursoId}`, {
           credentials: 'include',
           headers: headers,
         });
@@ -165,8 +165,8 @@ export function useCursoScorm(cursoId: string) {
         if (primerNoCompletadoIndex !== -1) {
           setCurrentModuleIndex(primerNoCompletadoIndex);
         } else {
-          setCurrentModuleIndex(modulos.length - 1); 
-          if (!dataInscripcion.cursoCompletado) { 
+          setCurrentModuleIndex(modulos.length - 1);
+          if (!dataInscripcion.cursoCompletado) {
             console.log('[useCursoScorm] Todos los módulos cargados están completados. Intentando marcar curso general si no lo estaba.');
             await markCourseAsCompletedGeneral();
           }
@@ -186,7 +186,7 @@ export function useCursoScorm(cursoId: string) {
 
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
-      console.log('[useCursoScorm] Mensaje recibido del iframe:', event.data); 
+      console.log('[useCursoScorm] Mensaje recibido del iframe:', event.data);
       if (!IS_DEVELOPMENT_MODE && event.origin !== BACKEND_ORIGIN) {
         console.warn(`Mensaje SCORM ignorado: Origen no permitido (${event.origin}). Esperado: ${BACKEND_ORIGIN}`);
         return;
@@ -196,11 +196,11 @@ export function useCursoScorm(cursoId: string) {
         const currentModule = modulosDelCurso[currentModuleIndex];
         if (currentModule?.tipo === 'scorm' && !currentModule.completado) {
           console.log(`[useCursoScorm] Mensaje SCORM_COMPLETED recibido para módulo ${currentModule.id}. Marcando como completado.`);
-          await marcarModuloCompletadoBackend(currentModule.id); 
+          await marcarModuloCompletadoBackend(currentModule.id);
         } else if (currentModule?.tipo === 'scorm' && currentModule.completado) {
           console.warn('[useCursoScorm] Mensaje SCORM recibido, pero el módulo ya estaba completado.', currentModule);
         } else {
-            console.warn('[useCursoScorm] Mensaje SCORM recibido, pero el módulo actual no es SCORM o no es el curso correcto.', currentModule);
+          console.warn('[useCursoScorm] Mensaje SCORM recibido, pero el módulo actual no es SCORM o no es el curso correcto.', currentModule);
         }
       }
     };
@@ -240,7 +240,7 @@ export function useCursoScorm(cursoId: string) {
       case 'scorm':
         urls = module.urlContenido ? [module.urlContenido] : [];
         break;
-      case 'texto': 
+      case 'texto':
         urls = [];
         break;
       default:
@@ -251,7 +251,7 @@ export function useCursoScorm(cursoId: string) {
   }, [modulosDelCurso, currentModuleIndex]);
 
   const handleNavigation = useCallback(
-    async (direction: 'next' | 'prev') => { 
+    async (direction: 'next' | 'prev') => {
       const currentModule = modulosDelCurso[currentModuleIndex];
       if (!currentModule) return;
 
@@ -267,23 +267,23 @@ export function useCursoScorm(cursoId: string) {
 
         console.log(`[handleNavigation - NEXT] isLastContentOfCurrentModule: ${isLastContentOfCurrentModule}, isLastModule: ${isLastModule}, currentModule.completado: ${currentModule.completado}`);
 
-     
-        if (isLastContentOfCurrentModule && !currentModule.completado) { 
-            console.log(`[handleNavigation - NEXT] Último contenido del módulo ${currentModule.id}. Marcando módulo como completado.`);
-            await marcarModuloCompletadoBackend(currentModule.id); 
-            console.log(`[handleNavigation - NEXT] Después de marcar módulo ${currentModule.id}: modulosDelCurso (local state):`, modulosDelCurso.map(m => ({ id: m.id, completado: m.completado, titulo: m.titulo })));
-        }
-        
-  
-        if (isLastContentOfCurrentModule && isLastModule) {
-            console.log('[handleNavigation - NEXT] Último módulo y último contenido alcanzado. DISPARANDO markCourseAsCompletedGeneral directamente.');
 
-            await markCourseAsCompletedGeneral();
-        } else if (isLastContentOfCurrentModule) { 
-            console.log(`[handleNavigation - NEXT] Navegando al siguiente módulo.`);
-            setCurrentModuleIndex((i) => i + 1);
-            setCurrentContentIndex(0);
-        } else { 
+        if (isLastContentOfCurrentModule && !currentModule.completado) {
+          console.log(`[handleNavigation - NEXT] Último contenido del módulo ${currentModule.id}. Marcando módulo como completado.`);
+          await marcarModuloCompletadoBackend(currentModule.id);
+          console.log(`[handleNavigation - NEXT] Después de marcar módulo ${currentModule.id}: modulosDelCurso (local state):`, modulosDelCurso.map(m => ({ id: m.id, completado: m.completado, titulo: m.titulo })));
+        }
+
+
+        if (isLastContentOfCurrentModule && isLastModule) {
+          console.log('[handleNavigation - NEXT] Último módulo y último contenido alcanzado. DISPARANDO markCourseAsCompletedGeneral directamente.');
+
+          await markCourseAsCompletedGeneral();
+        } else if (isLastContentOfCurrentModule) {
+          console.log(`[handleNavigation - NEXT] Navegando al siguiente módulo.`);
+          setCurrentModuleIndex((i) => i + 1);
+          setCurrentContentIndex(0);
+        } else {
           console.log(`[handleNavigation - NEXT] Navegando al siguiente contenido dentro del mismo módulo.`);
           setCurrentContentIndex((i) => i + 1);
         }
@@ -296,7 +296,7 @@ export function useCursoScorm(cursoId: string) {
           const prevIndex = currentModuleIndex - 1;
           setCurrentModuleIndex(prevIndex);
           const prevModule = modulosDelCurso[prevIndex];
-          
+
           let totalPrevModuleContents = 0;
           switch (prevModule?.tipo) {
             case 'video':
@@ -309,9 +309,9 @@ export function useCursoScorm(cursoId: string) {
               totalPrevModuleContents = prevModule.imageUrls?.length || 0;
               break;
             case 'scorm':
-              totalPrevModuleContents = prevModule.urlContenido ? 1 : 0; 
+              totalPrevModuleContents = prevModule.urlContenido ? 1 : 0;
               break;
-            case 'texto': 
+            case 'texto':
               totalPrevModuleContents = prevModule.descripcionContenido ? 1 : 0;
               break;
             default:
@@ -321,24 +321,24 @@ export function useCursoScorm(cursoId: string) {
         }
       }
     },
-    [currentModuleIndex, currentContentIndex, modulosDelCurso, marcarModuloCompletadoBackend, getCurrentContentUrls, markCourseAsCompletedGeneral] 
+    [currentModuleIndex, currentContentIndex, modulosDelCurso, marcarModuloCompletadoBackend, getCurrentContentUrls, markCourseAsCompletedGeneral]
   );
 
   const handleModuleClick = useCallback(
     (index: number) => {
       const currentModule = modulosDelCurso[currentModuleIndex];
-      
+
       if (currentModule && !currentModule.completado && index !== currentModuleIndex) {
         const contentUrls = getCurrentContentUrls();
         const totalContentItems = contentUrls.length;
         const isLastContent = currentContentIndex === totalContentItems - 1 || totalContentItems === 0;
 
         if (currentModule.tipo === 'scorm' || currentModule.tipo === 'texto' || isLastContent) {
-            console.log(`[handleModuleClick] Módulo ${currentModule.id} marcado como completado al navegar a otro módulo.`);
-            marcarModuloCompletadoBackend(currentModule.id).catch(e => {
-                console.error("[handleModuleClick] Error al marcar módulo en handleModuleClick:", e);
-                toast.error("Hubo un error al marcar el módulo actual.");
-            });
+          console.log(`[handleModuleClick] Módulo ${currentModule.id} marcado como completado al navegar a otro módulo.`);
+          marcarModuloCompletadoBackend(currentModule.id).catch(e => {
+            console.error("[handleModuleClick] Error al marcar módulo en handleModuleClick:", e);
+            toast.error("Hubo un error al marcar el módulo actual.");
+          });
         }
       }
 
@@ -346,11 +346,11 @@ export function useCursoScorm(cursoId: string) {
         toast.warn('Debes completar el módulo anterior primero para acceder a este, o este módulo debe estar ya completado.');
         return;
       }
-      
+
       setCurrentModuleIndex(index);
       setCurrentContentIndex(0);
     },
-    [modulosDelCurso, currentModuleIndex, currentContentIndex, marcarModuloCompletadoBackend, getCurrentContentUrls] 
+    [modulosDelCurso, currentModuleIndex, currentContentIndex, marcarModuloCompletadoBackend, getCurrentContentUrls]
   );
 
   const progresoGeneral = useMemo(() => {
@@ -372,7 +372,7 @@ export function useCursoScorm(cursoId: string) {
           cantidadContenidosEnModulo = modulo.imageUrls?.length || 0;
           break;
         case 'scorm':
-          cantidadContenidosEnModulo = modulo.urlContenido ? 1 : 0; 
+          cantidadContenidosEnModulo = modulo.urlContenido ? 1 : 0;
           break;
         case 'texto':
           cantidadContenidosEnModulo = modulo.descripcionContenido ? 1 : 0;
@@ -400,10 +400,10 @@ export function useCursoScorm(cursoId: string) {
   const currentContentUrl = memoizedCurrentContentUrls[currentContentIndex];
 
   const isPrevContentDisabled = currentContentIndex === 0 && currentModuleIndex === 0;
-  
+
   const isNextContentDisabled =
-    currentModule && 
-    currentContentIndex === (currentModule.tipo === 'texto' ? 0 : memoizedCurrentContentUrls.length - 1) && 
+    currentModule &&
+    currentContentIndex === (currentModule.tipo === 'texto' ? 0 : memoizedCurrentContentUrls.length - 1) &&
     currentModuleIndex === modulosDelCurso.length - 1 &&
     currentModule.completado;
 
@@ -417,13 +417,13 @@ export function useCursoScorm(cursoId: string) {
     error,
     loading,
     cursoCompletadoGeneral,
-    markCourseAsCompletedGeneral, 
+    markCourseAsCompletedGeneral,
     marcarModuloCompletadoBackend,
     handleNavigation,
     handleModuleClick,
-    progresoGeneral, 
+    progresoGeneral,
     currentModule,
-    currentContentUrl, 
+    currentContentUrl,
     isPrevContentDisabled,
     isNextContentDisabled,
   };

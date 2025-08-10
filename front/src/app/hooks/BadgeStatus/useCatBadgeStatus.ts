@@ -16,7 +16,7 @@ export const useCatBadgeStatus = (userId: number | null) => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("http://localhost:3001/logros/cat-badge", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/logros/cat-badge`, {
           credentials: 'include',
         });
 

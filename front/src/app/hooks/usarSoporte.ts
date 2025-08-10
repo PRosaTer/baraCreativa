@@ -28,11 +28,11 @@ export const useSoporte = () => {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
   const obtenerDatosUsuario = async (): Promise<UsuarioAutenticado | null> => {
-    try {
-      const respuesta = await fetch(`${API_URL}/auth/profile`, {
-        method: 'GET',
-        credentials: 'include',
-      });
+  try {
+  const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`, {
+    method: 'GET',
+    credentials: 'include',
+  });
 
       if (!respuesta.ok) {
         return null;
@@ -104,12 +104,13 @@ export const useSoporte = () => {
       estado_caso: 'Pendiente',
     };
 
-    try {
-      const respuesta = await fetch(`${API_URL}/contacto`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datosAEnviar),
-      });
+  try {
+  const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contacto`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(datosAEnviar),
+    credentials: 'include',
+  });
 
       if (!respuesta.ok) {
         const errorData = await respuesta.json();
