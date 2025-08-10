@@ -45,7 +45,7 @@ export default function Navbar() {
   }, [isProfileOpen]);
 
   return (
-    <nav className="w-full bg-primary py-2 lg:py-4 relative z-30">
+    <nav className="w-full bg-primary py-1 lg:py-2 relative z-30">
       <div className="flex items-center justify-between w-full max-w-screen-xl mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between w-full lg:w-auto">
           <Logo />
