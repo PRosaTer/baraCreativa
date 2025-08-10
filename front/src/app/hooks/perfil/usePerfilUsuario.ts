@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Usuario } from "@/app/types/auth";
+import { Usuario } from "@/types/auth";
 
 export const usePerfilUsuario = () => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
