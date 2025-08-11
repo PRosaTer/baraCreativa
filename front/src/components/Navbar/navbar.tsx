@@ -18,6 +18,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const navbarRef = useRef<HTMLDivElement>(null);
 
   const toggleProfileMenu = () => {
     setIsProfileOpen(!isProfileOpen);
@@ -44,34 +45,52 @@ export default function Navbar() {
     };
   }, [isProfileOpen]);
 
-  // Función para obtener la URL de la imagen de perfil de forma segura.
-  // Esto maneja diferentes formatos de rutas, incluyendo 'null' o 'undefined'.
+  // Manejador para cerrar el menú de hamburguesa cuando se hace clic fuera de él.
+  useEffect(() => {
+    function handleClickOutsideMenu(event: MouseEvent) {
+      if (
+        navbarRef.current &&
+        isMenuOpen &&
+        !navbarRef.current.contains(event.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    }
+    
+    // Solo agregamos el listener si el menú está abierto.
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutsideMenu);
+    }
+    
+    // Eliminamos el listener al desmontar o si el menú se cierra.
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideMenu);
+    };
+  }, [isMenuOpen]);
+
+
   const getProfileImageUrl = (fotoPerfil: string | null | undefined) => {
     if (!fotoPerfil) {
       return null;
     }
 
-    // Si la ruta ya es una URL completa (empieza con 'http' o '/'), la usamos directamente.
-    // Esto es útil si en producción la base de datos guarda la ruta completa.
     if (fotoPerfil.startsWith('http') || fotoPerfil.startsWith('/')) {
       return fotoPerfil;
     }
 
-    // Si solo es el nombre del archivo, construimos la ruta completa.
-    // Esto es útil si en desarrollo la base de datos guarda solo el nombre del archivo.
     return `${process.env.NEXT_PUBLIC_API_URL}/uploads/perfiles/${fotoPerfil}`;
   };
 
   const profileImageUrl = usuario ? getProfileImageUrl(usuario.fotoPerfil) : null;
 
   return (
-    <nav className={`w-full bg-primary mt-[5px] h-[100px] relative z-30 ${isMenuOpen ? "bg-primary/95 backdrop-blur" : ""}`}>
+    <nav className={`w-full bg-primary mt-[5px] h-[100px] relative z-30`} ref={navbarRef}>
       <div className="flex items-center justify-between w-full max-w-screen-xl mx-auto px-4 lg:px-8 h-full">
         <div className="flex items-center justify-between w-full lg:w-auto">
           <Logo />
           {/* Botón de menú hamburguesa */}
           <button
-            className="lg:hidden text-white ml-2 z-50 relative"
+            className="lg:hidden text-white ml-2 z-[60] relative"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -105,7 +124,7 @@ export default function Navbar() {
             fixed lg:static inset-0 lg:inset-auto
             p-6 lg:p-0
             bg-gray-900 lg:bg-transparent backdrop-blur
-            z-40
+            z-50
             transition-all duration-300 ease-in-out
             
             ${isMenuOpen ? "absolute top-0 left-0 w-screen overflow-y-auto" : "overflow-y-auto lg:overflow-visible"}
@@ -133,7 +152,6 @@ export default function Navbar() {
           {/* Menú de hamburguesa para móvil, visible solo cuando está abierto */}
           {isMenuOpen && (
             <div className="lg:hidden flex flex-col w-full mt-[100px] p-4 items-center">
-              {/* Contenedor para los botones del menú de hamburguesa */}
               <div className="flex flex-wrap justify-center gap-4 mb-4">
                 <div className="w-[calc(50%-8px)]">
                   <SobreComunidadButton />
@@ -152,7 +170,6 @@ export default function Navbar() {
                 </div>
               </div>
               
-              {/* Barra de búsqueda para móvil, debajo de los botones */}
               <BarraBusqueda className="w-full" />
             </div>
           )}
@@ -162,7 +179,7 @@ export default function Navbar() {
               Cargando...
             </div>
           ) : usuario ? (
-            <div className="relative z-50 lg:ml-6 flex items-center justify-center lg:justify-start" ref={profileMenuRef}>
+            <div className="relative z-[60] lg:ml-6 flex items-center justify-center lg:justify-start" ref={profileMenuRef}>
               <button
                 onClick={toggleProfileMenu}
                 className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white"
@@ -185,7 +202,7 @@ export default function Navbar() {
                   isProfileOpen ? "opacity-100 visible" : "opacity-0 invisible"
                 } transition-all duration-300 ease-out
                   fixed lg:absolute right-4 lg:right-0 top-[80px] lg:top-full mt-2
-                  w-44 bg-white rounded-lg shadow-lg py-2 z-50`}
+                  w-44 bg-white rounded-lg shadow-lg py-2 z-[70]`}
               >
                 <button
                   onClick={() => {
