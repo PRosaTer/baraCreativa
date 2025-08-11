@@ -210,7 +210,7 @@ export default function Navbar() {
               </div>
             </div>
           ) : (
-            <BotonConEfecto texto="Acceso" href="/login" />
+            <BotonConEfecto texto="Acceso" href="/login" className="lg:ml-6" />
           )}
         </div>
       </div>
