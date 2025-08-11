@@ -3,6 +3,7 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
+  ForbiddenException,
   Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -29,41 +30,43 @@ export class RolesGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    // 1. Obtener los roles requeridos de los metadatos de la ruta.
     const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
-      context.getHandler(), // Para métodos del controlador
-      context.getClass(), // Para el controlador completo
+      context.getHandler(),
+      context.getClass(),
     ]);
 
-    // Si no hay roles requeridos, permite el acceso.
     if (!requiredRoles) {
       return true;
     }
 
-    // 2. Obtener el usuario del objeto de la solicitud.
-    // El 'user' es agregado a la solicitud por el JwtStrategy.
     const request = context.switchToHttp().getRequest<Request>();
-    const user = request.user as { role: string }; // Asume que el usuario tiene una propiedad 'role'.
+    // CAMBIO: Asumimos que el usuario tiene la propiedad esAdmin: boolean
+    const user = request.user as { esAdmin: boolean };
 
-    // Si no hay usuario o no tiene un rol, deniega el acceso.
-    if (!user || !user.role) {
+    if (!user) {
       this.logger.warn(
-        'RolesGuard: Intento de acceso a ruta protegida sin usuario o rol.',
+        'RolesGuard: Intento de acceso a ruta protegida sin usuario.',
       );
-      throw new UnauthorizedException('Acceso denegado. Rol de usuario no definido.');
+      throw new UnauthorizedException('Acceso denegado. Usuario no autenticado.');
     }
+    
+    // Si se requiere el rol 'admin', se verifica la propiedad esAdmin.
+    // Esto te permitirá usar @Roles('admin') en tu controlador.
+    const isAdminRequired = requiredRoles.includes('admin');
+    const isUserAdmin = user.esAdmin === true;
 
-    // 3. Verificar si el rol del usuario está incluido en los roles requeridos.
-    const hasRole = requiredRoles.includes(user.role);
-
-    if (!hasRole) {
+    if (isAdminRequired && !isUserAdmin) {
       this.logger.warn(
-        `RolesGuard: Usuario con rol '${user.role}' intentó acceder a ruta para roles: ${requiredRoles.join(', ')}`,
+        'RolesGuard: Usuario autenticado pero no es un administrador.',
       );
-      throw new UnauthorizedException('No tienes los permisos necesarios para esta acción.');
+      throw new ForbiddenException('No tienes los permisos necesarios para esta acción.');
+    } else if (!isAdminRequired) {
+      // Si la ruta no requiere admin, se permite el acceso por defecto.
+      this.logger.log('RolesGuard: Acceso permitido a ruta no restringida.');
+      return true;
     }
-
-    this.logger.log('RolesGuard: Acceso permitido.');
+    
+    this.logger.log('RolesGuard: Acceso de administrador permitido.');
     return true;
   }
 }

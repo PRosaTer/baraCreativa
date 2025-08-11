@@ -11,6 +11,8 @@ interface JwtPayload {
   sub?: number;
   id?: number;
   correoElectronico: string;
+  // AÑADIDO: Ahora la propiedad del token se llama esAdmin
+  esAdmin?: boolean; 
 }
 
 @Injectable()
@@ -26,11 +28,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new Error('JWT_SECRET no está definido en las variables de entorno');
     }
     super({
-      // CRÍTICO: Extracción del token de la cookie
-      // Se utiliza un extractor de cookie para que Passport lo maneje internamente.
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          // Extrae el token de la cookie llamada 'jwt'
           return request?.cookies?.jwt || null;
         },
         ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -56,8 +55,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       this.logger.warn('JwtStrategy: Error de validación: Usuario no encontrado.');
       throw new UnauthorizedException('Token inválido o usuario no encontrado.');
     }
-
-    this.logger.log('JwtStrategy: Validación exitosa.');
+    
+    // CRÍTICO: Adjuntamos el objeto 'usuario' completo (que contiene 'esAdmin') a la solicitud
+    // para que el RolesGuard lo pueda leer.
     return usuario;
   }
 }
