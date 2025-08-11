@@ -10,6 +10,7 @@ export default function useUsuarios() {
   const socket = useSocket();
   const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
+
   const fetchUsuarios = useCallback(async () => {
     setLoading(true);
     try {
@@ -29,12 +30,15 @@ export default function useUsuarios() {
     }
   }, [API_URL]);
 
+
   useEffect(() => {
     fetchUsuarios();
   }, [fetchUsuarios]);
 
+
   useEffect(() => {
     if (!socket) return;
+
 
     const actualizar = (usuariosActualizados: Usuario[]) => {
       usuariosActualizados.sort((a, b) => a.id - b.id);
@@ -46,6 +50,7 @@ export default function useUsuarios() {
       socket.off('usuariosActualizados', actualizar);
     };
   }, [socket]);
+
 
   const actualizarUsuarioEnLista = useCallback((actualizado: Usuario) => {
     setUsuarios((prev) => prev.map((u) => (u.id === actualizado.id ? actualizado : u)));
