@@ -104,7 +104,7 @@ export default function Navbar() {
             w-full lg:w-auto
             fixed lg:static inset-0 lg:inset-auto
             p-6 lg:p-0
-            bg-primary/95 lg:bg-transparent backdrop-blur
+            bg-gray-900 lg:bg-transparent backdrop-blur
             z-40
             transition-all duration-300 ease-in-out
             
@@ -132,7 +132,7 @@ export default function Navbar() {
 
           {/* Menú de hamburguesa para móvil, visible solo cuando está abierto */}
           {isMenuOpen && (
-            <div className="lg:hidden flex flex-col w-full mt-[100px] p-4">
+            <div className="lg:hidden flex flex-col w-full mt-[100px] p-4 items-center">
               {/* Contenedor para los botones del menú de hamburguesa */}
               <div className="flex flex-wrap justify-center gap-4 mb-4">
                 <div className="w-[calc(50%-8px)]">
