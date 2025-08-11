@@ -1,24 +1,25 @@
-import React from 'react';
+"use client";
 
-export interface InlineToastProps {
-  mensaje: string;
-  onClose: () => void;
-  type: 'success' | 'error';
+import { Modulo } from "@/app/types/curso";
+
+interface ListaModulosProps {
+  modulos: Modulo[];
+  currentModule: number;
+  onModuleClick: (index: number) => void;
 }
 
-export default function InlineToast({ mensaje, onClose, type }: InlineToastProps) {
+export default function ListaModulos({ modulos, currentModule, onModuleClick }: ListaModulosProps) {
   return (
-    <div
-      className={`p-4 rounded mb-4 ${
-        type === 'success' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
-      }`}
-    >
-      <div className="flex justify-between items-center">
-        <span>{mensaje}</span>
-        <button onClick={onClose} className="ml-4 text-sm underline">
-          Cerrar
+    <div className="lista-modulos">
+      {modulos.map((modulo, index) => (
+        <button
+          key={modulo.id}
+          onClick={() => onModuleClick(index)}
+          className={index === currentModule ? "activo" : ""}
+        >
+          {modulo.titulo}
         </button>
-      </div>
+      ))}
     </div>
   );
 }

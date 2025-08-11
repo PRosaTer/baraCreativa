@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
-
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 import { PasswordModule } from './modules/password/password.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -12,7 +11,6 @@ import { InscripcionesModule } from './modules/inscripciones/inscripciones.modul
 import { ReporteProgresoModule } from './modules/reporte-progreso/reporte-progreso.module';
 import { CertificadosModule } from './modules/certificados/certificados.module';
 import { BadgesModule } from './modules/badges/badges.module';
-
 import configuration, { AppConfig } from './config/configuration';
 
 @Module({
@@ -25,21 +23,15 @@ import configuration, { AppConfig } from './config/configuration';
       inject: [ConfigService],
       useFactory: (config: ConfigService<AppConfig>): TypeOrmModuleOptions => {
         const databaseUrl = process.env.DATABASE_URL;
-
         if (databaseUrl) {
-          // Configuración para Render usando DATABASE_URL
           return {
             type: 'postgres',
             url: databaseUrl,
             entities: [join(__dirname, '**', '*.entity.{ts,js}')],
             synchronize: true,
-            ssl: {
-              rejectUnauthorized: false, // Necesario en Render
-            },
+            ssl: { rejectUnauthorized: false },
           };
         }
-
-        // Configuración local
         return {
           type: 'postgres',
           host: process.env.DB_HOST,

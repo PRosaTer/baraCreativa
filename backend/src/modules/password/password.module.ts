@@ -1,12 +1,17 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Usuario } from 'src/entidades/usuario.entity';
+import { PasswordService } from '../../services/password/password.service';
 import { PasswordController } from '../../controllers/password/password.controller';
-import { PasswordService } from '../../services/password/password.service'; // Mismo error aquí.
+import { Usuario } from 'src/entidades/usuario.entity';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Usuario])],
+  imports: [
+    TypeOrmModule.forFeature([Usuario]),  // Registro del repositorio Usuario
+    ConfigModule,                         // Para inyectar ConfigService
+  ],
   controllers: [PasswordController],
   providers: [PasswordService],
+  exports: [PasswordService],
 })
 export class PasswordModule {}

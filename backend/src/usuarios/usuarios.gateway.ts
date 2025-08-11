@@ -7,23 +7,18 @@ import {
 import { Server, Socket } from 'socket.io';
 import { UsuariosService } from '../services/usuarios/usuarios.service';
 import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 
 @WebSocketGateway({
   cors: {
-    // Obtener las URLs de origen permitidas desde las variables de entorno
-    // Se usa una cadena de texto para facilitar la configuración en el archivo .env
     origin: (origin: string, callback: (error: Error | null, success: boolean) => void) => {
-      // Usamos la variable de entorno para la URL del frontend
       const allowedOrigins = [
-        'http://localhost:3000', // Mantener para desarrollo local
-        'https://bara-creativa-front.onrender.com', // Ejemplo de URL de producción
-        'https://baracreativa.onrender.com' // Otro ejemplo de URL de producción
+        'http://localhost:3000',
+        'https://bara-creativa-front.onrender.com',
+        'https://baracreativa.onrender.com'
       ];
 
-      // Podríamos obtener esto de ConfigService, pero para CORS en un decorador,
-      // es más sencillo gestionarlo de forma dinámica si es necesario.
-      // Aquí, la configuración está en el constructor.
-      // Si el origen está en la lista de permitidos o es un origen no-HTTP (como 'null' para conexiones del mismo origen)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -34,51 +29,69 @@ import { ConfigService } from '@nestjs/config';
   },
 })
 export class UsuariosGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  private readonly logger = new Logger(UsuariosGateway.name);
   @WebSocketServer()
   server: Server;
 
-  private connectedUsers = new Map<number, Socket>();
+  // Usa un Map para vincular el ID de usuario con el Socket.id
+  private connectedUsers = new Map<number, string>();
 
   constructor(
     private readonly usuariosService: UsuariosService,
-    private readonly configService: ConfigService, // Inyectamos ConfigService
-  ) {
-    // Es mejor usar ConfigService aquí si la lista de orígenes es dinámica.
-    // Para simplificar, la he dejado fija en el decorador, pero es importante tener en cuenta que
-    // las variables de entorno pueden ser la mejor opción.
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-    if (frontendUrl) {
-      // Nota: NestJS no soporta `ConfigService` directamente en los decoradores,
-      // por lo que he mantenido la lista en el decorador con un valor fijo.
-      // Para una implementación más dinámica, se podría usar un middleware.
-      // He añadido un comentario para explicar esto en el código.
-    }
-  }
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async handleConnection(client: Socket) {
-    const userIdStr = client.handshake.query.usuarioId as string;
-    const userId = parseInt(userIdStr);
-
-    if (!userId || isNaN(userId)) {
-      client.disconnect();
+    const token = client.handshake.auth?.token;
+    
+    if (!token) {
+      this.logger.warn('Conexión rechazada: Token no proporcionado.');
+      client.disconnect(true);
       return;
     }
 
-    this.connectedUsers.set(userId, client);
+    try {
+      const payload = this.jwtService.verify(token);
+      const userId = payload.sub || payload.id;
 
-    await this.usuariosService.actualizarEstado(userId, true);
+      if (!userId || isNaN(Number(userId))) {
+        this.logger.warn(`Conexión rechazada: ID de usuario inválido en el token. ID: ${userId}`);
+        client.disconnect(true);
+        return;
+      }
 
-    const usuarios = await this.usuariosService.findAll();
-    this.server.emit('usuariosActualizados', usuarios);
+      const userIdNum = Number(userId);
 
-    console.log(`✅ Usuario ${userId} conectado.`);
+      // Verificar si el usuario existe en la base de datos
+      const usuarioExistente = await this.usuariosService.findOne(userIdNum);
+      if (!usuarioExistente) {
+        this.logger.warn(`Conexión rechazada: Usuario con ID ${userIdNum} no encontrado.`);
+        client.disconnect(true);
+        return;
+      }
+
+      this.connectedUsers.set(userIdNum, client.id);
+
+      await this.usuariosService.actualizarEstado(userIdNum, true);
+      this.logger.log(`✅ Usuario ${userIdNum} conectado.`);
+
+      // Emitir la lista actualizada de usuarios a todos los clientes
+      const usuarios = await this.usuariosService.findAll();
+      this.server.emit('usuariosActualizados', usuarios);
+
+    } catch (error) {
+      this.logger.error(`Error durante la conexión: ${error.message}`);
+      client.disconnect(true);
+    }
   }
 
   async handleDisconnect(client: Socket) {
+    // Buscar el ID del usuario en el Map usando el socket.id
     let disconnectedUserId: number | undefined;
 
-    for (const [userId, socket] of this.connectedUsers.entries()) {
-      if (socket.id === client.id) {
+    for (const [userId, socketId] of this.connectedUsers.entries()) {
+      if (socketId === client.id) {
         disconnectedUserId = userId;
         this.connectedUsers.delete(userId);
         break;
@@ -86,12 +99,18 @@ export class UsuariosGateway implements OnGatewayConnection, OnGatewayDisconnect
     }
 
     if (disconnectedUserId !== undefined) {
-      await this.usuariosService.actualizarEstado(disconnectedUserId, false);
+      try {
+        await this.usuariosService.actualizarEstado(disconnectedUserId, false);
+        this.logger.log(`❌ Usuario ${disconnectedUserId} desconectado.`);
 
-      const usuarios = await this.usuariosService.findAll();
-      this.server.emit('usuariosActualizados', usuarios);
-
-      console.log(`❌ Usuario ${disconnectedUserId} desconectado.`);
+        // Emitir la lista actualizada de usuarios a todos los clientes
+        const usuarios = await this.usuariosService.findAll();
+        this.server.emit('usuariosActualizados', usuarios);
+      } catch (error) {
+        this.logger.error(`Error al actualizar el estado de desconexión para el usuario ${disconnectedUserId}: ${error.message}`);
+      }
+    } else {
+      this.logger.warn(`Cliente ${client.id} desconectado sin un ID de usuario registrado.`);
     }
   }
 }
