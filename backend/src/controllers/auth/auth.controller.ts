@@ -62,7 +62,7 @@ export class AuthController {
 
     res.cookie('jwt', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', 
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000,
       path: '/',
@@ -70,7 +70,9 @@ export class AuthController {
 
     const usuario = await this.usuariosService.encontrarPorCorreo(datos.correoElectronico);
     if (usuario) {
+      await this.usuariosService.actualizarUltimaSesion(usuario.id, new Date());
       await this.usuariosService.actualizarEstado(usuario.id, true);
+
       const usuarios = await this.usuariosService.findAll();
       this.socketGateway.server.emit('usuariosActualizados', usuarios);
     }
