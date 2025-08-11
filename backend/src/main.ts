@@ -23,8 +23,11 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
+  
+  const frontendOrigin = process.env.FRONTEND_URL || 'https://bara-creativa-front.onrender.com';
+
   app.enableCors({
-    origin: ['https://bara-creativa-front.onrender.com', 'https://baracreativa.onrender.com/'],
+    origin: [frontendOrigin],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: 'Content-Type, Authorization',
@@ -40,7 +43,6 @@ async function bootstrap() {
     }),
   );
 
- 
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const uploadPath = join(process.cwd(), 'uploads', 'imagenes-cursos');

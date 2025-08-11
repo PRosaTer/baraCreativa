@@ -1,17 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSocket } from '@/app/context/SocketProvider';
 import { Usuario } from '@/app/types/auth';
 
 export default function useUsuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [loading, setLoading] = useState(false);
   const socket = useSocket();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
-  const fetchUsuarios = async () => {
+  const fetchUsuarios = useCallback(async () => {
+    setLoading(true);
     try {
-      // Se corrige la URL de la API para que apunte al endpoint correcto en el backend.
-      const res = await fetch(`/api/auth/admin/users`, {
+      const res = await fetch(`${API_URL}/api/auth/admin/users`, {
         credentials: 'include',
       });
 
@@ -22,12 +24,14 @@ export default function useUsuarios() {
       setUsuarios(data);
     } catch (error) {
       console.error('Error al cargar usuarios:', error);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [API_URL]);
 
   useEffect(() => {
     fetchUsuarios();
-  }, []);
+  }, [fetchUsuarios]);
 
   useEffect(() => {
     if (!socket) return;
@@ -43,12 +47,13 @@ export default function useUsuarios() {
     };
   }, [socket]);
 
-  const actualizarUsuarioEnLista = (actualizado: Usuario) => {
+  const actualizarUsuarioEnLista = useCallback((actualizado: Usuario) => {
     setUsuarios((prev) => prev.map((u) => (u.id === actualizado.id ? actualizado : u)));
-  };
+  }, []);
 
   return {
     usuarios,
+    loading,
     actualizarUsuarioEnLista,
     fetchUsuarios,
   };

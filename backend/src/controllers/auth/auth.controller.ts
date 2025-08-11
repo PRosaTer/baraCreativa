@@ -62,7 +62,7 @@ export class AuthController {
 
     res.cookie('jwt', token, {
       httpOnly: true,
-      secure: true, 
+      secure: process.env.NODE_ENV === 'production', 
       sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000,
       path: '/',
@@ -88,7 +88,12 @@ export class AuthController {
   @Post('logout')
   async logout(@Req() req: UserRequest, @Res({ passthrough: true }) res: Response) {
     await this.usuariosService.actualizarEstado(req.user.id, false);
-    res.clearCookie('jwt', { path: '/' });
+    res.clearCookie('jwt', {
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
+    });
     const usuarios = await this.usuariosService.findAll();
     this.socketGateway.server.emit('usuariosActualizados', usuarios);
     return { message: 'Sesión cerrada correctamente' };

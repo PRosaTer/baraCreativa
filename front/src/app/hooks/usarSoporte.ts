@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Swal from 'sweetalert2';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 interface DatosContacto {
   correo: string;
-  tipoConsulta: 'Técnica' | 'Administrativa' | 'Académica';
+  tipoConsulta: "Técnica" | "Administrativa" | "Académica";
   mensaje: string;
 }
 
@@ -16,9 +16,9 @@ interface UsuarioAutenticado {
 
 export const useSoporte = () => {
   const [datosContacto, setDatosContacto] = useState<DatosContacto>({
-    correo: '',
-    tipoConsulta: 'Técnica',
-    mensaje: '',
+    correo: "",
+    tipoConsulta: "Técnica",
+    mensaje: "",
   });
   const [usuarioAutenticado, setUsuarioAutenticado] = useState<UsuarioAutenticado | null>(null);
   const [cargandoUsuario, setCargandoUsuario] = useState(true);
@@ -28,11 +28,11 @@ export const useSoporte = () => {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
   const obtenerDatosUsuario = async (): Promise<UsuarioAutenticado | null> => {
-  try {
-  const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`, {
-    method: 'GET',
-    credentials: 'include',
-  });
+    try {
+      const respuesta = await fetch(`${API_URL}/api/auth/profile`, {
+        method: "GET",
+        credentials: "include",
+      });
 
       if (!respuesta.ok) {
         return null;
@@ -78,20 +78,20 @@ export const useSoporte = () => {
 
     if (!validarCorreo(correo)) {
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Por favor, introduce un correo electrónico válido.',
-        confirmButtonColor: '#ef4444',
+        icon: "error",
+        title: "Error",
+        text: "Por favor, introduce un correo electrónico válido.",
+        confirmButtonColor: "#ef4444",
       });
       return;
     }
 
     if (mensaje.trim().length < 10) {
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'El mensaje debe tener al menos 10 caracteres.',
-        confirmButtonColor: '#ef4444',
+        icon: "error",
+        title: "Error",
+        text: "El mensaje debe tener al menos 10 caracteres.",
+        confirmButtonColor: "#ef4444",
       });
       return;
     }
@@ -101,49 +101,47 @@ export const useSoporte = () => {
       tipo_consulta: tipoConsulta,
       mensaje,
       fecha_mensaje: new Date().toISOString(),
-      estado_caso: 'Pendiente',
+      estado_caso: "Pendiente",
     };
 
-  try {
-  const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contacto`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(datosAEnviar),
-    credentials: 'include',
-  });
+    try {
+      const respuesta = await fetch(`${API_URL}/api/contacto`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(datosAEnviar),
+        credentials: "include",
+      });
 
       if (!respuesta.ok) {
         const errorData = await respuesta.json();
         Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text:
-            errorData.message ||
-            'Error al enviar la consulta. Intenta de nuevo más tarde.',
-          confirmButtonColor: '#ef4444',
+          icon: "error",
+          title: "Error",
+          text: errorData.message || "Error al enviar la consulta. Intenta de nuevo más tarde.",
+          confirmButtonColor: "#ef4444",
         });
         return;
       }
 
       Swal.fire({
-        icon: 'success',
-        title: 'Éxito',
-        text: 'Consulta enviada exitosamente.',
-        confirmButtonColor: '#eab308',
+        icon: "success",
+        title: "Éxito",
+        text: "Consulta enviada exitosamente.",
+        confirmButtonColor: "#eab308",
       }).then(() => {
         setDatosContacto({
-          correo: usuarioAutenticado ? usuarioAutenticado.correoElectronico : '',
-          tipoConsulta: 'Técnica',
-          mensaje: '',
+          correo: usuarioAutenticado ? usuarioAutenticado.correoElectronico : "",
+          tipoConsulta: "Técnica",
+          mensaje: "",
         });
-        router.push('/contacto');
+        router.push("/contacto");
       });
     } catch {
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se pudo conectar con el servidor. Verifica tu conexión.',
-        confirmButtonColor: '#ef4444',
+        icon: "error",
+        title: "Error",
+        text: "No se pudo conectar con el servidor. Verifica tu conexión.",
+        confirmButtonColor: "#ef4444",
       });
     }
   };

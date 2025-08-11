@@ -32,14 +32,34 @@ export default function EditarCursoScorm({ curso, onGuardado, onCancelar }: Prop
 
   const handleSubmit = async () => {
     setError(null);
-    setLoading(true);
 
+    // Validaciones básicas
+    if (!titulo.trim()) {
+      setError('El título es obligatorio.');
+      return;
+    }
+    if (!descripcion.trim()) {
+      setError('La descripción es obligatoria.');
+      return;
+    }
+    const precioNum = Number(precio);
+    if (isNaN(precioNum) || precioNum < 0) {
+      setError('Precio inválido.');
+      return;
+    }
+    const duracionNum = Number(duracionHoras);
+    if (isNaN(duracionNum) || duracionNum < 0) {
+      setError('Duración inválida.');
+      return;
+    }
+
+    setLoading(true);
     try {
       const datosActualizados = {
         titulo,
         descripcion,
-        precio: Number(precio),
-        duracionHoras: Number(duracionHoras),
+        precio: precioNum,
+        duracionHoras: duracionNum,
         tipo,
         categoria,
         modalidad,
@@ -47,12 +67,17 @@ export default function EditarCursoScorm({ curso, onGuardado, onCancelar }: Prop
         badgeDisponible,
       };
 
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${curso.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${curso.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(datosActualizados),
         credentials: 'include',
       });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'Error al guardar cambios.');
+      }
 
       onGuardado();
     } catch (e) {

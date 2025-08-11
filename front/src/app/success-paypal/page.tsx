@@ -3,7 +3,6 @@
 import { useEffect, useState, Suspense } from 'react'; 
 import { useSearchParams, useRouter } from 'next/navigation';
 
-
 const SuccessPaypalContent: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -21,19 +20,19 @@ const SuccessPaypalContent: React.FC = () => {
 
     const capturarPago = async () => {
       try {
-       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/pagos/paypal/capture-order`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ orderId }),
-});
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/pagos/paypal/capture-order`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId }),
+        });
+
+        const data = await res.json();
 
         if (!res.ok) {
-          const data = await res.json();
           throw new Error(data.message || 'Error capturando el pago');
         }
 
-        const data = await res.json();
         const cursoId = data.pagoLocal.curso.id; 
         router.replace(`/scorm/${cursoId}`);
 
@@ -52,7 +51,6 @@ const SuccessPaypalContent: React.FC = () => {
 
   return null;
 };
-
 
 const SuccessPaypalPage: React.FC = () => {
   return (

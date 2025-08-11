@@ -6,7 +6,6 @@ import { ConfigService } from '@nestjs/config';
 import { UsuariosService } from '../../services/usuarios/usuarios.service';
 import { Usuario } from '../../entidades/usuario.entity';
 
-// Define la interfaz del payload para asegurar los tipos correctos.
 interface JwtPayload {
   sub?: number;
   id?: number;
@@ -29,10 +28,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          // Primero intenta obtener el token de la cookie
           return request?.cookies?.jwt || null;
         },
-        // Si no está en la cookie, intenta obtenerlo del header 'Bearer'
+   
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       secretOrKey: jwtSecret,
@@ -40,11 +38,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  // El método validate se encarga de validar el payload del token y buscar al usuario.
   async validate(payload: JwtPayload): Promise<Usuario> {
     this.logger.log(`JwtStrategy: Validando payload: ${JSON.stringify(payload)}`);
     
-    // Intenta obtener el ID del usuario de 'sub' o de 'id'.
+
     const userId = payload.sub || payload.id;
 
     if (typeof userId !== 'number') {
@@ -58,9 +55,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       this.logger.warn('JwtStrategy: Error de validación: Usuario no encontrado.');
       throw new UnauthorizedException('Token inválido o usuario no encontrado.');
     }
-    
-    // Devolvemos el objeto `usuario` completo, incluyendo la propiedad `esAdmin`.
-    // Esto es crucial para que los guards posteriores, como RolesGuard, puedan acceder a ella.
+
     return usuario;
   }
 }

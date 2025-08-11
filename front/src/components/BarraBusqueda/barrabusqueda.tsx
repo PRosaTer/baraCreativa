@@ -23,23 +23,42 @@ export default function BarraBusqueda({ className }: BarraBusquedaProps) {
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
 
- useEffect(() => {
-  fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos`)
-    .then((res) => res.json())
-    .then((data) => setData(data));
-}, []);
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos`, {
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Error al cargar cursos");
+        return res.json();
+      })
+      .then((data) => setData(data))
+      .catch((err) => {
+        if (err.name !== "AbortError") console.error("Error en fetch cursos:", err);
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   useEffect(() => {
     const texto = query.toLowerCase();
+    if (!texto) {
+      setResultados([]);
+      setShowDropdown(false);
+      return;
+    }
+
     const filtrados = data.filter(
       (item) =>
         item.titulo.toLowerCase().includes(texto) ||
         item.claseItem.toLowerCase().includes(texto) ||
-        // item.id.toString().includes(texto) ||
         item.duracionHoras.toString().includes(texto)
     );
-    setResultados(texto ? filtrados : []);
-    setShowDropdown(texto.length > 0 && filtrados.length > 0);
+    setResultados(filtrados);
+    setShowDropdown(filtrados.length > 0);
   }, [query, data]);
 
   const manejarRedireccion = (item: Item) => {
@@ -81,6 +100,8 @@ export default function BarraBusqueda({ className }: BarraBusquedaProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
+          aria-label="Buscar curso"
+          autoComplete="off"
         />
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -89,18 +110,26 @@ export default function BarraBusqueda({ className }: BarraBusquedaProps) {
           viewBox="0 0 30 30"
           fill="#6B7280"
           className="w-5 h-5"
+          aria-hidden="true"
+          focusable="false"
         >
           <path d="M 13 3 C 7.4889971 3 3 7.4889971 3 13 C 3 18.511003 7.4889971 23 13 23 C 15.396508 23 17.597385 22.148986 19.322266 20.736328 L 25.292969 26.707031 A 1.0001 1.0001 0 1 0 26.707031 25.292969 L 20.736328 19.322266 C 22.148986 17.597385 23 15.396508 23 13 C 23 7.4889971 18.511003 3 13 3 z M 13 5 C 17.430123 5 21 8.5698774 21 13 C 21 17.430123 17.430123 21 13 21 C 8.5698774 21 5 17.430123 5 13 C 5 8.5698774 8.5698774 5 13 5 z" />
         </svg>
       </div>
 
       {showDropdown && (
-        <ul className="absolute z-10 bg-white w-full border mt-1 rounded-md max-h-60 overflow-auto shadow-md">
+        <ul
+          className="absolute z-10 bg-white w-full border mt-1 rounded-md max-h-60 overflow-auto shadow-md"
+          role="listbox"
+        >
           {resultados.map((item) => (
             <li
               key={item.id}
               onClick={() => manejarRedireccion(item)}
               className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-sm"
+              role="option"
+              tabIndex={-1}
+              aria-selected={false}
             >
               <strong>{item.claseItem.toUpperCase()}</strong> - {item.titulo}
             </li>

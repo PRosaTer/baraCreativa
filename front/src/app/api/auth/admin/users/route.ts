@@ -7,9 +7,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'URL del backend no configurada' }, { status: 500 });
     }
 
-
     const endpointUrl = `${backendUrl}/auth/admin/users`;
-
 
     const cookies = req.headers.get('cookie') || '';
 
@@ -18,7 +16,6 @@ export async function GET(req: NextRequest) {
       headers: {
         'cookie': cookies,
       },
-      credentials: 'include', 
       cache: 'no-store',
     });
 

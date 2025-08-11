@@ -1,5 +1,5 @@
-import { useState, ChangeEvent, FormEvent } from 'react';
-import { CursoForm, Curso, EditableModuloForm, ClaseItem, TipoCurso } from '@/app/types/curso';
+import { useState, ChangeEvent, FormEvent } from "react";
+import { CursoForm, Curso, EditableModuloForm } from "@/app/types/curso";
 
 interface UseCursoFormularioReturn {
   step: number;
@@ -18,29 +18,32 @@ interface UseCursoFormularioReturn {
   setForm: React.Dispatch<React.SetStateAction<CursoForm>>;
 }
 
-export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, routerPush: (path: string) => void): UseCursoFormularioReturn => {
+export const useCursoFormulario = (
+  onGuardar: (curso: Curso) => Promise<void>,
+  routerPush: (path: string) => void
+): UseCursoFormularioReturn => {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<CursoForm>({
-    titulo: '',
-    descripcion: '',
-    precio: '',
-    duracionHoras: '',
-    tipo: '',
-    categoria: '',
+    titulo: "",
+    descripcion: "",
+    precio: "",
+    duracionHoras: "",
+    tipo: "",
+    categoria: "",
     subcategoria: null,
-    modalidad: '',
+    modalidad: "",
     certificadoDisponible: false,
     badgeDisponible: false,
     imagenCurso: null,
     archivoScorm: null,
     modulos: [],
     newScormFile: null,
-    claseItem: '',
+    claseItem: "",
     fechaInicio: null,
   });
 
-  const [error, setError] = useState('');
-  const [exito, setExito] = useState('');
+  const [error, setError] = useState("");
+  const [exito, setExito] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (
@@ -48,20 +51,22 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
   ) => {
     const { name, value, type } = e.target;
 
-    if (type === 'checkbox') {
+    if (type === "checkbox") {
       const target = e.target as HTMLInputElement;
-      setForm(prev => ({
+      setForm((prev) => ({
         ...prev,
         [name]: target.checked,
       }));
       return;
     }
 
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       [name]:
-        (name === 'precio' || name === 'duracionHoras')
-          ? (value === '' ? '' : Number(value))
+        name === "precio" || name === "duracionHoras"
+          ? value === ""
+            ? ""
+            : Number(value)
           : value,
     }));
   };
@@ -72,78 +77,81 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
 
     const file = files[0];
 
-    if (name === 'imagenCurso') {
-      if (!file.type.startsWith('image/')) {
-        setError('Solo imágenes permitidas para la imagen del curso');
-        setForm(prev => ({ ...prev, imagenCurso: null }));
+    if (name === "imagenCurso") {
+      if (!file.type.startsWith("image/")) {
+        setError("Solo imágenes permitidas para la imagen del curso");
+        setForm((prev) => ({ ...prev, imagenCurso: null }));
         return;
       }
-      setForm(prev => ({ ...prev, imagenCurso: file }));
-      setError('');
-    } else if (name === 'archivoScorm') {
-      if (file.type !== 'application/zip' && file.type !== 'application/x-zip-compressed') {
-        setError('Solo archivos .zip permitidos para SCORM');
-        setForm(prev => ({ ...prev, archivoScorm: null }));
+      setForm((prev) => ({ ...prev, imagenCurso: file }));
+      setError("");
+    } else if (name === "archivoScorm") {
+      if (file.type !== "application/zip" && file.type !== "application/x-zip-compressed") {
+        setError("Solo archivos .zip permitidos para SCORM");
+        setForm((prev) => ({ ...prev, archivoScorm: null }));
         return;
       }
-      setForm(prev => ({ ...prev, archivoScorm: file }));
-      setError('');
+      setForm((prev) => ({ ...prev, archivoScorm: file }));
+      setError("");
     }
   };
 
   const handleAddModulo = () => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      modulos: [...prev.modulos, {
-        id: Date.now(),
-        titulo: `Módulo ${prev.modulos.length + 1}`,
-        descripcion: null,
-        videoUrl: null,
-        pdfUrl: null,
-        imageUrl: null,
-        videoFile: null,
-        pdfFile: null,
-        imageFile: null
-      }],
+      modulos: [
+        ...prev.modulos,
+        {
+          id: Date.now(),
+          titulo: `Módulo ${prev.modulos.length + 1}`,
+          descripcion: null,
+          videoUrl: null,
+          pdfUrl: null,
+          imageUrl: null,
+          videoFile: [],
+          pdfFile: [],
+          imageFile: [],
+        },
+      ],
     }));
   };
 
   const handleRemoveModulo = (index: number) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       modulos: prev.modulos.filter((_, i) => i !== index),
     }));
   };
 
   const handleModuloTitleChange = (index: number, value: string) => {
-    setForm(prev => {
+    setForm((prev) => {
       const newModulos: EditableModuloForm[] = [...prev.modulos];
       newModulos[index] = { ...newModulos[index], titulo: value };
       return { ...prev, modulos: newModulos };
     });
   };
 
-  const nextStep = () => setStep(prev => prev + 1);
-  const prevStep = () => setStep(prev => prev - 1);
+  const nextStep = () => setStep((prev) => prev + 1);
+  const prevStep = () => setStep((prev) => prev - 1);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
-    setExito('');
+    setError("");
+    setExito("");
     setLoading(true);
 
-    if (form.claseItem === '') {
-      setError('Por favor, selecciona una Clase de Ítem.');
+    if (form.claseItem === "") {
+      setError("Por favor, selecciona una Clase de Ítem.");
       setLoading(false);
       return;
     }
-    if (form.tipo === '') {
-      setError('Por favor, selecciona un Tipo de Curso.');
+    if (form.tipo === "") {
+      setError("Por favor, selecciona un Tipo de Curso.");
       setLoading(false);
       return;
     }
-    if (form.modalidad === '') {
-      setError('Por favor, selecciona una Modalidad.');
+    if (form.modalidad === "") {
+      setError("Por favor, selecciona una Modalidad.");
       setLoading(false);
       return;
     }
@@ -162,55 +170,61 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
         badgeDisponible: form.badgeDisponible,
         claseItem: form.claseItem,
         fechaInicio: form.fechaInicio,
-        modulos: form.modulos.map(m => ({ titulo: m.titulo, descripcion: m.descripcion || null })),
+        modulos: form.modulos.map((m) => ({
+          titulo: m.titulo,
+          descripcion: m.descripcion || null,
+        })),
       };
 
       const resCurso = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(cursoDataToCreate),
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!resCurso.ok) {
         const errData = await resCurso.json();
-        throw new Error(errData.message || 'Error al crear el curso');
+        throw new Error(errData.message || "Error al crear el curso");
       }
       const newCurso: Curso = await resCurso.json();
       const cursoId = newCurso.id;
 
       if (form.imagenCurso instanceof File) {
         const formDataImagen = new FormData();
-        formDataImagen.append('imagen', form.imagenCurso);
+        formDataImagen.append("imagen", form.imagenCurso);
         const resImg = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoId}/imagen`, {
-          method: 'POST',
+          method: "POST",
           body: formDataImagen,
-          credentials: 'include',
+          credentials: "include",
         });
         if (!resImg.ok) {
           const errData = await resImg.json();
-          console.error('Error al subir imagen del curso:', errData);
-          throw new Error(errData.message || 'Error al subir imagen del curso');
+          console.error("Error al subir imagen del curso:", errData);
+          throw new Error(errData.message || "Error al subir imagen del curso");
         }
       }
 
       if (form.archivoScorm instanceof File) {
         const formDataScorm = new FormData();
-        formDataScorm.append('scormFile', form.archivoScorm);
-        formDataScorm.append('cursoId', cursoId.toString());
+        formDataScorm.append("scormFile", form.archivoScorm);
+        formDataScorm.append("cursoId", cursoId.toString());
         const resScorm = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/scorm_unzipped_courses`, {
-          method: 'POST',
+          method: "POST",
           body: formDataScorm,
-          credentials: 'include',
+          credentials: "include",
         });
         if (!resScorm.ok) {
           const errData = await resScorm.json();
-          console.error('Error al subir archivo SCORM:', errData);
-          throw new Error(errData.message || 'Error al subir archivo SCORM');
+          console.error("Error al subir archivo SCORM:", errData);
+          throw new Error(errData.message || "Error al subir archivo SCORM");
         }
       }
 
-      const updatedCursoWithModulos = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoId}`, { credentials: 'include' }).then(res => res.json());
+      const updatedCursoWithModulos = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoId}`,
+        { credentials: "include" }
+      ).then((res) => res.json());
 
       for (let i = 0; i < updatedCursoWithModulos.modulos.length; i++) {
         const moduloBackend = updatedCursoWithModulos.modulos[i];
@@ -220,39 +234,41 @@ export const useCursoFormulario = (onGuardar: (curso: Curso) => Promise<void>, r
         const formDataModuleFiles = new FormData();
         let filesAttached = false;
 
-
         if (moduloForm.videoFile && moduloForm.videoFile.length > 0) {
-          moduloForm.videoFile.forEach(file => formDataModuleFiles.append('files', file));
+          moduloForm.videoFile.forEach((file) => formDataModuleFiles.append("files", file));
           filesAttached = true;
         }
         if (moduloForm.pdfFile && moduloForm.pdfFile.length > 0) {
-          moduloForm.pdfFile.forEach(file => formDataModuleFiles.append('files', file));
+          moduloForm.pdfFile.forEach((file) => formDataModuleFiles.append("files", file));
           filesAttached = true;
         }
         if (moduloForm.imageFile && moduloForm.imageFile.length > 0) {
-          moduloForm.imageFile.forEach(file => formDataModuleFiles.append('files', file));
+          moduloForm.imageFile.forEach((file) => formDataModuleFiles.append("files", file));
           filesAttached = true;
         }
         if (filesAttached) {
-          const resModuleFiles = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/modulos/${moduloId}/files`, {
-            method: 'POST',
-            body: formDataModuleFiles,
-            credentials: 'include',
-          });
+          const resModuleFiles = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/cursos/modulos/${moduloId}/files`,
+            {
+              method: "POST",
+              body: formDataModuleFiles,
+              credentials: "include",
+            }
+          );
 
           if (!resModuleFiles.ok) {
             const errData = await resModuleFiles.json();
-            console.error(`Error al subir archivos para el módulo ${moduloId}:`, errData.message || 'Error desconocido');
+            console.error(`Error al subir archivos para el módulo ${moduloId}:`, errData.message || "Error desconocido");
           }
         }
       }
 
-      setExito('Curso creado y archivos subidos correctamente');
+      setExito("Curso creado y archivos subidos correctamente");
       await onGuardar(newCurso);
-      routerPush('/perfil');
+      routerPush("/perfil");
     } catch (error) {
       if (error instanceof Error) setError(error.message);
-      else setError('Error inesperado');
+      else setError("Error inesperado");
     } finally {
       setLoading(false);
     }

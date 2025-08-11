@@ -10,6 +10,8 @@ interface UseCursoFormProps {
 }
 
 export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
+  const backendBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? '';
+
   const [form, setForm] = useState<CursoForm>(() => ({
     titulo: curso?.titulo || '',
     descripcion: curso?.descripcion || '',
@@ -85,9 +87,7 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
 
     setForm((prev) => ({
       ...prev,
-      [name]: name === 'precio' || name === 'duracionHoras'
-        ? (value === '' ? '' : Number(value))
-        : value,
+      [name]: name === 'precio' || name === 'duracionHoras' ? (value === '' ? '' : Number(value)) : value,
     }));
   };
 
@@ -120,10 +120,7 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
   const handleAddModulo = () => {
     setForm((prev) => ({
       ...prev,
-      modulos: [
-        ...prev.modulos,
-        { titulo: '', descripcion: null, videoFile: null, pdfFile: null, imageFile: null },
-      ],
+      modulos: [...prev.modulos, { titulo: '', descripcion: null, videoFile: null, pdfFile: null, imageFile: null }],
     }));
     setModuloFiles((prev) => [...prev, {}]);
   };
@@ -136,11 +133,7 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
     setModuloFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleModuloChange = (
-    index: number,
-    field: 'titulo' | 'descripcion',
-    value: string
-  ) => {
+  const handleModuloChange = (index: number, field: 'titulo' | 'descripcion', value: string) => {
     setForm((prev) => {
       const newModulos = [...prev.modulos];
       newModulos[index] = {
@@ -167,11 +160,15 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
     e.preventDefault();
     setError('');
     setExito('');
+
+    if (!backendBaseUrl) {
+      setError('Error: URL del backend no configurada.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Se ha eliminado la variable 'baseUrl' ya que no se estaba utilizando.
-
       const baseData = {
         titulo: form.titulo,
         descripcion: form.descripcion,
@@ -216,22 +213,28 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
       let nuevoCurso: Curso;
 
       if (curso) {
-        const resUpdate = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${curso.id}`, {
+        const resUpdate = await fetch(`${backendBaseUrl}/api/cursos/${curso.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(courseDataForApi),
           credentials: 'include',
         });
-        if (!resUpdate.ok) throw new Error((await resUpdate.json()).message || 'Error al actualizar ítem');
+        if (!resUpdate.ok) {
+          const errorData = await resUpdate.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Error al actualizar ítem');
+        }
         nuevoCurso = await resUpdate.json();
       } else {
-        const resCreate = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos`, {
+        const resCreate = await fetch(`${backendBaseUrl}/api/cursos`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(courseDataForApi),
           credentials: 'include',
         });
-        if (!resCreate.ok) throw new Error((await resCreate.json()).message || 'Error al crear ítem');
+        if (!resCreate.ok) {
+          const errorData = await resCreate.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Error al crear ítem');
+        }
         nuevoCurso = await resCreate.json();
       }
 
@@ -240,24 +243,30 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
         formDataScorm.append('scormFile', form.newScormFile);
         formDataScorm.append('cursoId', nuevoCurso.id.toString());
 
-        const resScorm = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/scorm_unzipped_courses`, {
+        const resScorm = await fetch(`${backendBaseUrl}/api/cursos/scorm_unzipped_courses`, {
           method: 'POST',
           body: formDataScorm,
           credentials: 'include',
         });
 
-        if (!resScorm.ok) throw new Error((await resScorm.json()).message || 'Error al subir archivo SCORM');
+        if (!resScorm.ok) {
+          const errorData = await resScorm.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Error al subir archivo SCORM');
+        }
       }
 
       if (form.imagenCurso instanceof File) {
         const formDataImagen = new FormData();
         formDataImagen.append('imagen', form.imagenCurso);
-        const resImg = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${nuevoCurso.id}/imagen`, {
+        const resImg = await fetch(`${backendBaseUrl}/api/cursos/${nuevoCurso.id}/imagen`, {
           method: 'POST',
           body: formDataImagen,
           credentials: 'include',
         });
-        if (!resImg.ok) throw new Error((await resImg.json()).message || 'Error al subir imagen del ítem');
+        if (!resImg.ok) {
+          const errorData = await resImg.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Error al subir imagen del ítem');
+        }
       }
 
       if (form.claseItem === ClaseItem.CURSO) {
@@ -285,7 +294,7 @@ export const useCursoForm = ({ curso, onGuardar }: UseCursoFormProps) => {
             }
 
             if (fileUploaded) {
-              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/modulos/${currentModulo.id}/files`, {
+              const res = await fetch(`${backendBaseUrl}/api/modulos/${currentModulo.id}/files`, {
                 method: 'POST',
                 body: moduleFormData,
                 credentials: 'include',

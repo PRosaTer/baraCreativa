@@ -12,28 +12,33 @@ export default function useEditarUsuarioAdmin(
   const [tipoUsuario, setTipoUsuario] = useState<Usuario['tipoUsuario']>(usuario.tipoUsuario);
   const [nombreCompleto, setNombreCompleto] = useState(usuario.nombreCompleto);
   const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const telefonoRef = useRef<HTMLInputElement>(null);
 
   const handleGuardar = async () => {
     setGuardando(true);
+    setError(null);
     try {
-     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/${usuario.id}`, {
-    method: 'PATCH',
-    credentials: 'include',
-    headers: {
-        'Content-Type': 'application/json',
-    },
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/${usuario.id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ telefono, tipoUsuario, nombreCompleto }),
       });
 
-      if (!res.ok) throw new Error('Error al actualizar');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        throw new Error(errData?.message || 'Error al actualizar');
+      }
 
       const actualizado: Usuario = await res.json();
       onActualizar(actualizado);
       onCerrar();
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      if (e instanceof Error) setError(e.message);
+      else setError('Error inesperado');
+      console.error(e);
     } finally {
       setGuardando(false);
     }
@@ -69,6 +74,7 @@ export default function useEditarUsuarioAdmin(
     tipoUsuario,
     nombreCompleto,
     guardando,
+    error,
     telefonoRef,
     setTelefono,
     setTipoUsuario,
