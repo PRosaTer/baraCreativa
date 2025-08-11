@@ -19,7 +19,6 @@ export default function ServicioDetalle() {
   useEffect(() => {
     async function fetchDatos() {
       try {
-
         const resServicio = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${servicioId}`, {
           credentials: 'include',
         });
@@ -35,7 +34,6 @@ export default function ServicioDetalle() {
 
         setServicio(dataServicio);
 
-
         const resUsuario = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/me`, {
           credentials: 'include',
         });
@@ -43,9 +41,9 @@ export default function ServicioDetalle() {
         const usuario = await resUsuario.json();
         setUsuarioId(usuario.id);
 
-        setLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido al cargar el servicio');
+      } finally {
         setLoading(false);
       }
     }
@@ -95,7 +93,6 @@ export default function ServicioDetalle() {
         throw new Error(errData.message || 'Error al capturar el pago');
       }
 
-
       router.push(`/servicios/${servicioId}`);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Error desconocido');
@@ -105,6 +102,25 @@ export default function ServicioDetalle() {
   if (loading) return <p className="text-center text-lg mt-8 text-gray-700">Cargando servicio...</p>;
   if (error) return <p className="text-red-600 text-center mt-8">{error}</p>;
 
+  if (!servicio) return null; 
+
+  const {
+    titulo,
+    precio,
+    certificadoDisponible,
+    badgeDisponible,
+    claseItem,
+    archivoScorm,
+    modalidad,
+    duracionHoras,
+    tipo,
+    categoria,
+    fechaInicio,
+    descripcion,
+    imagenCurso,
+    modulos,
+  } = servicio;
+
   return (
     <div
       className="p-6 md:p-8 lg:p-10 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700
@@ -112,19 +128,19 @@ export default function ServicioDetalle() {
                    mx-auto my-8 md:my-12"
     >
       <h1 className="mb-4 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-purple-300 text-center">
-        {servicio?.titulo}
+        {titulo}
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6 items-start">
         <div className="flex flex-col">
           <div className="mb-6">
             <p className="font-bold text-base sm:text-lg text-green-400 mb-2">
-              💲 Precio: ${servicio?.precio}
+              💲 Precio: ${precio}
             </p>
 
             <p className="text-sm sm:text-base mb-1">
               Certificado:{' '}
-              {servicio?.certificadoDisponible ? (
+              {certificadoDisponible ? (
                 <span className="text-emerald-400">✅ Disponible</span>
               ) : (
                 <span className="text-red-400">❌ No disponible</span>
@@ -132,33 +148,33 @@ export default function ServicioDetalle() {
             </p>
             <p className="text-sm sm:text-base mb-1">
               Badge:{' '}
-              {servicio?.badgeDisponible ? (
+              {badgeDisponible ? (
                 <span className="text-emerald-400">✅ Disponible</span>
               ) : (
                 <span className="text-red-400">❌ No disponible</span>
               )}
             </p>
 
-            {servicio?.claseItem === ClaseItem.CURSO && (
+            {claseItem === ClaseItem.CURSO && (
               <>
                 <p className="text-sm sm:text-base mb-4">
                   Archivo Scorm:{' '}
-                  {servicio?.archivoScorm ? (
+                  {archivoScorm ? (
                     <span className="text-emerald-400">✅ Disponible</span>
                   ) : (
                     <span className="text-red-400">❌ No disponible</span>
                   )}
                 </p>
-                <p className="text-sm sm:text-base mb-1">Modalidad: <span className="font-bold">{servicio?.modalidad}</span></p>
-                <p className="text-sm sm:text-base mb-4">Horas: <span className="font-bold">{servicio?.duracionHoras}</span></p>
+                <p className="text-sm sm:text-base mb-1">Modalidad: <span className="font-bold">{modalidad}</span></p>
+                <p className="text-sm sm:text-base mb-4">Horas: <span className="font-bold">{duracionHoras}</span></p>
               </>
             )}
 
-            <p className="text-sm sm:text-base mb-1">Tipo: <span className="font-bold">{servicio?.tipo}</span></p>
-            <p className="text-sm sm:text-base mb-1">Categoría: <span className="font-bold">{servicio?.categoria ?? 'Sin categoría'}</span></p>
-            {servicio?.fechaInicio && (
+            <p className="text-sm sm:text-base mb-1">Tipo: <span className="font-bold">{tipo}</span></p>
+            <p className="text-sm sm:text-base mb-1">Categoría: <span className="font-bold">{categoria ?? 'Sin categoría'}</span></p>
+            {fechaInicio && (
               <p className="text-sm sm:text-base mb-4">
-                Fecha de Inicio: <span className="font-bold">{servicio.fechaInicio.toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                Fecha de Inicio: <span className="font-bold">{fechaInicio.toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
               </p>
             )}
           </div>
@@ -169,31 +185,30 @@ export default function ServicioDetalle() {
               className="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg
                           transition-all duration-300 hover:shadow-2xl hover:border-purple-500"
             >
-              <p className="m-0 text-lg sm:text-xl font-semibold text-purple-100 mb-5">{servicio?.descripcion}</p>
+              <p className="m-0 text-lg sm:text-xl font-semibold text-purple-100 mb-5">{descripcion}</p>
             </div>
           </div>
         </div>
 
         <div className="flex flex-col">
-          {servicio?.imagenCurso && typeof servicio.imagenCurso === 'string' && (
+          {imagenCurso && typeof imagenCurso === 'string' && (
             <div className="w-full flex justify-center md:justify-start mb-6">
               <img
-                src={servicio.imagenCurso}
-                alt={`Imagen de ${servicio.titulo}`}
+                src={imagenCurso}
+                alt={`Imagen de ${titulo}`}
                 className="max-w-full h-auto object-contain rounded-xl shadow-lg md:max-h-96 w-auto"
               />
             </div>
           )}
 
-
-          {servicio?.claseItem === ClaseItem.CURSO && (
+          {claseItem === ClaseItem.CURSO && (
             <div>
               <h3 className="text-xl sm:text-2xl font-bold text-purple-200 mb-3">Módulos:</h3>
               <div
                 className="grid grid-cols-1 gap-4 w-full"
               >
-                {servicio?.modulos && servicio.modulos.length > 0 ? (
-                  servicio.modulos.map((modulo) => (
+                {modulos && modulos.length > 0 ? (
+                  modulos.map((modulo) => (
                     <div
                       key={modulo.id}
                       className="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg
@@ -222,7 +237,7 @@ export default function ServicioDetalle() {
           <PayPalButtons
             createOrder={() => crearOrden()}
             onApprove={onApprove}
-            onError={(err) => {
+            onError={(err: unknown) => {
               console.error('Error en PayPal:', err);
               setError('Hubo un problema con PayPal');
             }}

@@ -1,15 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import type { OnApproveData } from '@paypal/paypal-js/types/components/buttons';
 import { Curso } from '@/app/types/curso';
-
-
-// Se eliminan las URLs hardcodeadas ya que se usa una variable de entorno.
-// const API_BASE_URL = 'http://localhost:3001';
-// const PAYPAL_API_BASE_URL = 'http://localhost:3001/pagos/paypal';
 
 interface UseDatosCursoResult {
   curso: Curso | null;
@@ -28,21 +23,23 @@ export function useDatosCurso(): UseDatosCursoResult {
   const [usuarioId, setUsuarioId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+  const redirectTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchDatos = async () => {
+      setLoading(true);
       try {
         const resCurso = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoId}`, {
           credentials: 'include',
         });
 
         if (resCurso.status === 401) {
-          toast.error('Necesitas iniciar sesión o registrarte para continuar.', {
-            duration: 3000,
-          });
-          setTimeout(() => {
-            router.push('/login');
-          }, 3000);
+          if (!cancelled) {
+            toast.error('Necesitas iniciar sesión o registrarte para continuar.', { duration: 3000 });
+            redirectTimeout.current = setTimeout(() => router.push('/login'), 3000);
+          }
           return;
         }
 
@@ -51,21 +48,19 @@ export function useDatosCurso(): UseDatosCursoResult {
         }
 
         const dataCurso: Curso = await resCurso.json();
-        dataCurso.precio = parseFloat(dataCurso.precio as unknown as string);
+        dataCurso.precio = parseFloat(String(dataCurso.precio)) || 0;
         dataCurso.fechaInicio = dataCurso.fechaInicio ? new Date(dataCurso.fechaInicio) : null;
-        setCurso(dataCurso);
+        if (!cancelled) setCurso(dataCurso);
 
         const resUsuario = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/me`, {
           credentials: 'include',
         });
 
         if (resUsuario.status === 401) {
-          toast.error('Necesitas iniciar sesión o registrarte para continuar.', {
-            duration: 3000,
-          });
-          setTimeout(() => {
-            router.push('/login');
-          }, 3000);
+          if (!cancelled) {
+            toast.error('Necesitas iniciar sesión o registrarte para continuar.', { duration: 3000 });
+            redirectTimeout.current = setTimeout(() => router.push('/login'), 3000);
+          }
           return;
         }
 
@@ -74,23 +69,34 @@ export function useDatosCurso(): UseDatosCursoResult {
         }
 
         const usuario = await resUsuario.json();
-        setUsuarioId(usuario.id);
-
+        if (!cancelled) setUsuarioId(usuario.id);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error desconocido al cargar los datos.');
-        toast.error('Error al cargar la información del programa. Intenta de nuevo más tarde.');
+        if (!cancelled) {
+          const message = err instanceof Error ? err.message : 'Error desconocido al cargar los datos.';
+          setError(message);
+          toast.error('Error al cargar la información del programa. Intenta de nuevo más tarde.');
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchDatos();
+
+    return () => {
+      cancelled = true;
+      if (redirectTimeout.current) clearTimeout(redirectTimeout.current);
+    };
   }, [cursoId, router]);
 
   const crearOrden = useCallback(async (): Promise<string> => {
     if (!usuarioId) {
       toast.error('Usuario no autenticado para crear la orden.');
       throw new Error('Usuario no autenticado');
+    }
+    if (!cursoId) {
+      toast.error('ID del curso inválido.');
+      throw new Error('ID de curso inválido');
     }
 
     try {
@@ -120,11 +126,16 @@ export function useDatosCurso(): UseDatosCursoResult {
   }, [usuarioId, cursoId]);
 
   const onApprove = useCallback(async (data: OnApproveData) => {
-    try {
-      if (!usuarioId) {
-        toast.error('Usuario no autenticado para completar el pago.');
-      }
+    if (!usuarioId) {
+      toast.error('Usuario no autenticado para completar el pago.');
+      return;
+    }
+    if (!data.orderID) {
+      toast.error('ID de orden inválido.');
+      return;
+    }
 
+    try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/pagos/capture-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -132,7 +143,6 @@ export function useDatosCurso(): UseDatosCursoResult {
         body: JSON.stringify({
           orderId: data.orderID,
         }),
-
       });
 
       if (!res.ok) {
@@ -144,7 +154,8 @@ export function useDatosCurso(): UseDatosCursoResult {
       toast.success('¡Pago completado con éxito! Aguarda que vas a ser redirigido.');
       router.push(`/cursos/${cursoId}/scorm`);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Error desconocido al finalizar el pago.');
+      const message = error instanceof Error ? error.message : 'Error desconocido al finalizar el pago.';
+      setError(message);
       toast.error('Hubo un problema al procesar tu pago. Por favor, contacta a soporte.');
     }
   }, [usuarioId, router, cursoId]);

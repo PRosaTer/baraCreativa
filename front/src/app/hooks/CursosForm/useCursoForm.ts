@@ -1,17 +1,21 @@
 "use client";
 
-import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import { Curso, EditableModuloForm, CursoForm, TipoCurso, ClaseItem } from '@/app/types/curso';
+import { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import { Curso } from "../../types/curso";
+import { EditableModuloForm, CursoForm, TipoCurso, ClaseItem } from "@/app/types/curso";
 
-export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curso: Curso) => void) {
+export default function useCursoForm(
+  cursoInicial?: Curso,
+  onCursoCreado?: (curso: Curso) => void
+) {
   const [datos, setDatos] = useState<CursoForm>({
-    titulo: '',
-    descripcion: '',
+    titulo: "",
+    descripcion: "",
     tipo: TipoCurso.DOCENTES,
-    categoria: '',
+    categoria: "",
     duracionHoras: 1,
     precio: 0,
-    modalidad: 'en vivo',
+    modalidad: "en vivo",
     certificadoDisponible: false,
     badgeDisponible: false,
     imagenCurso: null,
@@ -20,6 +24,7 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
   });
 
   const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [imagenPreview, setImagenPreview] = useState<string | null>(null);
 
   useEffect(() => {
@@ -51,17 +56,20 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
       });
 
       if (cursoInicial.imagenCurso) {
-        // Corrección: Usamos la variable de entorno para la URL
-        setImagenPreview(`${process.env.NEXT_PUBLIC_API_URL}/uploads/imagenes-cursos/${cursoInicial.imagenCurso}`);
+        setImagenPreview(
+          `${process.env.NEXT_PUBLIC_API_URL}/uploads/imagenes-cursos/${cursoInicial.imagenCurso}`
+        );
       }
     }
   }, [cursoInicial]);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value, type } = e.target;
-    if (type === 'checkbox') {
+    if (type === "checkbox") {
       setDatos((prev) => ({ ...prev, [name]: (e.target as HTMLInputElement).checked }));
-    } else if (type === 'number') {
+    } else if (type === "number") {
       setDatos((prev) => ({ ...prev, [name]: Number(value) }));
     } else {
       setDatos((prev) => ({ ...prev, [name]: value }));
@@ -86,7 +94,7 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
       modulos: [
         ...prev.modulos,
         {
-          titulo: '',
+          titulo: "",
           descripcion: null,
           videoFile: null,
           pdfFile: null,
@@ -99,11 +107,6 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
     }));
   };
 
-  /**
-   * @param index
-   * @param field 
-   * @param value 
-   */
   const handleModuloChange = <K extends keyof EditableModuloForm>(
     index: number,
     field: K,
@@ -122,7 +125,22 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    setError(null);
     setGuardando(true);
+
+    if (!datos.titulo.trim()) {
+      setError("El título es obligatorio");
+      setGuardando(false);
+      return;
+    }
+
+    if (!datos.descripcion.trim()) {
+      setError("La descripción es obligatoria");
+      setGuardando(false);
+      return;
+    }
+
     try {
       const cursoData = {
         titulo: datos.titulo,
@@ -147,34 +165,37 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
       let res;
       if (cursoInicial && cursoInicial.id) {
         res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoInicial.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(cursoData),
-          credentials: 'include',
+          credentials: "include",
         });
       } else {
         res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(cursoData),
-          credentials: 'include',
+          credentials: "include",
         });
       }
 
-      if (!res.ok) throw new Error('Error guardando curso');
+      if (!res.ok) throw new Error("Error guardando curso");
 
       const cursoGuardado: Curso = await res.json();
 
-      if (datos.imagenCurso && typeof datos.imagenCurso !== 'string') {
+      if (datos.imagenCurso && typeof datos.imagenCurso !== "string") {
         const formData = new FormData();
-        formData.append('imagen', datos.imagenCurso);
+        formData.append("imagen", datos.imagenCurso);
 
-        const resImg = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoGuardado.id}/imagen`, {
-          method: 'POST',
-          body: formData,
-          credentials: 'include',
-        });
-        if (!resImg.ok) throw new Error('Error subiendo imagen');
+        const resImg = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/cursos/${cursoGuardado.id}/imagen`,
+          {
+            method: "POST",
+            body: formData,
+            credentials: "include",
+          }
+        );
+        if (!resImg.ok) throw new Error("Error subiendo imagen");
 
         const jsonImg = await resImg.json();
         onCursoCreado && onCursoCreado(jsonImg.curso);
@@ -184,8 +205,7 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
       onCursoCreado && onCursoCreado(cursoGuardado);
     } catch (error) {
       console.error(error);
-      // Reemplazamos alert() por una consola de registro
-      console.error('Error guardando el curso');
+      setError(error instanceof Error ? error.message : "Error guardando el curso");
     } finally {
       setGuardando(false);
     }
@@ -194,6 +214,7 @@ export default function useCursoForm(cursoInicial?: Curso, onCursoCreado?: (curs
   return {
     datos,
     guardando,
+    error,
     imagenPreview,
     handleChange,
     handleFileChange,

@@ -6,9 +6,12 @@ export const useCatBadgeStatus = (userId: number | null) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
   useEffect(() => {
     if (!userId) {
       setLoading(false);
+      setStatus(null);
       return;
     }
 
@@ -16,8 +19,13 @@ export const useCatBadgeStatus = (userId: number | null) => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/logros/cat-badge`, {
-          credentials: 'include',
+        const url = `${API_URL}/api/logros/cat-badge${userId ? `?userId=${userId}` : ""}`;
+        const res = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
         });
 
         if (!res.ok) {
@@ -38,7 +46,7 @@ export const useCatBadgeStatus = (userId: number | null) => {
     };
 
     fetchBadgeStatus();
-  }, [userId]);
+  }, [userId, API_URL]);
 
   return { status, loading, error };
 };

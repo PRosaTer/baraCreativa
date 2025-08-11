@@ -4,8 +4,7 @@ import { useParams } from 'next/navigation';
 import { ToastContainer } from 'react-toastify';
 import React, { useState, useEffect } from 'react';
 
-// Importa la interfaz centralizada para asegurar la coherencia de tipos
-import { useCursoScorm, EstadoModuloUsuario } from '@/app/hooks/Scorm/useCursoScorm';
+import { useCursoScorm } from '@/app/hooks/Scorm/useCursoScorm';
 import { Curso } from '@/app/types/curso';
 
 import BarraProgreso from '@/components/Scorm/BarraProgreso';
@@ -15,101 +14,97 @@ import Navegacion from '@/components/Scorm/Navegacion';
 import ContenedorContenido from '@/components/Scorm/ContenedorContenido';
 
 export default function ScormPage() {
-    const params = useParams();
-    const cursoId = params.id as string;
+  const params = useParams();
+  const cursoId = params.id as string;
 
-    const [curso, setCurso] = useState<Curso | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [curso, setCurso] = useState<Curso | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    // Efecto para cargar los datos del curso desde la API
-    useEffect(() => {
-        const fetchCursoData = async () => {
-            try {
-                setLoading(true);
-                // URL de tu API para obtener el curso
-                const response = await fetch(`/api/cursos/${cursoId}`);
-                if (!response.ok) {
-                    throw new Error('Error al obtener el curso');
-                }
-                const data: Curso = await response.json();
-                setCurso(data);
-                setError(null);
-            } catch (err: unknown) { // Se corrige el tipo 'any' a 'unknown'
-                console.error(err);
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError('Ocurrió un error desconocido.');
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchCursoData();
-    }, [cursoId]);
+  useEffect(() => {
+    const fetchCursoData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/cursos/${cursoId}`, {
+          credentials: 'include',
+        });
+        if (!response.ok) {
+          throw new Error('Error al obtener el curso');
+        }
+        const data: Curso = await response.json();
+        setCurso(data);
+        setError(null);
+      } catch (err: unknown) {
+        console.error(err);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('Ocurrió un error desconocido.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCursoData();
+  }, [cursoId]);
 
-    // Usa el hook SOLO cuando los datos están cargados
-    const {
-        modulosEstadoUsuario,
-        currentModuleIndex,
-        cursoCompletadoGeneral,
-        handleNavigation,
-        handleModuleClick,
-        progresoGeneral,
-        currentModule,
-        currentContentUrl,
-        // Se corrigen los nombres de las propiedades desestructuradas
-        disablePrev,
-        disableNext,
-    } = useCursoScorm(curso?.modulos || []); // Pasa los módulos cargados
 
-    // Mensajes de estado
-    if (loading) return <p className="text-center mt-8 text-lg text-gray-700">Cargando curso y módulos...</p>;
-    if (error) return <p className="text-red-600 text-center mt-8 text-lg font-bold">Error al cargar el curso: {error}</p>;
-    if (!curso) return <p className="text-center mt-8 text-lg text-gray-700">No hay contenido disponible para este curso.</p>;
-    if (!currentModule) return <p className="text-center mt-8 text-lg text-gray-700">No hay contenido disponible para este módulo.</p>;
+  const {
+    modulosEstadoUsuario,
+    currentModuleIndex,
+    cursoCompletadoGeneral,
+    handleNavigation,
+    handleModuleClick,
+    progresoGeneral,
+    currentModule,
+    currentContentUrl,
+    disablePrev,
+    disableNext,
+  } = useCursoScorm(curso?.modulos || []);
 
-    // Aseguramos que la propiedad `tipo` no sea `null` antes de pasarla al componente
-    const tipoContenido = currentModule.tipo !== null ? currentModule.tipo : 'texto';
-    const contenidoTexto = currentModule.tipo === 'texto' ? currentModule.descripcion : undefined;
+  if (loading) return <p className="text-center mt-8 text-lg text-gray-700">Cargando curso y módulos...</p>;
+  if (error) return <p className="text-red-600 text-center mt-8 text-lg font-bold">Error al cargar el curso: {error}</p>;
+  if (!curso) return <p className="text-center mt-8 text-lg text-gray-700">No hay contenido disponible para este curso.</p>;
+  if (!currentModule) return <p className="text-center mt-8 text-lg text-gray-700">No hay contenido disponible para este módulo.</p>;
 
-    return (
-        <>
-            <div className="flex flex-col lg:flex-row h-screen bg-gray-100 p-4 gap-4">
-                <div className="lg:w-1/4 bg-white rounded-lg shadow-lg p-6 flex flex-col overflow-hidden">
-                    <h2 className="text-2xl font-bold mb-4 text-gray-800">Módulos del Curso</h2>
-                    <BarraProgreso progreso={progresoGeneral} />
-                    <ListaModulos
-                        modulos={modulosEstadoUsuario}
-                        currentModuleIndex={currentModuleIndex}
-                        onModuleClick={handleModuleClick}
-                    />
-                </div>
+  const tipoContenido = currentModule.tipo !== null ? currentModule.tipo : 'texto';
+  const contenidoTexto = currentModule.tipo === 'texto' ? currentModule.descripcion : undefined;
 
-                <div className="lg:w-3/4 bg-white rounded-lg shadow-lg p-6 flex flex-col">
-                    <MensajeFinal mostrar={cursoCompletadoGeneral} />
+  return (
+    <>
+      <div className="flex flex-col lg:flex-row h-screen bg-gray-100 p-4 gap-4">
+        <div className="lg:w-1/4 bg-white rounded-lg shadow-lg p-6 flex flex-col overflow-hidden">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">Módulos del Curso</h2>
+          <BarraProgreso progreso={progresoGeneral} />
+          <ListaModulos
+            modulos={modulosEstadoUsuario}
+            currentModuleIndex={currentModuleIndex}
+            onModuleClick={handleModuleClick}
+          />
+        </div>
 
-                    <h1 className="text-3xl font-bold mb-4 text-gray-900">{currentModule.titulo}</h1>
-                    {/* Se corrige la propiedad a currentModule.descripcion */}
-                    <p className="text-gray-600 mb-6">{currentModule.descripcion}</p>
+        <div className="lg:w-3/4 bg-white rounded-lg shadow-lg p-6 flex flex-col">
+          <MensajeFinal mostrar={cursoCompletadoGeneral} />
 
-                    <div className="flex-grow flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
-                        <ContenedorContenido
-                            tipo={tipoContenido} // Se asegura que el tipo no sea null
-                            urlContenido={currentContentUrl}
-                            contenidoTexto={contenidoTexto} // Se corrige la propiedad
-                        />
-                    </div>
+          <h1 className="text-3xl font-bold mb-4 text-gray-900">{currentModule.titulo}</h1>
+          <p className="text-gray-600 mb-6">{currentModule.descripcion}</p>
 
-                    <Navegacion
-                        onNavigate={handleNavigation}
-                        disablePrev={disablePrev}
-                        disableNext={disableNext}
-                    />
-                </div>
-            </div>
-            <ToastContainer />
-        </>
-    );
+          <div className="flex-grow flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
+            <ContenedorContenido
+              tipo={tipoContenido}
+              urlContenido={currentContentUrl}
+              contenidoTexto={contenidoTexto}
+            />
+          </div>
+
+          <Navegacion
+            onNavigate={handleNavigation}
+            disablePrev={disablePrev}
+            disableNext={disableNext}
+          />
+        </div>
+      </div>
+      <ToastContainer />
+    </>
+  );
 }

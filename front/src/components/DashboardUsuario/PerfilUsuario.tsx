@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState } from "react";
 import { Usuario } from "@/app/types/auth";
@@ -36,51 +36,57 @@ export default function PerfilUsuarioEditable({ usuario, onActualizar }: Props) 
   const nombreCompleto = usuario.nombreCompleto;
   const [mensajeExito, setMensajeExito] = useState("");
 
+  const backendBaseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+
   const manejarCambioFoto = (file: File | null) => {
     if (editando) setFotoPerfil(file);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!editando) {
-    setEstadoInicial({ telefono, fotoPerfilUrl: previewFoto });
-    setEditando(true);
-    return;
-  }
-
-  setGuardando(true);
-  setError(null);
-
-  try {
-    const formData = new FormData();
-    formData.append("nombreCompleto", nombreCompleto);
-    formData.append("telefono", telefono);
-    if (fotoPerfil) formData.append("fotoPerfil", fotoPerfil);
-
-   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/${usuario.id}`, {
-    method: "PATCH",
-    body: formData,
-    credentials: "include",
-});
-
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.message || "Error al actualizar");
+    if (!editando) {
+      setEstadoInicial({ telefono, fotoPerfilUrl: previewFoto });
+      setEditando(true);
+      return;
     }
 
-    const usuarioActualizado = await res.json();
-    onActualizar(usuarioActualizado);
-    setMensajeExito("✅ Perfil actualizado exitosamente 🚀");
-    setEditando(false);
-  } catch (error: unknown) {
-    if (error instanceof Error) setError(error.message);
-    else setError("Error desconocido");
-  } finally {
-    setGuardando(false);
-  }
-};
+    if (!backendBaseUrl) {
+      setError("Error: URL del backend no configurada.");
+      return;
+    }
 
+    setGuardando(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("nombreCompleto", nombreCompleto);
+      formData.append("telefono", telefono);
+      if (fotoPerfil) formData.append("fotoPerfil", fotoPerfil);
+
+      const res = await fetch(`${backendBaseUrl}/api/usuarios/${usuario.id}`, {
+        method: "PATCH",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Error al actualizar");
+      }
+
+      const usuarioActualizado = await res.json();
+      onActualizar(usuarioActualizado);
+      setMensajeExito("✅ Perfil actualizado exitosamente 🚀");
+      setEditando(false);
+    } catch (error: unknown) {
+      if (error instanceof Error) setError(error.message);
+      else setError("Error desconocido");
+    } finally {
+      setGuardando(false);
+    }
+  };
 
   const cancelarEdicion = () => {
     setTelefono(estadoInicial.telefono);

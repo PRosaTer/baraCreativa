@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-
 interface UsuarioAutenticado {
   id: number;
   nombreCompleto: string;
@@ -25,12 +24,11 @@ export const useAutenticacion = () => {
   const [mensajeExito, setMensajeExito] = useState(false);
   const router = useRouter();
 
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
   const obtenerDatosUsuario = useCallback(async (): Promise<UsuarioAutenticado | null> => {
     try {
-      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`, {
+      const respuesta = await fetch(`${API_URL}/api/auth/profile`, {
         method: "GET",
         credentials: "include",
       });
@@ -56,7 +54,6 @@ export const useAutenticacion = () => {
 
       const userData: UsuarioAutenticado = await respuesta.json();
       return userData;
-
     } catch (error) {
       console.error("Error de conexión al intentar obtener el perfil:", error);
       setUsuario(null);
@@ -72,7 +69,7 @@ export const useAutenticacion = () => {
     e.preventDefault();
 
     try {
-      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+      const respuesta = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -107,7 +104,6 @@ export const useAutenticacion = () => {
         console.error("Inicio de sesión exitoso, pero no se pudo obtener el perfil.");
         return false;
       }
-
     } catch (error) {
       console.error("Error al conectar con el servidor o iniciar sesión.", error);
       return false;
@@ -116,7 +112,7 @@ export const useAutenticacion = () => {
 
   const cerrarSesion = useCallback(async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+      await fetch(`${API_URL}/api/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -129,7 +125,6 @@ export const useAutenticacion = () => {
     router.push("/login");
     router.refresh();
   }, [router, API_URL]);
-
 
   useEffect(() => {
     const loadUser = async () => {

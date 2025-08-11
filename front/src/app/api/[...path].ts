@@ -25,6 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const targetPath = Array.isArray(path) ? path.join('/') : path || '';
     const targetUrl = `${BACKEND_URL.replace(/\/+$/g, '')}/${targetPath.replace(/^\/+/g, '')}`;
 
+
     const headers = new Headers();
     for (const key in req.headers) {
       const value = req.headers[key];
@@ -33,10 +34,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
+ 
+    if (req.headers.cookie) {
+      headers.set('cookie', req.headers.cookie);
+    }
+
     const requestInit: RequestInit = {
       method: req.method,
       headers,
-      body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
+      body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
       redirect: 'follow',
     };
 
