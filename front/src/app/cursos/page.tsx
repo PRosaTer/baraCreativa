@@ -1,120 +1,91 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Modulo } from '@/app/types/curso';
+import { useState, useEffect } from 'react';
+import { Curso } from '@/app/types/curso';
+import { useCursoScorm } from '@/app/hooks/Scorm/useCursoScorm';
+import ListaModulos from '@/components/Scorm/ListaModulos';
+import NavegacionModulos from '@/components/Scorm/Navegacion';
 
-// Interfaz para la lista de módulos que esperan los componentes
-export interface EstadoModuloUsuario extends Modulo {
-    tipo: 'video' | 'pdf' | 'imagen' | 'texto' | null;
-    orden: number;
-    completado: boolean;
-    fechaCompletado: Date | null;
-}
+export default function CursosPage() {
+    const [curso, setCurso] = useState<Curso | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-export function useCursoScorm(modulos: Modulo[]) {
-    // Estados principales
-    const [modulosEstadoUsuario, setModulosEstadoUsuario] = useState<EstadoModuloUsuario[]>([]);
-    const [currentModuleIndex, setCurrentModuleIndex] = useState(0);
-    const [currentContentIndex, setCurrentContentIndex] = useState(0);
-
-    // Efecto para procesar los módulos iniciales y prepararlos para el estado de usuario
+    // Efecto para cargar los datos del curso desde la API
     useEffect(() => {
-        const processedModulos: EstadoModuloUsuario[] = modulos.map((modulo, index) => {
-            let tipo: 'video' | 'pdf' | 'imagen' | 'texto' | null = null;
-            if (modulo.videoUrl && modulo.videoUrl.length > 0) tipo = 'video';
-            else if (modulo.pdfUrl && modulo.pdfUrl.length > 0) tipo = 'pdf';
-            else if (modulo.imageUrl && modulo.imageUrl.length > 0) tipo = 'imagen';
-            else if (modulo.descripcion) tipo = 'texto';
+        const fetchCursoData = async () => {
+            try {
+                setLoading(true);
+                // Esta es la lógica real para obtener datos.
+                // Si el cursoId fuera dinámico, se obtendría de los parámetros de la URL.
+                // Dado que este es un archivo de página estático, se podría obtener una lista
+                // de cursos o un curso con un ID fijo.
+                const response = await fetch(`/api/cursos`); // Ejemplo de una llamada a tu API
+                if (!response.ok) {
+                    throw new Error('Error al obtener el curso');
+                }
+                const cursos: Curso[] = await response.json();
+                
+                // Suponiendo que la API devuelve un array, se toma el primer curso
+                if (cursos.length > 0) {
+                    setCurso(cursos[0]);
+                } else {
+                    setCurso(null);
+                }
 
-            return {
-                ...modulo,
-                tipo,
-                orden: index,
-                completado: false,
-                fechaCompletado: null,
-            };
-        });
-        setModulosEstadoUsuario(processedModulos);
-    }, [modulos]);
-
-    // Función utilitaria para combinar todos los contenidos en una sola lista de URLs
-    const getContenidoModulo = useCallback((modulo: Modulo) => {
-        const urls: string[] = [];
-        if (modulo.videoUrl) urls.push(...modulo.videoUrl);
-        if (modulo.pdfUrl) urls.push(...modulo.pdfUrl);
-        if (modulo.imageUrl) urls.push(...modulo.imageUrl);
-        return urls;
+                setError(null);
+            } catch (err: unknown) {
+                console.error(err);
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError('Ocurrió un error desconocido.');
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchCursoData();
     }, []);
 
-    // Propiedades computadas basadas en el estado
-    const currentModule = modulosEstadoUsuario[currentModuleIndex] || null;
-    const allContents = currentModule ? getContenidoModulo(currentModule) : [];
-    const currentContentUrl = allContents[currentContentIndex] || '';
-
-    // Cálculo del progreso general
-    const progresoGeneral = useCallback(() => {
-        if (modulosEstadoUsuario.length === 0) return 0;
-        const totalContenidos = modulosEstadoUsuario.reduce((acc, mod) => acc + getContenidoModulo(mod).length, 0);
-        const contenidosVistosAntes = modulosEstadoUsuario
-            .slice(0, currentModuleIndex)
-            .reduce((acc, mod) => acc + getContenidoModulo(mod).length, 0);
-        const vistosEnModuloActual = currentContentIndex + 1;
-        const vistosTotales = contenidosVistosAntes + vistosEnModuloActual;
-        return totalContenidos > 0 ? (vistosTotales / totalContenidos) * 100 : 0;
-    }, [modulosEstadoUsuario, currentModuleIndex, currentContentIndex, getContenidoModulo]);
-
-    // Manejadores de eventos para la navegación
-    const handleModuleClick = useCallback((modIndex: number) => {
-        if (modIndex >= 0 && modIndex < modulosEstadoUsuario.length) {
-            setCurrentModuleIndex(modIndex);
-            setCurrentContentIndex(0);
-        }
-    }, [modulosEstadoUsuario]);
-
-    const handleNavigation = useCallback((direction: 'prev' | 'next') => {
-        if (!currentModule) return;
-        
-        const isLastContent = currentContentIndex === allContents.length - 1;
-        const isLastModule = currentModuleIndex === modulosEstadoUsuario.length - 1;
-        const isFirstContent = currentContentIndex === 0;
-        const isFirstModule = currentModuleIndex === 0;
-
-        if (direction === 'next') {
-            if (!isLastContent) {
-                setCurrentContentIndex(prev => prev + 1);
-            } else if (!isLastModule) {
-                setCurrentModuleIndex(prev => prev + 1);
-                setCurrentContentIndex(0);
-            }
-        } else { // 'prev'
-            if (!isFirstContent) {
-                setCurrentContentIndex(prev => prev - 1);
-            } else if (!isFirstModule) {
-                const prevModule = modulosEstadoUsuario[currentModuleIndex - 1];
-                const prevModuleContents = getContenidoModulo(prevModule);
-                setCurrentModuleIndex(prev => prev - 1);
-                setCurrentContentIndex(prevModuleContents.length - 1);
-            }
-        }
-    }, [currentModuleIndex, currentContentIndex, modulosEstadoUsuario, currentModule, allContents, getContenidoModulo]);
-
-    const isPrevContentDisabled = currentModuleIndex === 0 && currentContentIndex === 0;
-    const isNextContentDisabled = !currentModule || allContents.length === 0 || (currentModuleIndex === modulosEstadoUsuario.length - 1 && currentContentIndex === allContents.length - 1);
-    const cursoCompletadoGeneral = isNextContentDisabled; // Lógica simplificada para el ejemplo
-
-    return {
+    // Usa el hook SOLO si los datos del curso están cargados
+    const {
         modulosEstadoUsuario,
         currentModuleIndex,
-        currentContentIndex,
-        error: null,
-        loading: false,
-        cursoCompletadoGeneral,
-        handleNavigation,
+        progresoGeneral,
         handleModuleClick,
-        progresoGeneral: progresoGeneral(),
-        currentModule,
-        currentContentUrl,
-        isPrevContentDisabled,
-        isNextContentDisabled,
-    };
+        handleNavigation,
+        disablePrev,
+        disableNext,
+    } = useCursoScorm(curso?.modulos || []);
+
+    if (loading) return <div>Cargando curso...</div>;
+    if (error) return <div>Error: {error}</div>;
+    if (!curso) return <div>No se encontró el curso.</div>;
+
+    const currentModule = modulosEstadoUsuario[currentModuleIndex] || null;
+
+    return (
+        <div>
+            <h1>{curso.titulo}</h1>
+            <p>Progreso del curso: {progresoGeneral.toFixed(2)}%</p>
+            <ListaModulos
+                modulos={modulosEstadoUsuario}
+                currentModuleIndex={currentModuleIndex}
+                onModuleClick={handleModuleClick}
+            />
+            {currentModule && (
+                <div>
+                    {/* Se ha corregido la propiedad de 'nombre' a 'titulo' */}
+                    <h2>{currentModule.titulo}</h2>
+                    {/* Renderiza el contenido aquí, similar a lo que hiciste en tu código */}
+                </div>
+            )}
+            <NavegacionModulos
+                onNavigate={handleNavigation}
+                disablePrev={disablePrev}
+                disableNext={disableNext}
+            />
+        </div>
+    );
 }
