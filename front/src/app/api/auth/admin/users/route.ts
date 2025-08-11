@@ -1,36 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Esta ruta de API actúa como un proxy.
-// Recibe la solicitud del frontend, le adjunta las cookies de autenticación
-// y la reenvía al servicio de backend real.
 export async function GET(req: NextRequest) {
     try {
-        // 1. Obtener la URL base del backend desde las variables de entorno
-        // Asegúrate de que esta variable esté configurada en Render
         const backendUrl = process.env.NEXT_PUBLIC_API_URL;
         if (!backendUrl) {
             return NextResponse.json({ error: 'URL del backend no configurada' }, { status: 500 });
         }
 
-        // 2. Construir la URL completa para el endpoint de tu backend
-        // CRÍTICO: La URL del endpoint debe apuntar a la ruta que tu backend
-        // realmente reconoce. La ruta correcta es '/api/auth/admin/users'.
         const endpointUrl = `${backendUrl}/api/auth/admin/users`;
 
-        // 3. Crear un nuevo objeto de cabeceras.
-        // Se asegura de reenviar las cookies del cliente al backend.
+
         const cookies = req.headers.get('cookie');
 
-        // 4. Reenviar la solicitud al backend real
+        console.log('Proxy GET /api/auth/admin/users: re-enviando cookie:', cookies);
+
+ 
         const response = await fetch(endpointUrl, {
             method: 'GET',
-            // CRÍTICO: Incluir las cookies en la cabecera
             headers: {
-                'cookie': cookies || '', // Enviar la cookie si existe
+                'cookie': cookies || '',
             },
         });
 
-        // 5. Manejar errores si el backend no responde correctamente
+  
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Error del backend:', response.status, errorText);
@@ -40,7 +32,7 @@ export async function GET(req: NextRequest) {
             });
         }
 
-        // 6. Devolver la respuesta del backend al frontend
+
         const data = await response.json();
         return NextResponse.json(data);
     } catch (error) {
