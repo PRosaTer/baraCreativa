@@ -1,15 +1,20 @@
 import {
   Controller,
   Get,
+  Post,
+  Body,
   Patch,
   Param,
-  Body,
+  Delete,
   UseGuards,
+  HttpCode,
+  HttpStatus,
+  Request,
+  Logger,
   UseInterceptors,
   UploadedFile,
   ForbiddenException,
   BadRequestException,
-  Logger,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -21,6 +26,7 @@ import { UpdateUsuarioDto } from '../../dto/crear-editar-usuarios/update-usuario
 import { Usuario } from '../../entidades/usuario.entity';
 import { UsuarioAutenticado } from '../../auth/decoradores/usuario-autenticado.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RolesGuard, Roles } from '../../auth/guards/roles.guard';
 
 @Controller('usuarios')
 export class UsuariosController {
@@ -29,7 +35,7 @@ export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard) // Asegura que solo los usuarios autenticados puedan acceder
+  @UseGuards(JwtAuthGuard)
   async getAll(@UsuarioAutenticado() usuario: Usuario): Promise<Usuario[] | Partial<Usuario>> {
     // Verificamos si el usuario tiene el rol de administrador
     if (usuario.esAdmin) {
@@ -40,6 +46,19 @@ export class UsuariosController {
       const { password, ...usuarioSinPassword } = usuario;
       return usuarioSinPassword; // Si no es admin, devuelve solo su propio perfil
     }
+  }
+
+  // --- RUTA DEDICADA PARA EL PANEL DE ADMINISTRACIÓN ---
+  // Esta ruta está protegida por ambos guards:
+  // 1. JwtAuthGuard: Asegura que el usuario esté autenticado con un token válido.
+  // 2. RolesGuard: Asegura que el usuario autenticado tenga el rol 'admin'.
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin') // Requiere que el usuario tenga el rol 'admin'
+  @Get('admin') // El endpoint ahora es GET /usuarios/admin
+  @HttpCode(HttpStatus.OK)
+  async findAllAdmin(@Request() req): Promise<Usuario[]> {
+    this.logger.log(`Acceso al endpoint de administración por el usuario: ${req.user.correoElectronico}`);
+    return this.usuariosService.findAll();
   }
 
   @Get(':id')

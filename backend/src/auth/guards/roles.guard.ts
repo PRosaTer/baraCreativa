@@ -16,8 +16,12 @@ export const ROLES_KEY = 'roles';
 // Decorador para establecer los roles permitidos en una ruta.
 // Se usará así: @Roles('admin')
 export const Roles = (...roles: string[]) => {
-  return (target: any, key: string, descriptor: PropertyDescriptor) => {
-    Reflect.defineMetadata(ROLES_KEY, roles, descriptor.value);
+  return (
+    target: object,
+    key: string | symbol,
+    descriptor: TypedPropertyDescriptor<Function>
+  ) => {
+    Reflect.defineMetadata(ROLES_KEY, roles, descriptor.value!);
   };
 };
 
@@ -40,7 +44,7 @@ export class RolesGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<Request>();
-    // CAMBIO: Asumimos que el usuario tiene la propiedad esAdmin: boolean
+    // Asumimos que el usuario tiene la propiedad esAdmin: boolean
     const user = request.user as { esAdmin: boolean };
 
     if (!user) {
@@ -49,9 +53,7 @@ export class RolesGuard implements CanActivate {
       );
       throw new UnauthorizedException('Acceso denegado. Usuario no autenticado.');
     }
-    
-    // Si se requiere el rol 'admin', se verifica la propiedad esAdmin.
-    // Esto te permitirá usar @Roles('admin') en tu controlador.
+
     const isAdminRequired = requiredRoles.includes('admin');
     const isUserAdmin = user.esAdmin === true;
 
@@ -61,11 +63,10 @@ export class RolesGuard implements CanActivate {
       );
       throw new ForbiddenException('No tienes los permisos necesarios para esta acción.');
     } else if (!isAdminRequired) {
-      // Si la ruta no requiere admin, se permite el acceso por defecto.
       this.logger.log('RolesGuard: Acceso permitido a ruta no restringida.');
       return true;
     }
-    
+
     this.logger.log('RolesGuard: Acceso de administrador permitido.');
     return true;
   }
