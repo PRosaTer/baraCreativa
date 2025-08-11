@@ -3,6 +3,7 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { UsuariosService } from '../services/usuarios/usuarios.service';
@@ -33,7 +34,7 @@ export class UsuariosGateway implements OnGatewayConnection, OnGatewayDisconnect
   @WebSocketServer()
   server: Server;
 
-  // Usa un Map para vincular el ID de usuario con el Socket.id
+
   private connectedUsers = new Map<number, string>();
 
   constructor(
@@ -63,7 +64,6 @@ export class UsuariosGateway implements OnGatewayConnection, OnGatewayDisconnect
 
       const userIdNum = Number(userId);
 
-      // Verificar si el usuario existe en la base de datos
       const usuarioExistente = await this.usuariosService.findOne(userIdNum);
       if (!usuarioExistente) {
         this.logger.warn(`Conexión rechazada: Usuario con ID ${userIdNum} no encontrado.`);
@@ -74,11 +74,11 @@ export class UsuariosGateway implements OnGatewayConnection, OnGatewayDisconnect
       this.connectedUsers.set(userIdNum, client.id);
 
       await this.usuariosService.actualizarEstado(userIdNum, true);
+      await this.usuariosService.actualizarUltimaSesion(userIdNum, new Date());
+      
       this.logger.log(`✅ Usuario ${userIdNum} conectado.`);
 
-      // Emitir la lista actualizada de usuarios a todos los clientes
-      const usuarios = await this.usuariosService.findAll();
-      this.server.emit('usuariosActualizados', usuarios);
+      this.emitirListaUsuariosActualizada();
 
     } catch (error) {
       this.logger.error(`Error durante la conexión: ${error.message}`);
@@ -87,8 +87,8 @@ export class UsuariosGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   async handleDisconnect(client: Socket) {
-    // Buscar el ID del usuario en el Map usando el socket.id
     let disconnectedUserId: number | undefined;
+
 
     for (const [userId, socketId] of this.connectedUsers.entries()) {
       if (socketId === client.id) {
@@ -101,16 +101,32 @@ export class UsuariosGateway implements OnGatewayConnection, OnGatewayDisconnect
     if (disconnectedUserId !== undefined) {
       try {
         await this.usuariosService.actualizarEstado(disconnectedUserId, false);
+        await this.usuariosService.actualizarUltimaSesion(disconnectedUserId, new Date());
+
         this.logger.log(`❌ Usuario ${disconnectedUserId} desconectado.`);
 
-        // Emitir la lista actualizada de usuarios a todos los clientes
-        const usuarios = await this.usuariosService.findAll();
-        this.server.emit('usuariosActualizados', usuarios);
+
+        this.emitirListaUsuariosActualizada();
       } catch (error) {
         this.logger.error(`Error al actualizar el estado de desconexión para el usuario ${disconnectedUserId}: ${error.message}`);
       }
     } else {
       this.logger.warn(`Cliente ${client.id} desconectado sin un ID de usuario registrado.`);
+    }
+  }
+  
+
+  @SubscribeMessage('getUsuarios')
+  async handleGetUsuarios() {
+    this.emitirListaUsuariosActualizada();
+  }
+
+  private async emitirListaUsuariosActualizada() {
+    try {
+      const usuarios = await this.usuariosService.findAll();
+      this.server.emit('usuariosActualizados', usuarios);
+    } catch (error) {
+      this.logger.error(`Error al emitir la lista de usuarios actualizada: ${error.message}`);
     }
   }
 }
