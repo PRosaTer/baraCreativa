@@ -200,11 +200,21 @@ export default function Navbar() {
         {isMenuOpen && (
           <div className="lg:hidden absolute top-full left-0 w-full bg-gray-900 backdrop-blur z-50 p-4">
             <div className="flex flex-col items-center space-y-4">
-              <SobreComunidadButton className="w-full max-w-sm" />
-              <ComunidadButton className="w-full max-w-sm" />
-              <Academias className="w-full max-w-sm" />
-              <Cursos className="w-full max-w-sm" />
-              <Contactenos className="w-full max-w-sm" />
+              <div className="w-full max-w-sm">
+                <SobreComunidadButton />
+              </div>
+              <div className="w-full max-w-sm">
+                <ComunidadButton />
+              </div>
+              <div className="w-full max-w-sm">
+                <Academias />
+              </div>
+              <div className="w-full max-w-sm">
+                <Cursos />
+              </div>
+              <div className="w-full max-w-sm">
+                <Contactenos />
+              </div>
               <BarraBusqueda className="w-full max-w-sm" />
               {cargandoUsuario ? (
                 <div className="px-4 py-2 rounded-lg font-medium text-white bg-gray-400 animate-pulse whitespace-nowrap w-full max-w-sm text-center">
