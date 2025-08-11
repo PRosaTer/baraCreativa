@@ -35,9 +35,13 @@ export default function ScormPage() {
                 const data: Curso = await response.json();
                 setCurso(data);
                 setError(null);
-            } catch (err: any) {
+            } catch (err: unknown) { // Se corrige el tipo 'any' a 'unknown'
                 console.error(err);
-                setError(err.message || 'No se pudo cargar el curso. Inténtalo de nuevo más tarde.');
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError('Ocurrió un error desconocido.');
+                }
             } finally {
                 setLoading(false);
             }
@@ -55,8 +59,9 @@ export default function ScormPage() {
         progresoGeneral,
         currentModule,
         currentContentUrl,
-        isPrevContentDisabled,
-        isNextContentDisabled,
+        // Se corrigen los nombres de las propiedades desestructuradas
+        disablePrev,
+        disableNext,
     } = useCursoScorm(curso?.modulos || []); // Pasa los módulos cargados
 
     // Mensajes de estado
@@ -99,8 +104,8 @@ export default function ScormPage() {
 
                     <Navegacion
                         onNavigate={handleNavigation}
-                        disablePrev={isPrevContentDisabled}
-                        disableNext={isNextContentDisabled}
+                        disablePrev={disablePrev}
+                        disableNext={disableNext}
                     />
                 </div>
             </div>
