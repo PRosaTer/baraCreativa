@@ -2,7 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Modulo } from '@/app/types/curso';
-import { EstadoModuloUsuario } from '@/app/types/scorm-types';
+
+// Interfaz para la lista de módulos que esperan los componentes
+export interface EstadoModuloUsuario extends Modulo {
+    tipo: 'video' | 'pdf' | 'imagen' | 'texto' | null;
+    orden: number;
+    completado: boolean;
+    fechaCompletado: Date | null;
+}
 
 export function useCursoScorm(modulos: Modulo[]) {
     // Estados principales
@@ -107,7 +114,8 @@ export function useCursoScorm(modulos: Modulo[]) {
         progresoGeneral: progresoGeneral(),
         currentModule,
         currentContentUrl,
-        disablePrev,
+        // Se cambian los nombres de las propiedades para que coincidan con la interfaz
+        disablePrev, 
         disableNext,
     };
 }
