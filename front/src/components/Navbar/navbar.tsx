@@ -108,7 +108,7 @@ export default function Navbar() {
             z-40
             transition-all duration-300 ease-in-out
             
-            ${isMenuOpen ? "absolute top-0 left-0 h-screen w-screen overflow-y-hidden" : "overflow-y-auto lg:overflow-visible"}
+            ${isMenuOpen ? "absolute top-0 left-0 w-screen overflow-y-auto" : "overflow-y-auto lg:overflow-visible"}
           `}
         >
           {/* Contenedor para los elementos del menú en desktop */}
@@ -162,7 +162,7 @@ export default function Navbar() {
               Cargando...
             </div>
           ) : usuario ? (
-            <div className="relative z-50 lg:ml-6" ref={profileMenuRef}>
+            <div className="relative z-50 lg:ml-6 flex items-center justify-center lg:justify-start" ref={profileMenuRef}>
               <button
                 onClick={toggleProfileMenu}
                 className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white"
