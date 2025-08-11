@@ -14,8 +14,8 @@ export async function GET(req: NextRequest) {
 
         // 2. Construir la URL completa para el endpoint de tu backend
         // CRÍTICO: La URL del endpoint debe apuntar a la ruta que tu backend
-        // realmente reconoce, que es "/api/usuarios", no a la del proxy.
-        const endpointUrl = `${backendUrl}/api/usuarios`;
+        // realmente reconoce. La ruta correcta es '/api/auth/admin/users'.
+        const endpointUrl = `${backendUrl}/api/auth/admin/users`;
 
         // 3. Crear un nuevo objeto de cabeceras.
         // Se asegura de reenviar las cookies del cliente al backend.
