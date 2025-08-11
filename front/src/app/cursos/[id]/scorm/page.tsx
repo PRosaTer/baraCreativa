@@ -1,78 +1,93 @@
 'use client';
 
-import { useParams } from 'next/navigation';
-import { ToastContainer } from 'react-toastify';
-import React from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { Modulo } from '@/app/types/curso';
 
-import { useCursoScorm } from '@/app/hooks/Scorm/useCursoScorm';
+export function useCursoScorm(modulos: Modulo[]) {
+  // Estados principales
+  const [currentModuleIndex, setCurrentModuleIndex] = useState(0);
+  const [currentContentIndex, setCurrentContentIndex] = useState(0);
 
-import BarraProgreso from '@/components/Scorm/BarraProgreso';
-import ListaModulos from '@/components/Scorm/ListaModulos';
-import MensajeFinal from '@/components/Scorm/MensajeFinal';
-import Navegacion from '@/components/Scorm/Navegacion';
-import ContenedorContenido from '@/components/Scorm/ContenedorContenido';
+  // Función utilitaria para combinar todos los contenidos en una sola lista de URLs
+  const getContenidoModulo = useCallback((modulo: Modulo) => {
+    const urls: string[] = [];
+    if (modulo.videoUrl) urls.push(...modulo.videoUrl);
+    if (modulo.pdfUrl) urls.push(...modulo.pdfUrl);
+    if (modulo.imageUrl) urls.push(...modulo.imageUrl);
+    return urls;
+  }, []);
 
-export default function ScormPage() {
-  const params = useParams();
-  const cursoId = params.id as string;
+  // Efecto para resetear el índice de contenido si el módulo cambia
+  useEffect(() => {
+    setCurrentContentIndex(0);
+  }, [currentModuleIndex]);
 
-  const {
-    modulosDelCurso,
+  // Propiedades computadas basadas en el estado
+  const currentModule = modulos[currentModuleIndex] || null;
+  const allContents = currentModule ? getContenidoModulo(currentModule) : [];
+  const currentContentUrl = allContents[currentContentIndex] || '';
+
+  // Cálculo del progreso general (simulado)
+  const progresoGeneral = useCallback(() => {
+    if (modulos.length === 0) return 0;
+    const totalContenidos = modulos.reduce((acc, mod) => acc + getContenidoModulo(mod).length, 0);
+    const contenidosVistosAntes = modulos
+      .slice(0, currentModuleIndex)
+      .reduce((acc, mod) => acc + getContenidoModulo(mod).length, 0);
+    const vistosEnModuloActual = currentContentIndex + 1;
+    const vistosTotales = contenidosVistosAntes + vistosEnModuloActual;
+    return totalContenidos > 0 ? (vistosTotales / totalContenidos) * 100 : 0;
+  }, [modulos, currentModuleIndex, currentContentIndex, getContenidoModulo]);
+
+  // Manejadores de eventos para la navegación
+  const handleModuleClick = useCallback((modIndex: number) => {
+    setCurrentModuleIndex(modIndex);
+  }, []);
+
+  const handleNavigation = useCallback((direction: 'prev' | 'next') => {
+    if (!currentModule) return;
+    
+    const isLastContent = currentContentIndex === allContents.length - 1;
+    const isLastModule = currentModuleIndex === modulos.length - 1;
+    const isFirstContent = currentContentIndex === 0;
+    const isFirstModule = currentModuleIndex === 0;
+
+    if (direction === 'next') {
+      if (!isLastContent) {
+        setCurrentContentIndex(prev => prev + 1);
+      } else if (!isLastModule) {
+        setCurrentModuleIndex(prev => prev + 1);
+        setCurrentContentIndex(0);
+      }
+    } else { // 'prev'
+      if (!isFirstContent) {
+        setCurrentContentIndex(prev => prev - 1);
+      } else if (!isFirstModule) {
+        const prevModule = modulos[currentModuleIndex - 1];
+        const prevModuleContents = getContenidoModulo(prevModule);
+        setCurrentModuleIndex(prev => prev - 1);
+        setCurrentContentIndex(prevModuleContents.length - 1);
+      }
+    }
+  }, [currentModuleIndex, currentContentIndex, modulos, currentModule, allContents, getContenidoModulo]);
+
+  const isPrevContentDisabled = currentModuleIndex === 0 && currentContentIndex === 0;
+  const isNextContentDisabled = !currentModule || allContents.length === 0 || (currentModuleIndex === modulos.length - 1 && currentContentIndex === allContents.length - 1);
+  const cursoCompletadoGeneral = isNextContentDisabled; // Lógica simplificada para el ejemplo
+
+  return {
+    modulosDelCurso: modulos, // Cambiado 'modulos' a 'modulosDelCurso'
     currentModuleIndex,
-    setCurrentModuleIndex,
     currentContentIndex,
-    setCurrentContentIndex,
-    error,
-    loading,
+    error: null,
+    loading: false,
     cursoCompletadoGeneral,
-    handleNavigation, 
+    handleNavigation,
     handleModuleClick,
-    progresoGeneral,
+    progresoGeneral: progresoGeneral(),
     currentModule,
     currentContentUrl,
     isPrevContentDisabled,
     isNextContentDisabled,
-  } = useCursoScorm(cursoId);
-
-  if (loading) return <p className="text-center mt-8 text-lg text-gray-700">Cargando curso y módulos...</p>;
-  if (error) return <p className="text-red-600 text-center mt-8 text-lg font-bold">Error al cargar el curso: {error}</p>;
-  if (!currentModule) return <p className="text-center mt-8 text-lg text-gray-700">No hay contenido disponible para este curso.</p>;
-
-  return (
-    <>
-      <div className="flex flex-col lg:flex-row h-screen bg-gray-100 p-4 gap-4">
-        <div className="lg:w-1/4 bg-white rounded-lg shadow-lg p-6 flex flex-col overflow-hidden">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">Módulos del Curso</h2>
-          <BarraProgreso progreso={progresoGeneral} />
-          <ListaModulos
-            modulos={modulosDelCurso}
-            currentModuleIndex={currentModuleIndex}
-            onModuleClick={handleModuleClick}
-          />
-        </div>
-
-        <div className="lg:w-3/4 bg-white rounded-lg shadow-lg p-6 flex flex-col">
-          <MensajeFinal mostrar={cursoCompletadoGeneral} />
-
-          <h1 className="text-3xl font-bold mb-4 text-gray-900">{currentModule.titulo}</h1>
-          <p className="text-gray-600 mb-6">{currentModule.descripcionContenido}</p>
-
-          <div className="flex-grow flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
-            <ContenedorContenido
-              tipo={currentModule.tipo}
-              urlContenido={currentContentUrl}
-              contenidoTexto={currentModule.tipo === 'texto' ? currentModule.descripcionContenido : undefined}
-            />
-          </div>
-
-          <Navegacion
-            onNavigate={handleNavigation} 
-            disablePrev={isPrevContentDisabled}
-            disableNext={isNextContentDisabled}
-          />
-        </div>
-      </div>
-      <ToastContainer />
-    </>
-  );
+  };
 }
