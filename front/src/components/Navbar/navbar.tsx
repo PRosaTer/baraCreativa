@@ -107,7 +107,8 @@ export default function Navbar() {
             bg-primary/95 lg:bg-transparent backdrop-blur
             z-40
             transition-all duration-300 ease-in-out
-            overflow-y-auto lg:overflow-visible
+            
+            ${isMenuOpen ? "absolute top-0 left-0 h-screen w-screen overflow-y-hidden" : "overflow-y-auto lg:overflow-visible"}
           `}
         >
           {/* Contenedor para los elementos del menú en desktop */}
@@ -131,9 +132,9 @@ export default function Navbar() {
 
           {/* Menú de hamburguesa para móvil, visible solo cuando está abierto */}
           {isMenuOpen && (
-            <div className="lg:hidden flex flex-col w-full">
+            <div className="lg:hidden flex flex-col w-full mt-[100px] p-4">
               {/* Contenedor para los botones del menú de hamburguesa */}
-              <div className="flex flex-wrap justify-start gap-4 mb-4">
+              <div className="flex flex-wrap justify-center gap-4 mb-4">
                 <div className="w-[calc(50%-8px)]">
                   <SobreComunidadButton />
                 </div>
