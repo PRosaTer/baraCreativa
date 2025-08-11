@@ -7,7 +7,6 @@ import { UsuariosService } from '../../services/usuarios/usuarios.service';
 import { Usuario } from '../../entidades/usuario.entity';
 
 // Define la interfaz del payload para asegurar los tipos correctos.
-// 'sub' es el estándar, pero 'id' es una alternativa común.
 interface JwtPayload {
   sub?: number;
   id?: number;
@@ -20,31 +19,30 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   constructor(
     private configService: ConfigService,
-    private usuariosService: UsuariosService, // Inyectamos UsuariosService aquí
+    private usuariosService: UsuariosService,
   ) {
     const jwtSecret = configService.get('JWT_SECRET');
     if (!jwtSecret) {
       throw new Error('JWT_SECRET no está definido en las variables de entorno');
     }
     super({
-      // Extrae el token primero de la cookie y si no, de la cabecera
+      // CRÍTICO: Extracción del token de la cookie
+      // Se utiliza un extractor de cookie para que Passport lo maneje internamente.
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
+          // Extrae el token de la cookie llamada 'jwt'
           return request?.cookies?.jwt || null;
         },
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       secretOrKey: jwtSecret,
       ignoreExpiration: false,
-      passReqToCallback: false, // Esto es opcional, pero con la lógica anterior es mejor tenerlo en 'false'
     });
   }
 
-  // El método validate se encarga de validar el payload del token y buscar al usuario.
   async validate(payload: JwtPayload): Promise<Usuario> {
     this.logger.log(`JwtStrategy: Validando payload: ${JSON.stringify(payload)}`);
     
-    // Intenta obtener el ID del usuario de 'sub' o de 'id'.
     const userId = payload.sub || payload.id;
 
     if (typeof userId !== 'number') {
