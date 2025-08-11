@@ -22,23 +22,27 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleConnection(@ConnectedSocket() client: Socket) {
     console.log(`Cliente conectado: ${client.id}`);
 
-
     const userId = Number(client.handshake.query.userId);
+
     if (userId) {
       await this.usuariosService.actualizarEstado(userId, true);
-      const usuarios = await this.usuariosService.findAll();
-      this.server.emit('usuariosActualizados', usuarios);
+
+
+      this.server.emit('usuarioEstadoActualizado', { userId, isOnline: true });
     }
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket) {
     console.log(`Cliente desconectado: ${client.id}`);
 
+   
     const userId = Number(client.handshake.query.userId);
+
     if (userId) {
       await this.usuariosService.actualizarEstado(userId, false);
-      const usuarios = await this.usuariosService.findAll();
-      this.server.emit('usuariosActualizados', usuarios);
+
+
+      this.server.emit('usuarioEstadoActualizado', { userId, isOnline: false });
     }
   }
 }
