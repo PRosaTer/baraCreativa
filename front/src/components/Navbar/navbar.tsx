@@ -97,12 +97,12 @@ export default function Navbar() {
         </div>
 
         {/* Menú de navegación */}
+        {/* Aquí se usa 'lg:flex-row' para la versión de escritorio y 'flex-col' para la móvil */}
         <div
           className={`
             ${isMenuOpen ? "flex" : "hidden"}
             lg:flex flex-col lg:flex-row lg:items-center
             w-full lg:w-auto
-            gap-4 lg:gap-6
             fixed lg:static inset-0 lg:inset-auto
             p-6 lg:p-0
             bg-primary/95 lg:bg-transparent backdrop-blur
@@ -111,20 +111,30 @@ export default function Navbar() {
             overflow-y-auto lg:overflow-visible
           `}
         >
-          {/* Botones de navegación. La barra de búsqueda se movió debajo. */}
-          <SobreComunidadButton />
-          <ComunidadButton />
-          <Academias />
-          <Cursos />
-          <Contactenos />
-          <BarraBusqueda className="flex-grow min-w-[200px] max-w-[656px] lg:max-w-[400px] xl:max-w-[656px]" />
+          {/* Contenedor para los elementos del menú principal en el orden correcto */}
+          <div className="flex flex-col lg:flex-row lg:items-center w-full lg:w-auto gap-4 lg:gap-6">
+            <SobreComunidadButton />
+            <ComunidadButton />
+            <Academias />
+            {/* Barra de búsqueda visible en el escritorio, oculta en el menú de hamburguesa */}
+            <BarraBusqueda className="hidden lg:flex flex-grow min-w-[200px] max-w-[656px] lg:max-w-[400px] xl:max-w-[656px]" />
+            <Cursos />
+            <Contactenos />
+          </div>
+
+          {/* Barra de búsqueda solo visible en el menú de hamburguesa */}
+          {isMenuOpen && (
+            <div className="lg:hidden mt-4">
+              <BarraBusqueda className="flex-grow min-w-[200px] max-w-[656px]" />
+            </div>
+          )}
 
           {cargandoUsuario ? (
             <div className="px-4 py-2 rounded-lg font-medium text-white bg-gray-400 animate-pulse whitespace-nowrap">
               Cargando...
             </div>
           ) : usuario ? (
-            <div className="relative z-50" ref={profileMenuRef}>
+            <div className="relative z-50 lg:ml-6" ref={profileMenuRef}>
               <button
                 onClick={toggleProfileMenu}
                 className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white"
