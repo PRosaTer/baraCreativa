@@ -97,7 +97,6 @@ export default function Navbar() {
         </div>
 
         {/* Menú de navegación */}
-        {/* Aquí se usa 'lg:flex-row' para la versión de escritorio y 'flex-col' para la móvil */}
         <div
           className={`
             ${isMenuOpen ? "flex" : "hidden"}
@@ -111,21 +110,49 @@ export default function Navbar() {
             overflow-y-auto lg:overflow-visible
           `}
         >
-          {/* Contenedor para los elementos del menú principal en el orden correcto */}
-          <div className="flex flex-col lg:flex-row lg:items-center w-full lg:w-auto gap-4 lg:gap-6">
-            <SobreComunidadButton />
-            <ComunidadButton />
-            <Academias />
-            {/* Barra de búsqueda visible en el escritorio, oculta en el menú de hamburguesa */}
+          {/* Contenedor para los elementos del menú en desktop */}
+          <div className="flex flex-row items-center w-full lg:w-auto gap-4 lg:gap-6">
+            {/* Solo visible en pantallas grandes */}
+            <div className="hidden lg:flex flex-row items-center gap-4 lg:gap-6">
+              <SobreComunidadButton />
+              <ComunidadButton />
+              <Academias />
+            </div>
+
+            {/* Barra de búsqueda para escritorio, oculta en móvil */}
             <BarraBusqueda className="hidden lg:flex flex-grow min-w-[200px] max-w-[656px] lg:max-w-[400px] xl:max-w-[656px]" />
-            <Cursos />
-            <Contactenos />
+
+            {/* Solo visible en pantallas grandes */}
+            <div className="hidden lg:flex flex-row items-center gap-4 lg:gap-6">
+              <Cursos />
+              <Contactenos />
+            </div>
           </div>
 
-          {/* Barra de búsqueda solo visible en el menú de hamburguesa */}
+          {/* Menú de hamburguesa para móvil, visible solo cuando está abierto */}
           {isMenuOpen && (
-            <div className="lg:hidden mt-4">
-              <BarraBusqueda className="flex-grow min-w-[200px] max-w-[656px]" />
+            <div className="lg:hidden flex flex-col w-full">
+              {/* Contenedor para los botones del menú de hamburguesa */}
+              <div className="flex flex-wrap justify-start gap-4 mb-4">
+                <div className="w-[calc(50%-8px)]">
+                  <SobreComunidadButton />
+                </div>
+                <div className="w-[calc(50%-8px)]">
+                  <ComunidadButton />
+                </div>
+                <div className="w-[calc(50%-8px)]">
+                  <Academias />
+                </div>
+                <div className="w-[calc(50%-8px)]">
+                  <Cursos />
+                </div>
+                <div className="w-[calc(50%-8px)]">
+                  <Contactenos />
+                </div>
+              </div>
+              
+              {/* Barra de búsqueda para móvil, debajo de los botones */}
+              <BarraBusqueda className="w-full" />
             </div>
           )}
 
