@@ -102,7 +102,6 @@ export default function Navbar() {
             ${isMenuOpen ? "flex" : "hidden"}
             lg:flex flex-col lg:flex-row lg:items-center
             w-full lg:w-auto
-            gap-4 lg:gap-6
             fixed lg:static inset-0 lg:inset-auto
             p-6 lg:p-0
             bg-primary/95 lg:bg-transparent backdrop-blur
@@ -111,12 +110,17 @@ export default function Navbar() {
             overflow-y-auto lg:overflow-visible
           `}
         >
-          <SobreComunidadButton />
-          <ComunidadButton />
-          <Academias />
-          <BarraBusqueda className="flex-grow min-w-[200px] max-w-[656px] lg:max-w-[400px] xl:max-w-[656px]" />
-          <Cursos />
-          <Contactenos />
+          {/* Botones del menú alineados */}
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6 w-full lg:w-auto">
+            <SobreComunidadButton />
+            <ComunidadButton />
+            <Academias />
+            <Cursos />
+            <Contactenos />
+          </div>
+
+          {/* Barra de búsqueda debajo de los botones */}
+          <BarraBusqueda className="mt-4 lg:mt-0 flex-grow min-w-[200px] max-w-[656px] lg:max-w-[400px] xl:max-w-[656px]" />
 
           {cargandoUsuario ? (
             <div className="px-4 py-2 rounded-lg font-medium text-white bg-gray-400 animate-pulse whitespace-nowrap">
