@@ -1,52 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-
-export async function POST(req: NextRequest) {
+// Esta ruta de API actúa como un proxy.
+// Recibe la solicitud del frontend, le adjunta las cookies de autenticación
+// y la reenvía al servicio de backend real.
+export async function GET(req: NextRequest) {
     try {
+        // 1. Obtener la URL base del backend desde las variables de entorno
+        // Asegúrate de que esta variable esté configurada en Render
         const backendUrl = process.env.NEXT_PUBLIC_API_URL;
         if (!backendUrl) {
             return NextResponse.json({ error: 'URL del backend no configurada' }, { status: 500 });
         }
 
-        const endpointUrl = `${backendUrl}/auth/login`;
+        // 2. Construir la URL completa para el endpoint de tu backend
+        // CRÍTICO: La URL del endpoint debe apuntar a la ruta que tu backend
+        // realmente reconoce. La ruta correcta es '/api/auth/admin/users'.
+        const endpointUrl = `${backendUrl}/api/auth/admin/users`;
 
-        const body = await req.json();
+        // 3. Crear un nuevo objeto de cabeceras.
+        // Se asegura de reenviar las cookies del cliente al backend.
+        const cookies = req.headers.get('cookie');
+
+        // 4. Reenviar la solicitud al backend real
         const response = await fetch(endpointUrl, {
-            method: 'POST',
+            method: 'GET',
+            // CRÍTICO: Incluir las cookies en la cabecera
             headers: {
-                'Content-Type': 'application/json',
-                'cookie': req.headers.get('cookie') || '',
+                'cookie': cookies || '', // Enviar la cookie si existe
             },
-            body: JSON.stringify(body),
         });
 
-
+        // 5. Manejar errores si el backend no responde correctamente
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Error del backend en el login:', response.status, errorText);
+            console.error('Error del backend:', response.status, errorText);
             return new NextResponse(errorText, {
                 status: response.status,
                 headers: { 'Content-Type': response.headers.get('content-type') || 'text/plain' },
             });
         }
 
-
-        const setCookieHeader = response.headers.get('Set-Cookie');
-
-
+        // 6. Devolver la respuesta del backend al frontend
         const data = await response.json();
-        const clientResponse = NextResponse.json(data, {
-            status: response.status,
-        });
-
-    
-        if (setCookieHeader) {
-            clientResponse.headers.set('Set-Cookie', setCookieHeader);
-        }
-
-        return clientResponse;
+        return NextResponse.json(data);
     } catch (error) {
-        console.error('Error en el proxy de login:', error);
+        console.error('Error en el proxy de la API:', error);
         return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
     }
 }
