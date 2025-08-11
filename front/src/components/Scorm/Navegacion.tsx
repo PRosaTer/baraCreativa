@@ -1,25 +1,22 @@
-interface NavegacionProps {
-  onNavigate: (direccion: 'prev' | 'next') => void;
-  disablePrev: boolean;
-  disableNext: boolean;
+"use client";
+
+interface NavegacionModulosProps {
+  isPrevContentDisabled: boolean;
+  isNextContentDisabled: boolean;
+  onNavigate: (direction: "prev" | "next") => void;
 }
 
-export default function Navegacion({ onNavigate, disablePrev, disableNext }: NavegacionProps) {
+export default function NavegacionModulos({
+  isPrevContentDisabled,
+  isNextContentDisabled,
+  onNavigate
+}: NavegacionModulosProps) {
   return (
-    <div className="flex justify-between gap-4 mt-6">
-      <button
-        onClick={() => onNavigate('prev')}
-        disabled={disablePrev}
-        className="px-6 py-3 bg-gray-300 text-gray-800 rounded disabled:opacity-50"
-      >
+    <div className="navegacion-modulos">
+      <button onClick={() => onNavigate("prev")} disabled={isPrevContentDisabled}>
         Anterior
       </button>
-
-      <button
-        onClick={() => onNavigate('next')}
-        disabled={disableNext}
-        className="px-6 py-3 bg-blue-500 text-white rounded disabled:opacity-50"
-      >
+      <button onClick={() => onNavigate("next")} disabled={isNextContentDisabled}>
         Siguiente
       </button>
     </div>
