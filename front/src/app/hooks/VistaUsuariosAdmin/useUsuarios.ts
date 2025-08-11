@@ -4,6 +4,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSocket } from '@/app/context/SocketProvider';
 import { Usuario } from '@/app/types/auth';
 
+
+interface UserStatusUpdate {
+  userId: number;
+  isOnline: boolean;
+}
+
 export default function useUsuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(false);
@@ -30,7 +36,6 @@ export default function useUsuarios() {
     }
   }, [API_URL]);
 
-
   useEffect(() => {
     fetchUsuarios();
   }, [fetchUsuarios]);
@@ -39,18 +44,21 @@ export default function useUsuarios() {
   useEffect(() => {
     if (!socket) return;
 
-
-    const actualizar = (usuariosActualizados: Usuario[]) => {
-      usuariosActualizados.sort((a, b) => a.id - b.id);
-      setUsuarios(usuariosActualizados);
+    const actualizar = (data: UserStatusUpdate) => {
+      console.log('Evento de socket recibido:', data);
+      
+      setUsuarios((prevUsuarios) =>
+        prevUsuarios.map((usuario) =>
+          usuario.id === data.userId ? { ...usuario, estaConectado: data.isOnline } : usuario
+        )
+      );
     };
 
-    socket.on('usuariosActualizados', actualizar);
+    socket.on('usuarioEstadoActualizado', actualizar);
     return () => {
-      socket.off('usuariosActualizados', actualizar);
+      socket.off('usuarioEstadoActualizado', actualizar);
     };
   }, [socket]);
-
 
   const actualizarUsuarioEnLista = useCallback((actualizado: Usuario) => {
     setUsuarios((prev) => prev.map((u) => (u.id === actualizado.id ? actualizado : u)));
