@@ -11,7 +11,6 @@ interface JwtPayload {
   sub?: number;
   id?: number;
   correoElectronico: string;
-  // AÑADIDO: Ahora la propiedad del token se llama esAdmin
   esAdmin?: boolean; 
 }
 
@@ -30,8 +29,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
+          // Primero intenta obtener el token de la cookie
           return request?.cookies?.jwt || null;
         },
+        // Si no está en la cookie, intenta obtenerlo del header 'Bearer'
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       secretOrKey: jwtSecret,
@@ -39,9 +40,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
+  // El método validate se encarga de validar el payload del token y buscar al usuario.
   async validate(payload: JwtPayload): Promise<Usuario> {
     this.logger.log(`JwtStrategy: Validando payload: ${JSON.stringify(payload)}`);
     
+    // Intenta obtener el ID del usuario de 'sub' o de 'id'.
     const userId = payload.sub || payload.id;
 
     if (typeof userId !== 'number') {
@@ -56,8 +59,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Token inválido o usuario no encontrado.');
     }
     
-    // CRÍTICO: Adjuntamos el objeto 'usuario' completo (que contiene 'esAdmin') a la solicitud
-    // para que el RolesGuard lo pueda leer.
+    // Devolvemos el objeto `usuario` completo, incluyendo la propiedad `esAdmin`.
+    // Esto es crucial para que los guards posteriores, como RolesGuard, puedan acceder a ella.
     return usuario;
   }
 }
