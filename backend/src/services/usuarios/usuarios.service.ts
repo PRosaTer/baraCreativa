@@ -79,4 +79,13 @@ export class UsuariosService {
       relations: ['pagos', 'pagos.curso'],
     });
   }
+
+  /**
+   * @description Actualiza la fecha de la última sesión de un usuario.
+   * @param id El ID del usuario.
+   * @param fecha La fecha y hora de la última sesión.
+   */
+  async actualizarUltimaSesion(id: number, fecha: Date): Promise<void> {
+    await this.usuariosRepository.update(id, { ultimaSesion: fecha });
+  }
 }
