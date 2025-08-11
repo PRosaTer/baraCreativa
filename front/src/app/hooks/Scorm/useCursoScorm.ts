@@ -3,91 +3,118 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Modulo } from '@/app/types/curso';
 
+// Interfaz para la lista de módulos que esperan los componentes
+export interface EstadoModuloUsuario extends Modulo {
+    tipo: 'video' | 'pdf' | 'imagen' | 'texto' | null;
+    orden: number;
+    completado: boolean;
+    fechaCompletado: Date | null;
+}
+
 export function useCursoScorm(modulos: Modulo[]) {
-  // Estados principales
-  const [currentModuleIndex, setCurrentModuleIndex] = useState(0);
-  const [currentContentIndex, setCurrentContentIndex] = useState(0);
+    // Estados principales
+    const [modulosEstadoUsuario, setModulosEstadoUsuario] = useState<EstadoModuloUsuario[]>([]);
+    const [currentModuleIndex, setCurrentModuleIndex] = useState(0);
+    const [currentContentIndex, setCurrentContentIndex] = useState(0);
 
-  // Función utilitaria para combinar todos los contenidos en una sola lista de URLs
-  const getContenidoModulo = useCallback((modulo: Modulo) => {
-    const urls: string[] = [];
-    if (modulo.videoUrl) urls.push(...modulo.videoUrl);
-    if (modulo.pdfUrl) urls.push(...modulo.pdfUrl);
-    if (modulo.imageUrl) urls.push(...modulo.imageUrl);
-    return urls;
-  }, []);
+    // Efecto para procesar los módulos iniciales y prepararlos para el estado de usuario
+    useEffect(() => {
+        const processedModulos: EstadoModuloUsuario[] = modulos.map((modulo, index) => {
+            let tipo: 'video' | 'pdf' | 'imagen' | 'texto' | null = null;
+            if (modulo.videoUrl && modulo.videoUrl.length > 0) tipo = 'video';
+            else if (modulo.pdfUrl && modulo.pdfUrl.length > 0) tipo = 'pdf';
+            else if (modulo.imageUrl && modulo.imageUrl.length > 0) tipo = 'imagen';
+            else if (modulo.descripcion) tipo = 'texto';
 
-  // Efecto para resetear el índice de contenido si el módulo cambia
-  useEffect(() => {
-    setCurrentContentIndex(0);
-  }, [currentModuleIndex]);
+            return {
+                ...modulo,
+                tipo,
+                orden: index,
+                completado: false,
+                fechaCompletado: null,
+            };
+        });
+        setModulosEstadoUsuario(processedModulos);
+    }, [modulos]);
 
-  // Propiedades computadas basadas en el estado
-  const currentModule = modulos[currentModuleIndex] || null;
-  const allContents = currentModule ? getContenidoModulo(currentModule) : [];
-  const currentContentUrl = allContents[currentContentIndex] || '';
+    // Función utilitaria para combinar todos los contenidos en una sola lista de URLs
+    const getContenidoModulo = useCallback((modulo: Modulo) => {
+        const urls: string[] = [];
+        if (modulo.videoUrl) urls.push(...modulo.videoUrl);
+        if (modulo.pdfUrl) urls.push(...modulo.pdfUrl);
+        if (modulo.imageUrl) urls.push(...modulo.imageUrl);
+        return urls;
+    }, []);
 
-  // Cálculo del progreso general (simulado)
-  const progresoGeneral = useCallback(() => {
-    if (modulos.length === 0) return 0;
-    const totalContenidos = modulos.reduce((acc, mod) => acc + getContenidoModulo(mod).length, 0);
-    const contenidosVistosAntes = modulos
-      .slice(0, currentModuleIndex)
-      .reduce((acc, mod) => acc + getContenidoModulo(mod).length, 0);
-    const vistosEnModuloActual = currentContentIndex + 1;
-    const vistosTotales = contenidosVistosAntes + vistosEnModuloActual;
-    return totalContenidos > 0 ? (vistosTotales / totalContenidos) * 100 : 0;
-  }, [modulos, currentModuleIndex, currentContentIndex, getContenidoModulo]);
+    // Propiedades computadas basadas en el estado
+    const currentModule = modulosEstadoUsuario[currentModuleIndex] || null;
+    const allContents = currentModule ? getContenidoModulo(currentModule) : [];
+    const currentContentUrl = allContents[currentContentIndex] || '';
 
-  // Manejadores de eventos para la navegación
-  const handleModuleClick = useCallback((modIndex: number) => {
-    setCurrentModuleIndex(modIndex);
-  }, []);
+    // Cálculo del progreso general
+    const progresoGeneral = useCallback(() => {
+        if (modulosEstadoUsuario.length === 0) return 0;
+        const totalContenidos = modulosEstadoUsuario.reduce((acc, mod) => acc + getContenidoModulo(mod).length, 0);
+        const contenidosVistosAntes = modulosEstadoUsuario
+            .slice(0, currentModuleIndex)
+            .reduce((acc, mod) => acc + getContenidoModulo(mod).length, 0);
+        const vistosEnModuloActual = currentContentIndex + 1;
+        const vistosTotales = contenidosVistosAntes + vistosEnModuloActual;
+        return totalContenidos > 0 ? (vistosTotales / totalContenidos) * 100 : 0;
+    }, [modulosEstadoUsuario, currentModuleIndex, currentContentIndex, getContenidoModulo]);
 
-  const handleNavigation = useCallback((direction: 'prev' | 'next') => {
-    if (!currentModule) return;
-    
-    const isLastContent = currentContentIndex === allContents.length - 1;
-    const isLastModule = currentModuleIndex === modulos.length - 1;
-    const isFirstContent = currentContentIndex === 0;
-    const isFirstModule = currentModuleIndex === 0;
+    // Manejadores de eventos para la navegación
+    const handleModuleClick = useCallback((modIndex: number) => {
+        if (modIndex >= 0 && modIndex < modulosEstadoUsuario.length) {
+            setCurrentModuleIndex(modIndex);
+            setCurrentContentIndex(0);
+        }
+    }, [modulosEstadoUsuario]);
 
-    if (direction === 'next') {
-      if (!isLastContent) {
-        setCurrentContentIndex(prev => prev + 1);
-      } else if (!isLastModule) {
-        setCurrentModuleIndex(prev => prev + 1);
-        setCurrentContentIndex(0);
-      }
-    } else { // 'prev'
-      if (!isFirstContent) {
-        setCurrentContentIndex(prev => prev - 1);
-      } else if (!isFirstModule) {
-        const prevModule = modulos[currentModuleIndex - 1];
-        const prevModuleContents = getContenidoModulo(prevModule);
-        setCurrentModuleIndex(prev => prev - 1);
-        setCurrentContentIndex(prevModuleContents.length - 1);
-      }
-    }
-  }, [currentModuleIndex, currentContentIndex, modulos, currentModule, allContents, getContenidoModulo]);
+    const handleNavigation = useCallback((direction: 'prev' | 'next') => {
+        if (!currentModule) return;
+        
+        const isLastContent = currentContentIndex === allContents.length - 1;
+        const isLastModule = currentModuleIndex === modulosEstadoUsuario.length - 1;
+        const isFirstContent = currentContentIndex === 0;
+        const isFirstModule = currentModuleIndex === 0;
 
-  const isPrevContentDisabled = currentModuleIndex === 0 && currentContentIndex === 0;
-  const isNextContentDisabled = !currentModule || allContents.length === 0 || (currentModuleIndex === modulos.length - 1 && currentContentIndex === allContents.length - 1);
-  const cursoCompletadoGeneral = isNextContentDisabled; // Lógica simplificada para el ejemplo
+        if (direction === 'next') {
+            if (!isLastContent) {
+                setCurrentContentIndex(prev => prev + 1);
+            } else if (!isLastModule) {
+                setCurrentModuleIndex(prev => prev + 1);
+                setCurrentContentIndex(0);
+            }
+        } else { // 'prev'
+            if (!isFirstContent) {
+                setCurrentContentIndex(prev => prev - 1);
+            } else if (!isFirstModule) {
+                const prevModule = modulosEstadoUsuario[currentModuleIndex - 1];
+                const prevModuleContents = getContenidoModulo(prevModule);
+                setCurrentModuleIndex(prev => prev - 1);
+                setCurrentContentIndex(prevModuleContents.length - 1);
+            }
+        }
+    }, [currentModuleIndex, currentContentIndex, modulosEstadoUsuario, currentModule, allContents, getContenidoModulo]);
 
-  return {
-    modulos,
-    currentModuleIndex,
-    currentContentIndex,
-    error: null, // Asumimos que los datos ya vienen cargados y sin error desde el componente padre
-    loading: false,
-    cursoCompletadoGeneral,
-    handleNavigation,
-    handleModuleClick,
-    progresoGeneral: progresoGeneral(),
-    currentModule,
-    currentContentUrl,
-    isPrevContentDisabled,
-    isNextContentDisabled,
-  };
+    const isPrevContentDisabled = currentModuleIndex === 0 && currentContentIndex === 0;
+    const isNextContentDisabled = !currentModule || allContents.length === 0 || (currentModuleIndex === modulosEstadoUsuario.length - 1 && currentContentIndex === allContents.length - 1);
+    const cursoCompletadoGeneral = isNextContentDisabled; // Lógica simplificada para el ejemplo
+
+    return {
+        modulosEstadoUsuario,
+        currentModuleIndex,
+        currentContentIndex,
+        error: null,
+        loading: false,
+        cursoCompletadoGeneral,
+        handleNavigation,
+        handleModuleClick,
+        progresoGeneral: progresoGeneral(),
+        currentModule,
+        currentContentUrl,
+        isPrevContentDisabled,
+        isNextContentDisabled,
+    };
 }
