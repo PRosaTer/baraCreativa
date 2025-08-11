@@ -2,14 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Modulo } from '@/app/types/curso';
-
-// Interfaz para la lista de módulos que esperan los componentes
-export interface EstadoModuloUsuario extends Modulo {
-    tipo: 'video' | 'pdf' | 'imagen' | 'texto' | null;
-    orden: number;
-    completado: boolean;
-    fechaCompletado: Date | null;
-}
+import { EstadoModuloUsuario } from '@/app/types/scorm-types';
 
 export function useCursoScorm(modulos: Modulo[]) {
     // Estados principales
@@ -98,9 +91,9 @@ export function useCursoScorm(modulos: Modulo[]) {
         }
     }, [currentModuleIndex, currentContentIndex, modulosEstadoUsuario, currentModule, allContents, getContenidoModulo]);
 
-    const isPrevContentDisabled = currentModuleIndex === 0 && currentContentIndex === 0;
-    const isNextContentDisabled = !currentModule || allContents.length === 0 || (currentModuleIndex === modulosEstadoUsuario.length - 1 && currentContentIndex === allContents.length - 1);
-    const cursoCompletadoGeneral = isNextContentDisabled; // Lógica simplificada para el ejemplo
+    const disablePrev = currentModuleIndex === 0 && currentContentIndex === 0;
+    const disableNext = !currentModule || allContents.length === 0 || (currentModuleIndex === modulosEstadoUsuario.length - 1 && currentContentIndex === allContents.length - 1);
+    const cursoCompletadoGeneral = disableNext; // Lógica simplificada para el ejemplo
 
     return {
         modulosEstadoUsuario,
@@ -114,7 +107,7 @@ export function useCursoScorm(modulos: Modulo[]) {
         progresoGeneral: progresoGeneral(),
         currentModule,
         currentContentUrl,
-        isPrevContentDisabled,
-        isNextContentDisabled,
+        disablePrev,
+        disableNext,
     };
 }

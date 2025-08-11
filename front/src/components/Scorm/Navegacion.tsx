@@ -1,24 +1,20 @@
 "use client";
 
-interface NavegacionModulosProps {
-  isPrevContentDisabled: boolean;
-  isNextContentDisabled: boolean;
-  onNavigate: (direction: "prev" | "next") => void;
-}
+import { NavegacionModulosProps } from '@/app/types/scorm-types';
 
 export default function NavegacionModulos({
-  isPrevContentDisabled,
-  isNextContentDisabled,
-  onNavigate
+    disablePrev,
+    disableNext,
+    onNavigate
 }: NavegacionModulosProps) {
-  return (
-    <div className="navegacion-modulos">
-      <button onClick={() => onNavigate("prev")} disabled={isPrevContentDisabled}>
-        Anterior
-      </button>
-      <button onClick={() => onNavigate("next")} disabled={isNextContentDisabled}>
-        Siguiente
-      </button>
-    </div>
-  );
+    return (
+        <div className="navegacion-modulos">
+            <button onClick={() => onNavigate("prev")} disabled={disablePrev}>
+                Anterior
+            </button>
+            <button onClick={() => onNavigate("next")} disabled={disableNext}>
+                Siguiente
+            </button>
+        </div>
+    );
 }
