@@ -10,11 +10,8 @@ export default function useUsuarios() {
 
   const fetchUsuarios = async () => {
     try {
-      // Log para diagnosticar si la cookie JWT está presente antes de la llamada.
-      // Esto nos ayudará a entender por qué el servidor no está autorizando la petición.
-      console.log('Cookies en el documento antes de la llamada:', document.cookie);
-
-      const res = await fetch(`/api/usuarios`, {
+      // Se corrige la URL de la API para que apunte al endpoint correcto en el backend.
+      const res = await fetch(`/api/auth/admin/users`, {
         credentials: 'include',
       });
 
