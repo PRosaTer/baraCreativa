@@ -17,7 +17,22 @@ const ContenedorDeTestimonios = () => {
   const testimonio = testimoniosDeUsuarios[indiceActual];
 
   return (
-    <div className="relative w-full h-[400px] overflow-hidden mx-auto flex items-center justify-center -mt-10">
+    <div
+      className="
+        relative
+        w-full
+        overflow-hidden
+        mx-auto
+        flex
+        items-center
+        justify-center
+        h-[300px]      /* base */
+        sm:h-[350px]   /* pequeño aumento en sm */
+        md:h-[400px]   /* tamaño mediano */
+        lg:h-[400px]   /* grande */
+        max-w-[580px]
+      "
+    >
       <AnimatePresence mode="wait">
         <motion.div
           key={indiceActual}
@@ -25,7 +40,7 @@ const ContenedorDeTestimonios = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -50 }}
           transition={{ duration: 0.6 }}
-          className="flex bg-orange-100 text-orange-900 rounded-lg shadow-lg p-4 gap-4 w-full h-full max-w-[580px]"
+          className="flex bg-orange-100 text-orange-900 rounded-lg shadow-lg p-4 gap-4 w-full h-full"
         >
           <img
             src={testimonio.imagen}
