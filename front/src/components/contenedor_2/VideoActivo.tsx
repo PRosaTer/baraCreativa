@@ -27,8 +27,8 @@ export const VideoActivo = ({ src, reproduciendo, onPlay, onPause }: Props) => (
         attributes: {
           style: {
             objectFit: "cover",
-            width: "200%",
-            height: "50%",
+            width: "100%",
+            height: "100%",
           },
         },
       },
