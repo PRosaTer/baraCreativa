@@ -35,7 +35,7 @@ export const useAutenticacion = () => {
 
       if (!respuesta.ok) {
         if (respuesta.status === 401) {
-          console.log("No hay una sesión activa o el token no es válido. Redirigiendo a login.");
+          console.log("¿Que esperas para unirte a Bara Creativa?.");
         } else if (respuesta.status === 404) {
           console.error("Error 404: La ruta del perfil no se encontró. Revisa tu backend.");
         } else {
