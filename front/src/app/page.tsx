@@ -26,10 +26,14 @@ export default function Home() {
       </section>
 
       {/* Sección de los dos contenedores */}
-      <section className="container mx-auto py-8 flex flex-col lg:flex-row gap-4 justify-center items-center">
-        <Contenedor_1 />
-        <DynamicContenedor2 />
-      </section>
+     <section className="container mx-auto py-8 flex flex-col md:flex-row gap-4 justify-center items-start">
+  <div className="w-full md:w-1/2">
+    <Contenedor_1 />
+  </div>
+  <div className="w-full md:w-1/2">
+    <DynamicContenedor2 />
+  </div>
+</section>
 
       {/* Carrusel de marcas */}
       <div>
