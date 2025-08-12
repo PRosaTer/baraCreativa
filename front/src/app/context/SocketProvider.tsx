@@ -21,7 +21,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       withCredentials: true,
     });
 
-    console.log('✅ WebSocket conectado a', socketUrl, 'como usuario', usuario.id);
     setSocket(socketInstance);
 
     return () => {
