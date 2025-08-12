@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
 import React from "react";
-import clsx from "clsx"; // Opcional: para combinar clases de forma segura
+import clsx from "clsx";
 
 interface Contenedor1Props {
   bgColor?: string;
   children?: React.ReactNode;
-  className?: string; // Añadimos className como prop opcional
+  className?: string;
 }
 
 const Contenedor_1: React.FC<Contenedor1Props> = ({
@@ -18,7 +18,7 @@ const Contenedor_1: React.FC<Contenedor1Props> = ({
     <div
       className={clsx(
         `
-          w-full max-w-[667px] mx-auto 
+          w-full max-w-[960px] mx-auto 
           min-h-[auto] sm:min-h-[592px] 
           ${bgColor} rounded-lg p-3 sm:p-4 
           flex flex-col items-center justify-center
@@ -33,8 +33,8 @@ const Contenedor_1: React.FC<Contenedor1Props> = ({
           <h2 className="text-lg sm:text-2xl font-bold text-center mb-3 sm:mb-6 text-blue-800">
             ¿Por qué elegirnos?
           </h2>
-          {/* Grid de tarjetas */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+          {/* CAMBIO: Usamos flex-col por defecto para apilar y md:grid para pantallas medianas o más grandes */}
+          <div className="flex flex-col md:grid md:grid-cols-2 md:gap-4 gap-2">
             {/* Tarjeta 1 */}
             <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 flex items-start space-x-2 sm:space-x-3 hover:shadow-lg transition-shadow">
               <span className="text-lg sm:text-2xl">🎮</span>
@@ -88,7 +88,8 @@ const Contenedor_1: React.FC<Contenedor1Props> = ({
               </div>
             </div>
             {/* Tarjeta 5 */}
-            <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 flex items-start space-x-2 sm:space-x-3 hover:shadow-lg transition-shadow sm:col-span-2">
+            {/* CAMBIO: En pantallas pequeñas, ocupa 1 columna por defecto, y en md o más, ocupa 2 */}
+            <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 flex items-start space-x-2 sm:space-x-3 hover:shadow-lg transition-shadow md:col-span-2">
               <span className="text-lg sm:text-2xl">🌟</span>
               <div>
                 <h3 className="font-semibold text-blue-600 text-xs sm:text-base">
