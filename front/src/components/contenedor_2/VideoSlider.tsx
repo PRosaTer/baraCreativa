@@ -35,7 +35,7 @@ const VideoSlider = () => {
   }, [indiceActual]);
 
   return (
-    <div className="relative w-full max-w-[600px] mx-auto flex flex-col items-center justify-center">
+    <div className="relative w-full max-w-[500px] mx-auto flex flex-col items-center justify-center">
       {/* Título */}
       <div className="w-full text-center py-3 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 text-white font-semibold rounded-t-lg select-none text-xl">
         {videosDeTestimonios[indiceActual].name}
