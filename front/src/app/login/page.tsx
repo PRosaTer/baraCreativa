@@ -16,7 +16,7 @@ const InicioSesion: React.FC = () => {
   const manejarSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     const exito = await manejarInicioSesion(e, correo, contrasena);
     if (exito) {
-      console.log("Login exitoso.");
+      console.log("Bienvenido a Bara Creativa");
     }
   };
 

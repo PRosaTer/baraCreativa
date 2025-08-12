@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Modulo } from '@/app/types/curso';
 
-// Interfaz para la lista de módulos que esperan los componentes
+
 export interface EstadoModuloUsuario extends Modulo {
     tipo: 'video' | 'pdf' | 'imagen' | 'texto' | null;
     orden: number;
@@ -12,14 +12,13 @@ export interface EstadoModuloUsuario extends Modulo {
 }
 
 export function useCursoScorm(modulos: Modulo[]) {
-    // Estados principales
     const [modulosEstadoUsuario, setModulosEstadoUsuario] = useState<EstadoModuloUsuario[]>([]);
     const [currentModuleIndex, setCurrentModuleIndex] = useState(0);
     const [currentContentIndex, setCurrentContentIndex] = useState(0);
 
-    // Efecto para procesar los módulos iniciales y prepararlos para el estado de usuario
-    useEffect(() => {
-        const processedModulos: EstadoModuloUsuario[] = modulos.map((modulo, index) => {
+    
+    const processedModulos = useMemo(() => {
+        return modulos.map((modulo, index) => {
             let tipo: 'video' | 'pdf' | 'imagen' | 'texto' | null = null;
             if (modulo.videoUrl && modulo.videoUrl.length > 0) tipo = 'video';
             else if (modulo.pdfUrl && modulo.pdfUrl.length > 0) tipo = 'pdf';
@@ -34,10 +33,17 @@ export function useCursoScorm(modulos: Modulo[]) {
                 fechaCompletado: null,
             };
         });
-        setModulosEstadoUsuario(processedModulos);
     }, [modulos]);
 
-    // Función utilitaria para combinar todos los contenidos en una sola lista de URLs
+
+    useEffect(() => {
+        setModulosEstadoUsuario(prev => {
+            const igual = JSON.stringify(prev) === JSON.stringify(processedModulos);
+            return igual ? prev : processedModulos;
+        });
+    }, [processedModulos]);
+
+
     const getContenidoModulo = useCallback((modulo: Modulo) => {
         const urls: string[] = [];
         if (modulo.videoUrl) urls.push(...modulo.videoUrl);
@@ -46,13 +52,13 @@ export function useCursoScorm(modulos: Modulo[]) {
         return urls;
     }, []);
 
-    // Propiedades computadas basadas en el estado
+
     const currentModule = modulosEstadoUsuario[currentModuleIndex] || null;
     const allContents = currentModule ? getContenidoModulo(currentModule) : [];
     const currentContentUrl = allContents[currentContentIndex] || '';
 
-    // Cálculo del progreso general
-    const progresoGeneral = useCallback(() => {
+
+    const progresoGeneral = useMemo(() => {
         if (modulosEstadoUsuario.length === 0) return 0;
         const totalContenidos = modulosEstadoUsuario.reduce((acc, mod) => acc + getContenidoModulo(mod).length, 0);
         const contenidosVistosAntes = modulosEstadoUsuario
@@ -63,7 +69,7 @@ export function useCursoScorm(modulos: Modulo[]) {
         return totalContenidos > 0 ? (vistosTotales / totalContenidos) * 100 : 0;
     }, [modulosEstadoUsuario, currentModuleIndex, currentContentIndex, getContenidoModulo]);
 
-    // Manejadores de eventos para la navegación
+ 
     const handleModuleClick = useCallback((modIndex: number) => {
         if (modIndex >= 0 && modIndex < modulosEstadoUsuario.length) {
             setCurrentModuleIndex(modIndex);
@@ -100,7 +106,7 @@ export function useCursoScorm(modulos: Modulo[]) {
 
     const disablePrev = currentModuleIndex === 0 && currentContentIndex === 0;
     const disableNext = !currentModule || allContents.length === 0 || (currentModuleIndex === modulosEstadoUsuario.length - 1 && currentContentIndex === allContents.length - 1);
-    const cursoCompletadoGeneral = disableNext; // Lógica simplificada para el ejemplo
+    const cursoCompletadoGeneral = disableNext; 
 
     return {
         modulosEstadoUsuario,
@@ -111,10 +117,9 @@ export function useCursoScorm(modulos: Modulo[]) {
         cursoCompletadoGeneral,
         handleNavigation,
         handleModuleClick,
-        progresoGeneral: progresoGeneral(),
+        progresoGeneral,
         currentModule,
         currentContentUrl,
-        // Se cambian los nombres de las propiedades para que coincidan con la interfaz
         disablePrev, 
         disableNext,
     };
