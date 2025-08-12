@@ -2,7 +2,7 @@
 
 import React from "react";
 import VideoSlider from "../contenedor_2/VideoSlider";
-import ContenedorDeTestimonios from "./ContenedorDeTestimonios";
+import ContenedorDeTestimonios from "./contenedorDeTestimonios";
 
 const HeavyComponent = () => {
   return (
