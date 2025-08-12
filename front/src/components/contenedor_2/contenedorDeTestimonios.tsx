@@ -17,22 +17,7 @@ const ContenedorDeTestimonios = () => {
   const testimonio = testimoniosDeUsuarios[indiceActual];
 
   return (
-    <div
-      className="
-        relative
-        w-full
-        overflow-hidden
-        mx-auto
-        flex
-        items-center
-        justify-center
-        h-[300px]      /* base */
-        sm:h-[350px]   /* pequeño aumento en sm */
-        md:h-[400px]   /* tamaño mediano */
-        lg:h-[400px]   /* grande */
-        max-w-[580px]
-      "
-    >
+    <div className="relative w-full max-w-[580px] h-[200px] sm:h-[220px] md:h-[260px] lg:h-[300px] xl:h-[340px] overflow-hidden mx-auto flex items-center justify-center">
       <AnimatePresence mode="wait">
         <motion.div
           key={indiceActual}
@@ -45,12 +30,11 @@ const ContenedorDeTestimonios = () => {
           <img
             src={testimonio.imagen}
             alt={testimonio.nombre}
-            className="w-[100px] h-[100px] object-cover rounded-full self-center border-2 border-orange-300"
+            className="w-[80px] h-[80px] sm:w-[90px] sm:h-[90px] md:w-[100px] md:h-[100px] object-cover rounded-full self-center border-2 border-orange-300"
           />
-
-          <div className="flex flex-col justify-center h-full">
-            <h3 className="text-lg font-bold mb-2">{testimonio.nombre}</h3>
-            <p className="text-sm whitespace-pre-line">{testimonio.mensaje}</p>
+          <div className="flex flex-col justify-center h-full overflow-hidden">
+            <h3 className="text-base sm:text-lg font-bold mb-1 sm:mb-2">{testimonio.nombre}</h3>
+            <p className="text-xs sm:text-sm whitespace-pre-line">{testimonio.mensaje}</p>
           </div>
         </motion.div>
       </AnimatePresence>
