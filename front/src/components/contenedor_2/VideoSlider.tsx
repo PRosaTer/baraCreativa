@@ -16,7 +16,7 @@ const BotonNavegacion = ({
     onClick={onClick}
     className={`absolute top-1/2 -translate-y-1/2 ${
       direccion === "izquierda" ? "left-4" : "right-4"
-    } bg-white rounded-full shadow-md w-12 h-12 flex items-center justify-center hover:scale-110 transition`}
+    } bg-white rounded-full shadow-md w-12 h-12 flex items-center justify-center hover:scale-110 transition z-30`}
   >
     <span className="text-2xl font-bold text-gray-700">
       {direccion === "izquierda" ? "←" : "→"}
@@ -35,20 +35,20 @@ const VideoSlider = () => {
   }, [indiceActual]);
 
   return (
-    <div className="relative w-full h-[1000px] flex flex-col items-center justify-center max-w-[600px] mx-auto">
+    <div className="relative w-full max-w-[600px] mx-auto flex flex-col items-center justify-center">
       {/* Título */}
       <div className="w-full text-center py-3 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 text-white font-semibold rounded-t-lg select-none text-xl">
         {videosDeTestimonios[indiceActual].name}
       </div>
 
-      {/* Contenedor de video */}
-      <div className="relative w-full h-full overflow-hidden rounded-lg">
+      {/* Contenedor de video sin overflow-hidden */}
+      <div className="relative w-full rounded-lg aspect-video">
         {videosDeTestimonios.map(
           ({ src }, index) =>
             index === indiceActual && (
               <div
                 key={src}
-                className="absolute z-20 scale-100 opacity-100 left-1/2 transform -translate-x-1/2 w-full h-full"
+                className="absolute z-20 inset-0 scale-100 opacity-100"
               >
                 <VideoActivo
                   src={src}
@@ -60,7 +60,7 @@ const VideoSlider = () => {
             )
         )}
 
-        {/* Botones */}
+        {/* Botones de navegación */}
         <BotonNavegacion
           direccion="izquierda"
           onClick={() => {
