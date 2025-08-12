@@ -11,14 +11,13 @@ const ContenedorDeTestimonios = () => {
     const intervalo = setInterval(() => {
       setIndiceActual((prev) => (prev + 1) % testimoniosDeUsuarios.length);
     }, 8000);
-
     return () => clearInterval(intervalo);
   }, []);
 
   const testimonio = testimoniosDeUsuarios[indiceActual];
 
   return (
-    <div className="relative w-full h-[550px] mt-20 overflow-hidden mx-auto flex items-center justify-center">
+    <div className="relative w-full h-[200px] overflow-hidden mx-auto flex items-center justify-center">
       <AnimatePresence mode="wait">
         <motion.div
           key={indiceActual}
@@ -26,17 +25,17 @@ const ContenedorDeTestimonios = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -50 }}
           transition={{ duration: 0.6 }}
-          className="flex bg-orange-100 text-orange-900 rounded-lg shadow-lg p-8 gap-6 w-full h-full max-w-[580px]"
+          className="flex bg-orange-100 text-orange-900 rounded-lg shadow-lg p-4 gap-4 w-full h-full max-w-[580px]"
         >
           <img
             src={testimonio.imagen}
             alt={testimonio.nombre}
-            className="w-[150px] h-[150px] object-cover rounded-full self-center border-2 border-orange-300"
+            className="w-[100px] h-[100px] object-cover rounded-full self-center border-2 border-orange-300"
           />
 
           <div className="flex flex-col justify-center h-full">
-            <h3 className="text-xl font-bold mb-4">{testimonio.nombre}</h3>
-            <p className="text-base whitespace-pre-line">{testimonio.mensaje}</p>
+            <h3 className="text-lg font-bold mb-2">{testimonio.nombre}</h3>
+            <p className="text-sm whitespace-pre-line">{testimonio.mensaje}</p>
           </div>
         </motion.div>
       </AnimatePresence>
