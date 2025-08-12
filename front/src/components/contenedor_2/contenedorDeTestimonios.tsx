@@ -18,7 +18,7 @@ const ContenedorDeTestimonios = () => {
   const testimonio = testimoniosDeUsuarios[indiceActual];
 
   return (
-    <div className="relative w-full h-[500px] mt-20 overflow-hidden mx-auto flex items-center justify-center">
+    <div className="relative w-full h-[550px] mt-20 overflow-hidden mx-auto flex items-center justify-center">
       <AnimatePresence mode="wait">
         <motion.div
           key={indiceActual}
