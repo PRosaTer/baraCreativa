@@ -26,7 +26,7 @@ const Contacto: React.FC = () => {
 
   if (cargandoUsuario) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-2xl font-bold text-yellow-400 animate-pulse drop-shadow-lg">
           Cargando...
         </div>
