@@ -30,7 +30,7 @@ export default function AcademiasPage() {
         <section className="border border-white rounded-xl p-6 shadow-md bg-[var(--background)]">
           <div className="flex justify-center">
             <img
-              src="/logotipo-dynamis-blanco.png"
+              src="/Logotipo-Dynamis-blanco.png"
               alt="Academia Dynamys"
               className="rounded-lg mb-6 object-cover max-w-md w-full"
             />
