@@ -1,8 +1,8 @@
 import {
   Injectable,
   NotFoundException,
-  InternalServerErrorException,
   BadRequestException,
+  InternalServerErrorException, // Aseguramos que esta excepción esté importada
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
@@ -12,19 +12,16 @@ import { ConfirmarResetDto } from '../../dto/password/confirmar-reset.dto';
 import { randomUUID } from 'crypto';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
-import { crearTransportador } from 'src/config/mail.config';
+import { MailService } from 'src/mail/mail.service'; // Inyectamos tu MailService
 
 @Injectable()
 export class PasswordService {
-  private transporter;
-
   constructor(
     @InjectRepository(Usuario)
     private usuariosRepo: Repository<Usuario>,
     private configService: ConfigService,
-  ) {
-    this.transporter = crearTransportador(this.configService);
-  }
+    private mailService: MailService, // Inyectamos tu MailService
+  ) {}
 
   async solicitarReset(dto: SolicitarResetDto) {
     const usuario = await this.usuariosRepo.findOne({
@@ -43,24 +40,19 @@ export class PasswordService {
     usuario.expiracionTokenRecuperacion = expiracion;
     await this.usuariosRepo.save(usuario);
 
-    // Obtener la URL del frontend de la configuración
     const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
     const enlace = `${frontendUrl}/password/restablecer?token=${token}`;
 
     try {
-      await this.transporter.sendMail({
-        from: `"Bara Creativa" <${this.configService.get('EMAIL_USER')}>`,
-        to: usuario.correoElectronico,
-        subject: 'Restablecer contraseña - Bara Creativa',
-        html: `
-          <p>Hola ${usuario.nombreCompleto},</p>
-          <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
-          <a href="${enlace}">${enlace}</a>
-          <p>Este enlace expirará en 1 hora.</p>
-        `,
-      });
+      // Usamos tu propio MailService con su método específico para la recuperación de contraseña.
+      await this.mailService.sendPasswordRecoveryEmailToUser(
+        usuario.correoElectronico,
+        usuario.nombreCompleto,
+        token,
+        enlace,
+      );
     } catch (error) {
-      console.error('Error enviando mail:', error);
+      console.error('Error enviando mail de recuperación:', error);
       throw new InternalServerErrorException('No se pudo enviar el correo de recuperación.');
     }
 
