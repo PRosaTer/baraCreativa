@@ -16,11 +16,14 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
         transport: {
           host: configService.get<string>('EMAIL_HOST'),
           port: configService.get<number>('EMAIL_PORT'),
-          secure: configService.get<string>('EMAIL_SECURE') === 'true',
+          secure: false, 
           auth: {
             user: configService.get<string>('EMAIL_USER'),
             pass: configService.get<string>('EMAIL_PASS'),
           },
+          tls: {
+            rejectUnauthorized: false
+          }
         },
         defaults: {
           from: `"BaraCreativa" <${configService.get<string>('EMAIL_USER')}>`,
