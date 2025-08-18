@@ -5,7 +5,7 @@ import { Usuario } from "@/app/types/auth";
 import MenuLateral from "./MenuLateral";
 import PerfilUsuarioEditable from "./PerfilUsuario";
 import CursosUsuario from "./CursosUsuario";
-import CertificadosUsuario from "@/components/DashboardUsuario/CertificadosUsuario";
+import CertificadosUsuario from "./CertificadosUsuario";
 import BadgeCAT from "./BadgeCAT";
 import { useCatBadgeStatus } from "@/app/hooks/BadgeStatus/useCatBadgeStatus";
 
@@ -21,14 +21,14 @@ export default function DashboardUsuario({ usuario }: Props) {
   const { status, loading, error } = useCatBadgeStatus(usuario.id);
 
   return (
-    <div className="flex min-h-screen gap-4 bg-gray-50 p-6">
+    <div className="flex flex-col md:flex-row min-h-screen gap-4 bg-gray-50 p-6">
       <MenuLateral
         seleccionarVista={setVista}
         vistaActual={vista}
         nombreUsuario={usuario.nombreCompleto}
       />
 
-      <section className="flex-1 bg-white p-6 rounded-lg shadow-md overflow-auto">
+      <section className="flex-1 bg-white p-6 rounded-lg shadow-md overflow-auto w-full md:w-auto">
         {vista === "perfil" && (
           <PerfilUsuarioEditable
             usuario={usuarioActualizado}
