@@ -16,6 +16,7 @@ import { JwtService } from '@nestjs/jwt';
       const allowedOrigins = [
         'http://localhost:3000',
         'https://www.baracreativahn.com',
+        'https://baracreativahn.com',
       ];
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
