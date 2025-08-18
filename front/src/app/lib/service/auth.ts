@@ -1,11 +1,13 @@
+import { Result } from 'postcss';
+
 type ResultadoRestablecimiento = { mensaje?: string; error?: string };
 
 export async function solicitarRestablecimientoPassword(email: string): Promise<ResultadoRestablecimiento> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/request-password-reset`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/password/solicitar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ correoElectronico: email }), 
     });
 
     const data = await response.json();
@@ -24,7 +26,7 @@ export async function solicitarRestablecimientoPassword(email: string): Promise<
 
 export async function confirmarRestablecimientoPassword(token: string, password: string): Promise<ResultadoRestablecimiento> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/reset-password`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/password/confirmar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, password }),
