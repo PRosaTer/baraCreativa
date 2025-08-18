@@ -37,24 +37,21 @@ export class UsuariosController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async getAll(@UsuarioAutenticado() usuario: Usuario): Promise<Usuario[] | Partial<Usuario>> {
-    // Verificamos si el usuario tiene el rol de administrador
+
     if (usuario.esAdmin) {
       this.logger.log(`Usuario administrador (${usuario.correoElectronico}) ha accedido a la lista completa de usuarios.`);
-      return this.usuariosService.findAll(); // Si es admin, devuelve todos los usuarios
+      return this.usuariosService.findAll();
     } else {
       this.logger.log(`Usuario regular (${usuario.correoElectronico}) ha accedido a su propio perfil.`);
       const { password, ...usuarioSinPassword } = usuario;
-      return usuarioSinPassword; // Si no es admin, devuelve solo su propio perfil
+      return usuarioSinPassword; 
     }
   }
 
-  // --- RUTA DEDICADA PARA EL PANEL DE ADMINISTRACIÓN ---
-  // Esta ruta está protegida por ambos guards:
-  // 1. JwtAuthGuard: Asegura que el usuario esté autenticado con un token válido.
-  // 2. RolesGuard: Asegura que el usuario autenticado tenga el rol 'admin'.
+
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin') // Requiere que el usuario tenga el rol 'admin'
-  @Get('admin') // El endpoint ahora es GET /usuarios/admin
+  @Roles('admin') 
+  @Get('admin')
   @HttpCode(HttpStatus.OK)
   async findAllAdmin(@Request() req): Promise<Usuario[]> {
     this.logger.log(`Acceso al endpoint de administración por el usuario: ${req.user.correoElectronico}`);
@@ -82,9 +79,7 @@ export class UsuariosController {
       storage: diskStorage({
         destination: './uploads/perfiles',
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `${uniqueSuffix}${ext}`);
+          cb(null, file.originalname);
         },
       }),
     }),
