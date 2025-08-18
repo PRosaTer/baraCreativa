@@ -70,7 +70,7 @@ export class AuthController {
 
     const usuario = await this.usuariosService.encontrarPorCorreo(datos.correoElectronico);
     if (usuario) {
-      await this.usuariosService.actualizar(usuario.id, new Date());
+      await this.usuariosService.actualizarUltimaSesion(usuario.id, new Date());
       await this.usuariosService.actualizarEstado(usuario.id, true);
 
       const usuarios = await this.usuariosService.findAll();
