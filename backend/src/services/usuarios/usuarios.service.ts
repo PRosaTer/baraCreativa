@@ -27,8 +27,22 @@ export class UsuariosService {
     return await this.usuariosRepository.findOne({ where: { correoElectronico } });
   }
 
+
   async findAll(): Promise<Usuario[]> {
-    return this.usuariosRepository.find();
+    return this.usuariosRepository.find({
+      select: {
+        id: true,
+        nombreCompleto: true,
+        correoElectronico: true,
+        tipoUsuario: true,
+        nombreEmpresa: true,
+        estadoCuenta: true,
+        estaConectado: true,
+        esAdmin: true,
+        ultimaSesion: true,
+        fotoPerfil: true, 
+      },
+    });
   }
 
   async findOne(id: number): Promise<Usuario> {
