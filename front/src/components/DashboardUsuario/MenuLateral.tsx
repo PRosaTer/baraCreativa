@@ -10,16 +10,15 @@ interface Props {
 
 export default function MenuUsuario({ seleccionarVista, vistaActual, nombreUsuario }: Props) {
   return (
-    <nav className="w-48 bg-gray-100 p-4 flex flex-col space-y-4 select-none sticky top-4 self-start h-fit">
-
+    <nav className="flex flex-row md:flex-col w-full md:w-48 bg-gray-100 p-4 space-x-2 md:space-x-0 md:space-y-4 rounded-lg select-none sticky top-4 md:self-start h-fit overflow-x-auto">
       <input
         value={nombreUsuario}
         disabled
-        className="py-2 px-4 rounded bg-amber-300 text-white font-semibold text-center cursor-default"
+        className="py-2 px-4 rounded bg-amber-300 text-white font-semibold text-center cursor-default min-w-[120px]"
       />
 
       <button
-        className={`py-2 px-4 rounded text-white font-semibold transition ${
+        className={`py-2 px-4 rounded text-white font-semibold transition min-w-[120px] ${
           vistaActual === "perfil" ? "bg-blue-600" : "bg-blue-500 hover:bg-blue-600"
         }`}
         onClick={() => seleccionarVista("perfil")}
@@ -28,7 +27,7 @@ export default function MenuUsuario({ seleccionarVista, vistaActual, nombreUsuar
       </button>
 
       <button
-        className={`py-2 px-4 rounded text-white font-semibold transition ${
+        className={`py-2 px-4 rounded text-white font-semibold transition min-w-[120px] ${
           vistaActual === "cursos" ? "bg-green-600" : "bg-green-500 hover:bg-green-600"
         }`}
         onClick={() => seleccionarVista("cursos")}
@@ -37,7 +36,7 @@ export default function MenuUsuario({ seleccionarVista, vistaActual, nombreUsuar
       </button>
 
       <button
-        className={`py-2 px-4 rounded text-white font-semibold transition ${
+        className={`py-2 px-4 rounded text-white font-semibold transition min-w-[120px] ${
           vistaActual === "logros" ? "bg-purple-600" : "bg-purple-500 hover:bg-purple-600"
         }`}
         onClick={() => seleccionarVista("logros")}
@@ -46,7 +45,7 @@ export default function MenuUsuario({ seleccionarVista, vistaActual, nombreUsuar
       </button>
 
       <button
-        className={`py-2 px-4 rounded text-white font-semibold transition ${
+        className={`py-2 px-4 rounded text-white font-semibold transition min-w-[120px] ${
           vistaActual === "certificados" ? "bg-pink-600" : "bg-pink-500 hover:bg-pink-600"
         }`}
         onClick={() => seleccionarVista("certificados")}
