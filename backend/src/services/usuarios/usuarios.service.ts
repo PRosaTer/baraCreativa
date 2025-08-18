@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Usuario, TipoUsuario } from '../../entidades/usuario.entity';
@@ -10,6 +15,7 @@ export class UsuariosService {
   constructor(
     @InjectRepository(Usuario)
     private usuariosRepository: Repository<Usuario>,
+    @Inject(forwardRef(() => SocketGateway))
     private readonly socketGateway: SocketGateway,
   ) {}
 
@@ -83,17 +89,16 @@ export class UsuariosService {
   }
 
   /**
-   * @description Actualiza la fecha de la última sesión de un usuario.
-   * @param id El ID del usuario.
-   * @param fecha La fecha y hora de la última sesión.
+   * @description Updates the last session date for a user.
+   * @param id The user ID.
+   * @param fecha The date and time of the last session.
    */
   async actualizarUltimaSesion(id: number, fecha: Date): Promise<void> {
     await this.usuariosRepository.update(id, { ultimaSesion: fecha });
   }
 
   /**
-   * @description Obtiene la lista completa de usuarios y la emite a través de WebSockets.
-   * Esto se llama después de que un cambio de estado ha sido guardado en la base de datos.
+   * @description Gets the complete list of users and emits it via WebSockets.
    */
   async notificarActualizacionEstado(): Promise<void> {
     const usuarios = await this.findAll();

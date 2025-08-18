@@ -6,6 +6,10 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import {
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { UsuariosService } from '../services/usuarios/usuarios.service';
 
 @WebSocketGateway({
@@ -17,7 +21,10 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly usuariosService: UsuariosService) {}
+  constructor(
+    @Inject(forwardRef(() => UsuariosService))
+    private readonly usuariosService: UsuariosService,
+  ) {}
 
   async handleConnection(@ConnectedSocket() client: Socket) {
     console.log(`Cliente conectado: ${client.id}`);
@@ -26,23 +33,18 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (userId) {
       await this.usuariosService.actualizarEstado(userId, true);
-
-
-      this.server.emit('usuarioEstadoActualizado', { userId, isOnline: true });
+      await this.usuariosService.notificarActualizacionEstado();
     }
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket) {
     console.log(`Cliente desconectado: ${client.id}`);
 
-   
     const userId = Number(client.handshake.query.userId);
 
     if (userId) {
       await this.usuariosService.actualizarEstado(userId, false);
-
-
-      this.server.emit('usuarioEstadoActualizado', { userId, isOnline: false });
+      await this.usuariosService.notificarActualizacionEstado();
     }
   }
 }
