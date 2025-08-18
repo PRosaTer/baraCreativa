@@ -2,7 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
-  InternalServerErrorException, // Aseguramos que esta excepción esté importada
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
@@ -12,7 +12,7 @@ import { ConfirmarResetDto } from '../../dto/password/confirmar-reset.dto';
 import { randomUUID } from 'crypto';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
-import { MailService } from 'src/mail/mail.service'; // Inyectamos tu MailService
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class PasswordService {
@@ -20,7 +20,7 @@ export class PasswordService {
     @InjectRepository(Usuario)
     private usuariosRepo: Repository<Usuario>,
     private configService: ConfigService,
-    private mailService: MailService, // Inyectamos tu MailService
+    private mailService: MailService,
   ) {}
 
   async solicitarReset(dto: SolicitarResetDto) {
@@ -44,7 +44,6 @@ export class PasswordService {
     const enlace = `${frontendUrl}/password/restablecer?token=${token}`;
 
     try {
-      // Usamos tu propio MailService con su método específico para la recuperación de contraseña.
       await this.mailService.sendPasswordRecoveryEmailToUser(
         usuario.correoElectronico,
         usuario.nombreCompleto,
