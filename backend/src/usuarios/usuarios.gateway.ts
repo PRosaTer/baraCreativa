@@ -10,6 +10,7 @@ import { UsuariosService } from '../services/usuarios/usuarios.service';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+
 @WebSocketGateway({
   cors: {
     origin: (origin: string, callback: (error: Error | null, success: boolean) => void) => {
