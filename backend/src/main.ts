@@ -20,8 +20,13 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.setGlobalPrefix('api');
   const frontendOrigin = process.env.FRONTEND_URL || 'https://www.baracreativahn.com';
+  const allowedOrigins = [
+    frontendOrigin,
+    'https://baracreativahn.com',
+    'http://localhost:3000'
+  ];
   app.enableCors({
-    origin: [frontendOrigin],
+    origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: 'Content-Type, Authorization',
