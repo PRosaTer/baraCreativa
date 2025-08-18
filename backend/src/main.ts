@@ -9,6 +9,7 @@ import { promises as fsPromises } from 'fs';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/http-exception.filter';
+
 async function createFolderIfNotExist(path) {
   try {
     await fsPromises.mkdir(path, { recursive: true });
@@ -16,6 +17,7 @@ async function createFolderIfNotExist(path) {
     console.error(`Error creando carpeta ${path}:`, err);
   }
 }
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.setGlobalPrefix('api');
