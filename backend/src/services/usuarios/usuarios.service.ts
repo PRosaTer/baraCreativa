@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Usuario, TipoUsuario } from '../../entidades/usuario.entity';
 import * as bcrypt from 'bcrypt';
+import { SocketGateway } from '../../socket/socket.gateway';
 
 @Injectable()
 export class UsuariosService {
   constructor(
     @InjectRepository(Usuario)
     private usuariosRepository: Repository<Usuario>,
+    private readonly socketGateway: SocketGateway,
   ) {}
 
   async encontrarPorId(id: number): Promise<Usuario | null> {
@@ -87,5 +89,14 @@ export class UsuariosService {
    */
   async actualizarUltimaSesion(id: number, fecha: Date): Promise<void> {
     await this.usuariosRepository.update(id, { ultimaSesion: fecha });
+  }
+
+  /**
+   * @description Obtiene la lista completa de usuarios y la emite a través de WebSockets.
+   * Esto se llama después de que un cambio de estado ha sido guardado en la base de datos.
+   */
+  async notificarActualizacionEstado(): Promise<void> {
+    const usuarios = await this.findAll();
+    this.socketGateway.server.emit('usuariosActualizados', usuarios);
   }
 }
