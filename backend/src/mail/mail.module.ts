@@ -1,29 +1,40 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import { Module } from '@nestjs/common';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import * as path from 'path';
+import { MailService } from './mail.service';
 
-@Injectable()
-export class MailService {
-  private transporter;
-
-  constructor(private configService: ConfigService) {
-    this.transporter = nodemailer.createTransport({
-      host: this.configService.get('EMAIL_HOST'),
-      port: this.configService.get('EMAIL_PORT'),
-      secure: this.configService.get<string>('EMAIL_SECURE') === 'true', 
-      auth: {
-        user: this.configService.get('EMAIL_USER'),
-        pass: this.configService.get('EMAIL_PASS'),
-      },
-    });
-  }
-
-  async sendMail(mailOptions: nodemailer.SendMailOptions) {
-    try {
-      await this.transporter.sendMail(mailOptions);
-    } catch (error) {
-      console.error('Error sending email:', error);
-      throw new InternalServerErrorException('No se pudo enviar el correo electrónico.');
-    }
-  }
-}
+@Module({
+  imports: [
+    ConfigModule,
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        transport: {
+          host: configService.get<string>('EMAIL_HOST'),
+          port: configService.get<number>('EMAIL_PORT'),
+          secure: configService.get<string>('EMAIL_SECURE') === 'true',
+          auth: {
+            user: configService.get<string>('EMAIL_USER'),
+            pass: configService.get<string>('EMAIL_PASS'),
+          },
+        },
+        defaults: {
+          from: `\"BaraCreativa\" <${configService.get<string>('EMAIL_USER')}>`,
+        },
+        template: {
+          dir: path.join(process.cwd(), 'dist', 'templates', 'mail', 'templates'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+    }),
+  ],
+  providers: [MailService],
+  exports: [MailService],
+})
+export class MailModule {}
