@@ -45,10 +45,10 @@ export class PasswordService {
 
     try {
       await this.mailService.sendPasswordRecoveryEmailToUser(
-        usuario.correoElectronico, 
-        usuario.nombreCompleto, 
-        token,                  
-        enlace,    
+        usuario.correoElectronico,
+        usuario.nombreCompleto,
+        token,
+        enlace,
       );
     } catch (error) {
       console.error('Error enviando mail de recuperación:', error);
