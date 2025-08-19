@@ -4,7 +4,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import * as path from 'path';
 import { ConfigService, ConfigModule } from '@nestjs/config';
-import { PurchaseMailService } from './purchase-mail.service';
 
 @Module({
   imports: [
@@ -15,8 +14,8 @@ import { PurchaseMailService } from './purchase-mail.service';
       useFactory: async (configService: ConfigService) => ({
         transport: {
           host: configService.get<string>('EMAIL_HOST'),
-          port: configService.get<number>('EMAIL_PORT'),
-          secure: false, 
+          port: Number(configService.get<string>('EMAIL_PORT')),
+          secure: configService.get<string>('EMAIL_SECURE') === 'true',
           auth: {
             user: configService.get<string>('EMAIL_USER'),
             pass: configService.get<string>('EMAIL_PASS'),
@@ -39,7 +38,7 @@ import { PurchaseMailService } from './purchase-mail.service';
     }),
   ],
   controllers: [],
-  providers: [MailService, PurchaseMailService], 
-  exports: [MailService, PurchaseMailService] 
+  providers: [MailService],
+  exports: [MailService]
 })
 export class MailModule {}
