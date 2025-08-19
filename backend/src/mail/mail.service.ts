@@ -1,8 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as Handlebars from 'handlebars';
+import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
+import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 import { TransactionDetails } from '../interfaces/transaction-details.interface';
 
 export interface PurchaseNotificationData {
@@ -20,31 +18,17 @@ export interface PurchaseNotificationData {
 
 @Injectable()
 export class MailService {
-  private transporter: nodemailer.Transporter;
-  private readonly adminEmail: string;
+  private readonly logger = new Logger(MailService.name);
 
-  constructor() {
-    this.adminEmail = process.env.EMAIL_USER ?? 'admin@default.com';
+  constructor(
+    private readonly mailerService: MailerService,
+    private readonly configService: ConfigService,
+  ) {}
 
-    this.transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: Number(process.env.EMAIL_PORT),
-      secure: process.env.EMAIL_SECURE === 'true',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-  }
-
-  private async renderTemplate<T extends object>(templateName: string, variables: T): Promise<string> {
-const filePath = path.resolve(__dirname, 'templates', `${templateName}.hbs`);
-
-    const templateContent = await fs.promises.readFile(filePath, 'utf-8');
-    const template = Handlebars.compile(templateContent);
-    return template(variables);
-  }
-
+  /**
+   * Envía un correo de recibo de compra al cliente.
+   * Ahora usa el MailerService inyectado.
+   */
   async sendPurchaseReceiptToCustomer(
     userEmail: string,
     userName: string,
@@ -53,89 +37,93 @@ const filePath = path.resolve(__dirname, 'templates', `${templateName}.hbs`);
     orderId: string,
     transactionDetails: TransactionDetails,
   ): Promise<void> {
-    const html = await this.renderTemplate('purchase-receipt-user', {
-      customerName: userName,
-      courseTitle,
-      paymentAmount,
-      orderId,
-      transactionId: transactionDetails?.id ?? '',
-      captureTime: transactionDetails?.create_time ?? '',
-      currency: 'USD',
-      currentYear: new Date().getFullYear(),
-    });
-
-    const mailOptions = {
-      from: this.adminEmail,
-      to: userEmail,
-      subject: `Gracias por tu compra, ${userName}!`,
-      html,
-    };
-
-    await this.transporter.sendMail(mailOptions);
+    try {
+      await this.mailerService.sendMail({
+        to: userEmail,
+        subject: `Gracias por tu compra, ${userName}!`,
+        template: 'purchase-receipt-user',
+        context: {
+          customerName: userName,
+          courseTitle,
+          paymentAmount,
+          orderId,
+          transactionId: transactionDetails?.id ?? '',
+          captureTime: transactionDetails?.create_time ?? '',
+          currency: 'USD',
+          currentYear: new Date().getFullYear(),
+        },
+      });
+      this.logger.log(`Recibo de compra enviado a: ${userEmail}`);
+    } catch (error) {
+      this.logger.error('Error al enviar el recibo de compra:', error.message, error.stack);
+    }
   }
 
+  /**
+   * Envía un correo de notificación de compra al administrador.
+   * Ahora usa el MailerService inyectado.
+   */
   async sendPurchaseNotificationToAdmin(data: PurchaseNotificationData): Promise<void> {
-    const {
-      userName,
-      userEmail,
-      courseTitle,
-      paymentAmount,
-      orderId,
-      transactionDetails,
-      tipoUsuario,
-      cursosComprados,
-      totalComprados,
-      porcentajeComprados,
-    } = data;
-
-    const html = await this.renderTemplate('admin-purchase-notification', {
-      userName,
-      userEmail,
-      courseTitle,
-      paymentAmount,
-      orderId,
-      transactionId: transactionDetails?.id ?? '',
-      purchaseDate: transactionDetails?.create_time ?? '',
-      tipoUsuario,
-      listaCursos: cursosComprados,
-      totalCursosComprados: totalComprados,
-      porcentajeCursosComprados: porcentajeComprados.toFixed(2),
-      currentYear: new Date().getFullYear(),
-    });
-
-    const mailOptions = {
-      from: this.adminEmail,
-      to: this.adminEmail,
-      subject: `Nueva compra realizada por ${userName}`,
-      html,
-    };
-
-    await this.transporter.sendMail(mailOptions);
+    try {
+      await this.mailerService.sendMail({
+        to: this.configService.get<string>('EMAIL_USER'),
+        subject: `Nueva compra realizada por ${data.userName}`,
+        template: 'admin-purchase-notification',
+        context: {
+          userName: data.userName,
+          userEmail: data.userEmail,
+          courseTitle: data.courseTitle,
+          paymentAmount: data.paymentAmount,
+          orderId: data.orderId,
+          transactionId: data.transactionDetails?.id ?? '',
+          purchaseDate: data.transactionDetails?.create_time ?? '',
+          tipoUsuario: data.tipoUsuario,
+          listaCursos: data.cursosComprados,
+          totalCursosComprados: data.totalComprados,
+          porcentajeCursosComprados: data.porcentajeComprados.toFixed(2),
+          currentYear: new Date().getFullYear(),
+        },
+      });
+      this.logger.log(`Notificación de compra enviada al administrador.`);
+    } catch (error) {
+      this.logger.error('Error al enviar la notificación al administrador:', error.message, error.stack);
+    }
   }
 
+  /**
+   * Envía un correo de recuperación de contraseña al usuario.
+   * Ahora usa el MailerService inyectado.
+   */
   async sendPasswordRecoveryEmailToUser(
     userEmail: string,
     userName: string,
     recoveryCode: string,
     resetUrl: string,
   ): Promise<void> {
-    const html = await this.renderTemplate('password-recovery-user', {
-      userName,
-      recoveryCode,
-      resetUrl,
-      currentYear: new Date().getFullYear(),
-    });
-
-    const mailOptions = {
-      from: this.adminEmail,
-      to: userEmail,
-      subject: 'Recuperación de contraseña',
-      html,
-    };
-
-    await this.transporter.sendMail(mailOptions);
+    try {
+      await this.mailerService.sendMail({
+        to: userEmail,
+        subject: 'Recuperación de contraseña',
+        template: 'password-recovery-user',
+        context: {
+          userName,
+          recoveryCode,
+          resetUrl,
+          currentYear: new Date().getFullYear(),
+        },
+      });
+      this.logger.log(`Correo de recuperación enviado con éxito a: ${userEmail}`);
+    } catch (error) {
+      this.logger.error('Error al enviar el correo de recuperación:', error.message, error.stack);
+      throw new InternalServerErrorException('No se pudo enviar el correo de recuperación.');
+    }
   }
 
+  /**
+   * Envía un correo de notificación de recuperación al administrador.
+   * Nota: Para esta función, no tienes una plantilla .hbs,
+   * por lo que usamos el 'html' en línea, como en tu código original.
+   */
   async sendPasswordRecoveryNotificationToAdmin(
     adminEmail: string,
     userEmail: string,
@@ -150,14 +138,17 @@ const filePath = path.resolve(__dirname, 'templates', `${templateName}.hbs`);
         <li>Código de recuperación: ${recoveryCode}</li>
       </ul>
     `;
-
-    const mailOptions = {
-      from: this.adminEmail,
-      to: adminEmail,
-      subject: 'Notificación de recuperación de contraseña',
-      html,
-    };
-
-    await this.transporter.sendMail(mailOptions);
+    
+    try {
+      await this.mailerService.sendMail({
+        from: this.configService.get<string>('EMAIL_USER'),
+        to: adminEmail,
+        subject: 'Notificación de recuperación de contraseña',
+        html,
+      });
+      this.logger.log(`Notificación de recuperación enviada al administrador: ${adminEmail}`);
+    } catch (error) {
+      this.logger.error('Error al enviar notificación al administrador:', error.message, error.stack);
+    }
   }
 }
