@@ -3,7 +3,7 @@ import React from "react";
 interface Props {
   correo: string;
   setCorreo: (value: string) => void;
-  manejarSubmit: (e: React.FormEvent) => void;
+  manejarSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   mensaje: string;
   error: string;
 }

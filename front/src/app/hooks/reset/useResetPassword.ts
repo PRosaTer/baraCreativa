@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { solicitarRestablecimientoPassword } from '@/app/lib/service/auth';
+import { FormEvent } from 'react'; 
 
 export const useResetPassword = () => {
   const [correo, setCorreo] = useState('');
@@ -7,7 +8,7 @@ export const useResetPassword = () => {
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
 
-  const manejarSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => { 
+  const manejarSubmit = useCallback(async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMensaje('');
     setError('');
@@ -28,7 +29,7 @@ export const useResetPassword = () => {
     } finally {
       setCargando(false);
     }
-  }, [correo]); 
+  }, [correo]);
 
   return {
     correo,
