@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
+import { MailService } from './mail.service';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as path from 'path';
-import { MailService } from './mail.service';
+import { ConfigService, ConfigModule } from '@nestjs/config';
+import { PurchaseMailService } from './purchase-mail.service';
 
 @Module({
   imports: [
@@ -15,17 +16,20 @@ import { MailService } from './mail.service';
         transport: {
           host: configService.get<string>('EMAIL_HOST'),
           port: configService.get<number>('EMAIL_PORT'),
-          secure: configService.get<string>('EMAIL_SECURE') === 'true',
+          secure: false, 
           auth: {
             user: configService.get<string>('EMAIL_USER'),
             pass: configService.get<string>('EMAIL_PASS'),
           },
+          tls: {
+            rejectUnauthorized: false
+          }
         },
         defaults: {
-          from: `\"BaraCreativa\" <${configService.get<string>('EMAIL_USER')}>`,
+          from: `"BaraCreativa" <${configService.get<string>('EMAIL_USER')}>`,
         },
         template: {
-          dir: path.join(process.cwd(), 'dist', 'templates', 'mail', 'templates'),
+          dir: path.join(process.cwd(), 'dist', 'templates'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
@@ -34,7 +38,8 @@ import { MailService } from './mail.service';
       }),
     }),
   ],
-  providers: [MailService],
-  exports: [MailService],
+  controllers: [],
+  providers: [MailService, PurchaseMailService], 
+  exports: [MailService, PurchaseMailService] 
 })
 export class MailModule {}
