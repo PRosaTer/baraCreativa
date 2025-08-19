@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { solicitarRestablecimientoPassword } from '@/app/lib/service/auth';
 
 export const useResetPassword = () => {
@@ -7,7 +7,7 @@ export const useResetPassword = () => {
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
 
-  const manejarSubmit = async (e: React.FormEvent) => {
+  const manejarSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => { 
     e.preventDefault();
     setMensaje('');
     setError('');
@@ -24,11 +24,11 @@ export const useResetPassword = () => {
       }
     } catch (err) {
       console.error('Error en el hook useResetPassword:', err);
-      setError('Error de conexión con el servidor.');
+      setError('Error de conexión con el servidor. Por favor, intenta de nuevo más tarde.');
     } finally {
       setCargando(false);
     }
-  };
+  }, [correo]); 
 
   return {
     correo,
