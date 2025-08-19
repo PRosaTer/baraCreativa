@@ -1,44 +1,29 @@
-import { Module } from '@nestjs/common';
-import { MailService } from './mail.service';
-import { PurchaseMailService } from '../mail/purchase-mail.service';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import * as path from 'path';
-import { ConfigService, ConfigModule } from '@nestjs/config';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as nodemailer from 'nodemailer';
 
-@Module({
-  imports: [
-    ConfigModule,
-    MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        transport: {
-          host: configService.get<string>('EMAIL_HOST'),
-          port: configService.get<number>('EMAIL_PORT'),
-          secure: false, 
-          auth: {
-            user: configService.get<string>('EMAIL_USER'),
-            pass: configService.get<string>('EMAIL_PASS'),
-          },
-          tls: {
-            rejectUnauthorized: false
-          }
-        },
-        defaults: {
-          from: `"BaraCreativa" <${configService.get<string>('EMAIL_USER')}>`,
-        },
-        template: {
-          dir: path.join(process.cwd(), 'dist', 'templates', 'mail', 'templates'),
-          adapter: new HandlebarsAdapter(),
-          options: {
-            strict: true,
-          },
-        },
-      }),
-    }),
-  ],
-  providers: [PurchaseMailService, MailService],
-  exports: [PurchaseMailService, MailService],
-})
-export class MailModule {}
+@Injectable()
+export class MailService {
+  private transporter;
+
+  constructor(private configService: ConfigService) {
+    this.transporter = nodemailer.createTransport({
+      host: this.configService.get('EMAIL_HOST'),
+      port: this.configService.get('EMAIL_PORT'),
+      secure: this.configService.get<string>('EMAIL_SECURE') === 'true', 
+      auth: {
+        user: this.configService.get('EMAIL_USER'),
+        pass: this.configService.get('EMAIL_PASS'),
+      },
+    });
+  }
+
+  async sendMail(mailOptions: nodemailer.SendMailOptions) {
+    try {
+      await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      throw new InternalServerErrorException('No se pudo enviar el correo electrónico.');
+    }
+  }
+}
